@@ -74,3 +74,19 @@ Key facts captured:
   - commit-reveal2: Solidity 0.8.30, Foundry, 2단계 Commit-Reveal, last revealer attack 방지
   - drb-node: Go 1.23, libp2p, Leader/Regular 2노드 아키텍처, PostgreSQL 영속성
   - tokamak-rollup-hub-v2: Next.js 16 마케팅 사이트, Three.js 3D, GitHub API로 trh-platform 릴리즈 조회
+
+## [2026-04-09] refactor | raw/ 드롭존 구조 개편
+HTML 다이어그램 에셋 분리 및 inbox/ 드롭존 추가
+
+Files moved:
+  raw/architecture/*.html (4개) → raw/assets/
+
+New directories:
+  raw/inbox/     ← 신규 문서 드롭존 (분류 전 보관)
+  raw/assets/    ← HTML 다이어그램 및 이미지 에셋
+
+CLAUDE.md 업데이트:
+  - raw/ 디렉토리 레이아웃 설명 갱신
+  - inbox/ 드롭존 워크플로우 명시
+  - wiki/components/ core/integration 서브섹션 반영
+  - 컴포넌트 canonical names 12개 레포로 확장

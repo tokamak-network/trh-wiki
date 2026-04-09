@@ -17,22 +17,26 @@ The wiki captures accumulated knowledge about the TRH Platform ecosystem:
 trh-wiki/
 ├── CLAUDE.md          # This file — the schema (you are reading it now)
 ├── raw/               # Source materials — NEVER edit these files
-│   ├── architecture/  # PRDs, design docs, flow diagrams
-│   ├── sessions/      # Claude session summaries, claude-mem exports
+│   ├── inbox/         # Drop zone for new documents (unclassified)
+│   ├── architecture/  # Architecture docs, design docs
 │   ├── decisions/     # Architecture Decision Records (ADR)
-│   ├── changelogs/    # Release notes, significant commit summaries
-│   └── assets/        # Screenshots, diagrams (referenced by wiki pages)
+│   └── assets/        # HTML diagrams, screenshots (referenced by wiki pages)
 ├── wiki/              # LLM-maintained markdown — humans read, LLM writes
 │   ├── index.md       # Master index — update on every ingest
 │   ├── log.md         # Append-only operation log
 │   ├── overview/      # High-level architecture maps
 │   ├── components/    # Per-repository deep-dives
+│   │   ├── core/      # Core repos (trh-platform, trh-sdk, trh-backend, etc.)
+│   │   └── integration/ # Integration repos (cross-trade, thanos-bridge, etc.)
 │   ├── concepts/      # Core technical concepts
 │   ├── workflows/     # Step-by-step operational guides
 │   ├── decisions/     # ADR summaries with rationale
 │   └── troubleshooting/ # Known issues and resolutions
 └── ref/               # External reference links and API specs
 ```
+
+**raw/ is a drop zone — no classification needed.**
+New documents go into `raw/inbox/`. The ingest agent reads the content and determines which wiki pages to create or update.
 
 **Rule**: `raw/` is read-only. If a source needs correction, add a new file noting the correction — do not edit the original.
 
@@ -66,11 +70,11 @@ Then the page body:
 
 ### `ingest [filename]`
 
-When the user says "ingest [file]" or drops a new file into `raw/`:
+When the user says "ingest [file]" or drops a new file into `raw/inbox/`:
 
 1. Read the source file fully
 2. Identify key facts, decisions, concepts, and components it touches
-3. Discuss key takeaways with the user briefly
+3. Determine which wiki section the content belongs to (component / concept / workflow / decision / troubleshooting)
 4. Check `wiki/index.md` to find all pages that should be updated
 5. Update each affected page — revise summaries, add new facts, note contradictions
 6. If a new concept appears with no existing page, create one
@@ -129,11 +133,22 @@ When the user says "lint":
 - Example: link to `wiki/concepts/presets.md` as `[[presets]]`
 
 ### Component names (canonical)
+
+**Core**
 - `trh-platform` — the Electron desktop app
 - `trh-sdk` — the Go deployment CLI
 - `trh-backend` — the Go API server
 - `trh-platform-ui` — the Next.js web UI
-- `cross-trade` — the CrossTrade integration module
+- `tokamak-thanos` — OP Stack v1.7.7 fork (op-node, op-batcher, op-proposer)
+- `tokamak-thanos-stack` — Terraform + Helm IaC for EKS
+- `tokamak-thanos-geth` — go-ethereum OP Stack fork
+- `tokamak-rollup-hub-v2` — Rollup Hub marketing website
+
+**Integration**
+- `cross-trade` — the CrossTrade DeFi integration module
+- `thanos-bridge` — L1↔L2 asset bridge DApp
+- `commit-reveal2` — Distributed Random Beacon smart contracts
+- `drb-node` — DRB Go node (Leader/Regular architecture)
 
 ### Preset names (canonical)
 - `General` — base L2, no DeFi modules
