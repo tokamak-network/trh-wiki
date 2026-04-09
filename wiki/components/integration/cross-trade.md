@@ -1,7 +1,8 @@
 ---
-updated: 2026-04-09
+updated: 2026-04-10
 sources:
   - raw/decisions/PRD-CrossTrade-TRH-Integration-v2.1.md
+  - raw/inbox/crosstrade-deployment-guide.md
 related:
   - "[[deposit-tx]]"
   - "[[l2-deployment]]"
@@ -10,6 +11,7 @@ related:
   - "[[trh-backend]]"
   - "[[deposit-tx-vs-genesis-predeploy]]"
   - "[[separate-compose-for-crosstrade]]"
+  - "[[crosstrade-deployment]]"
 tags: [component]
 ---
 
@@ -125,3 +127,26 @@ L2toL2CrossTradeL1.setChainInfo(l2ChainId, crossDomainMessenger, l2toL2CrossTrad
 |------|---------|---------|
 | AWS (K8s) | Foundry 스크립트 | Helm chart |
 | Local (Docker) | L1 Deposit Tx (신규) | Docker Compose (신규) |
+
+---
+
+## Testnet 배포 주소 (Sepolia, 2026-04-10 기준)
+
+### L2-L1 Flow
+
+| 컨트랙트 | 체인 | 주소 |
+|---------|------|------|
+| L1CrossTradeProxy | Sepolia | `0xfea37d39bec823d503ed6fb9d3a6e151190821fb` |
+| L2CrossTradeProxy | Thanos Sepolia | `0xfd2c81fe8a9ceed49c33642cba84bd3cf744bc0e` |
+| L2CrossTradeProxy | ect-defi (111551190773) | `0xD2Aea5CC4cA8861D809dCb34b354D6059766A809` |
+
+### L2-L2 Flow
+
+| 컨트랙트 | 체인 | 주소 |
+|---------|------|------|
+| L2toL2CrossTradeProxyL1 (허브) | Sepolia | `0xd038d89655f106d88c5bd56a9442d9ecee675c1c` |
+| L2toL2CrossTradeProxy | Thanos Sepolia | `0x7bbec445f9bdf6c579e81eada5df86654184bce3` |
+| L2toL2CrossTradeProxy | ect-defi (111551190773) | `0x2452ceB66Ccd4B997e3d400F90d42F2566AC0C94` |
+
+> 기존 L1CrossTradeProxy(`0x00a13E2...`) 및 Thanos L2CrossTradeProxy(`0x54bc...`)는 admin key 미확보로 재배포됨.
+> 배포 및 등록 순서 전체 가이드 → [[crosstrade-deployment]]

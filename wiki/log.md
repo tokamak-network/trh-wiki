@@ -110,3 +110,21 @@ CLAUDE.md 업데이트:
   - inbox/ 드롭존 워크플로우 명시
   - wiki/components/ core/integration 서브섹션 반영
   - 컴포넌트 canonical names 12개 레포로 확장
+
+## [2026-04-10] ingest | raw/inbox/crosstrade-deployment-guide.md
+Source: crossTrade/docs/deployment-guide.md (Foundry 기반 배포 가이드)
+
+Pages created:
+  [[crosstrade-deployment]] — L2-L1/L2-L2 flow별 배포 및 체인 등록 절차, forge 명령, 검증, Sepolia 주소
+
+Pages updated:
+  [[cross-trade]] — Testnet 배포 주소 섹션 추가, [[crosstrade-deployment]] 링크 추가
+  [[index]] — Workflows 섹션에 [[crosstrade-deployment]] 항목 추가
+
+Key facts captured:
+  - L2-L1: L1CrossTradeProxy 재배포 (0xfea37d39...), Thanos L2CrossTradeProxy 재배포 (0xfd2c81fe...) — 기존 admin key 미확보
+  - L2-L2: L2toL2CrossTradeProxy ect-defi (0x2452ceB6...) upgradeTo 완료, Thanos L2toL2CrossTradeProxy (0x7bbec445...)
+  - L2-L1 setChainInfo = 3 params, L2-L2 L1허브 setChainInfo = 7 params (비대칭 주의)
+  - L2-L2 L2 프록시 setChainInfo는 proxy 직접 구현 (impl 위임 아님), 하지만 나머지 로직은 impl 위임 → upgradeTo 필수
+  - Blast API 403 → publicnode.com 대체 사용
+  - ect-defi Chain ID: 111551190773, RPC: http://localhost:8545
