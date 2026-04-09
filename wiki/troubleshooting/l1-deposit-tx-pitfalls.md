@@ -1,6 +1,8 @@
 ---
-updated: 2026-04-09
-source: raw/architecture/deployment-pitfalls.md
+updated: 2026-04-10
+sources:
+  - raw/architecture/deployment-pitfalls.md
+  - raw/inbox/crosstrade-deployment-guide.md
 ---
 
 # L1 Deposit Tx Pitfalls
@@ -161,6 +163,24 @@ CrossTrade L2 컨트랙트 배포 시 L1 Deposit Transaction 패턴에서 발생
 **현상:** L2toL2 setChainInfo가 L2→L1 성공 후 L2 revert
 
 **방지:** L2CrossTradeProxy와 L2toL2CrossTradeProxy에 대해 별도 ABI 바인딩 생성. 함수 시그니처 사전 검증.
+
+---
+
+### 14. L2toL2CrossTradeProxy — upgradeTo 없이 setChainInfo 성공, 나머지 전부 silent broken
+
+**현상:** `setChainInfo` 호출 성공 → 체인 등록 완료로 착각 → 이후 모든 함수 "Proxy: impl OR proxy is false" revert
+
+**원인:** `L2toL2CrossTradeProxy.setChainInfo`는 implementation에 위임하지 않고 **proxy 자체에 직접 구현**되어 있다. `upgradeTo` 없이도 이 함수만큼은 정상 실행된다. 하지만 나머지 모든 비즈니스 로직은 implementation으로 위임되므로, `implementation() == 0x0` 상태면 전부 revert. `chainData()` 같은 조회 함수도 포함.
+
+**L2-L1 flow Pitfall #4와의 차이:** #4는 upgradeTo 선행 없이 setSelectorImplementations2가 실패하는 케이스. #14는 upgradeTo 없이도 *일부 함수가 성공*하기 때문에 문제를 인지하기 더 어렵다.
+
+**실제 사례(2026-04-10):** ect-defi `L2toL2CrossTradeProxy(0x2452ceB6...)`에 이전 세션에서 setChainInfo까지는 정상 실행됐지만 upgradeTo는 미실행. 이후 `chainData(chainId)` 호출 시 revert로 문제 발견.
+
+**방지:**
+- 배포 직후 `cast call <proxy> "implementation()"` 확인. `0x0`이면 `upgradeTo` 미실행.
+- deploy 스크립트에서 upgradeTo 후 `implementation()` 반환값 어설션 추가.
+
+**신뢰도:** HIGH (실제 발생 + 소스 코드 검증)
 
 ---
 

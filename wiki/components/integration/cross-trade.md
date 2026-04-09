@@ -11,7 +11,7 @@ related:
   - "[[trh-backend]]"
   - "[[deposit-tx-vs-genesis-predeploy]]"
   - "[[separate-compose-for-crosstrade]]"
-  - "[[crosstrade-deployment]]"
+  - "[[l1-deposit-tx-pitfalls]]"
 tags: [component]
 ---
 
@@ -130,23 +130,20 @@ L2toL2CrossTradeL1.setChainInfo(l2ChainId, crossDomainMessenger, l2toL2CrossTrad
 
 ---
 
-## Testnet 배포 주소 (Sepolia, 2026-04-10 기준)
+## 운영 함정
 
-### L2-L1 Flow
+### Admin key 없으면 기존 프록시 재사용 불가
 
-| 컨트랙트 | 체인 | 주소 |
-|---------|------|------|
-| L1CrossTradeProxy | Sepolia | `0xfea37d39bec823d503ed6fb9d3a6e151190821fb` |
-| L2CrossTradeProxy | Thanos Sepolia | `0xfd2c81fe8a9ceed49c33642cba84bd3cf744bc0e` |
-| L2CrossTradeProxy | ect-defi (111551190773) | `0xD2Aea5CC4cA8861D809dCb34b354D6059766A809` |
+CrossTrade 프록시(L1CrossTradeProxy, L2CrossTradeProxy 등)의 `setChainInfo`는 ADMIN_ROLE(`keccak256("ADMIN")`) 보유자만 호출 가능. 최초 deployer 주소가 ADMIN_ROLE을 갖고 있으며, 그 private key를 잃으면 해당 프록시에 새 체인을 등록하는 것이 **영구적으로 불가능**하다.
 
-### L2-L2 Flow
+실제 사례(2026-04-10): 기존 `L1CrossTradeProxy(0x00a13E2...)` 및 Thanos `L2CrossTradeProxy(0x54bc...)` 모두 원래 deployer(`0xb4032ff...`)의 key가 없어 새 체인 등록 불가 → 전체 재배포.
 
-| 컨트랙트 | 체인 | 주소 |
-|---------|------|------|
-| L2toL2CrossTradeProxyL1 (허브) | Sepolia | `0xd038d89655f106d88c5bd56a9442d9ecee675c1c` |
-| L2toL2CrossTradeProxy | Thanos Sepolia | `0x7bbec445f9bdf6c579e81eada5df86654184bce3` |
-| L2toL2CrossTradeProxy | ect-defi (111551190773) | `0x2452ceB66Ccd4B997e3d400F90d42F2566AC0C94` |
+**사전 체크**: 배포 전 `isAdmin(ourAddress)` 호출로 권한 확인.
 
-> 기존 L1CrossTradeProxy(`0x00a13E2...`) 및 Thanos L2CrossTradeProxy(`0x54bc...`)는 admin key 미확보로 재배포됨.
-> 배포 및 등록 순서 전체 가이드 → [[crosstrade-deployment]]
+### L2-L2 프록시 setChainInfo — proxy-direct 구현의 함정
+
+`L2toL2CrossTradeProxy.setChainInfo`는 implementation에 위임하지 않고 **proxy 자체에 직접 구현**되어 있다. 이 때문에 `implementation() == 0x0`인 상태(upgradeTo 미실행)에서도 `setChainInfo` 호출은 성공한다.
+
+문제: 나머지 모든 비즈니스 로직 함수는 implementation에 위임되므로, upgradeTo 없이 setChainInfo만 실행된 프록시는 **체인 등록은 되어 있지만 실제 기능은 전혀 동작하지 않는** 상태가 된다. `chainData()` 같은 조회 함수조차 "Proxy: impl OR proxy is false"로 revert.
+
+→ [[l1-deposit-tx-pitfalls]] Pitfall #14 참고

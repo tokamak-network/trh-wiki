@@ -58,7 +58,6 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[ec2-deploy]] | AWS EC2 deployment via Terraform — one-time setup and update flow |
 | [[release]] | Release process — building macOS/Windows/Linux binaries, versioning |
 | [[testing]] | 테스트 스택, 실행 명령어, E2E 3가지 모드, Vitest/Playwright 패턴 |
-| [[crosstrade-deployment]] | CrossTrade 컨트랙트 배포 및 체인 등록 — L2-L1/L2-L2 flow별 순서, forge 명령, Sepolia 주소 |
 
 ## Decisions
 
