@@ -57,6 +57,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[l2-deploy-local]] | Full walkthrough: deploying an L2 chain locally via Docker Compose |
 | [[ec2-deploy]] | AWS EC2 deployment via Terraform — one-time setup and update flow |
 | [[release]] | Release process — building macOS/Windows/Linux binaries, versioning |
+| [[testing]] | 테스트 스택, 실행 명령어, E2E 3가지 모드, Vitest/Playwright 패턴 |
 
 ## Decisions
 
@@ -66,6 +67,8 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[abigen-vs-manual-calldata]] | abigen bindings vs manual keccak256 calldata construction |
 | [[separate-compose-for-crosstrade]] | Why CrossTrade dApp uses a separate docker-compose file |
 | [[sequential-l2-deploy]] | Why L2 deployments must run sequentially (port conflict analysis) |
+| [[tech-debt-and-risks]] | Known bugs, tech debt, security concerns, dependency risks |
+| [[requirements-v1]] | CrossTrade 통합 v1 요구사항 30개 — 전체 완료, Phase traceability 포함 |
 
 ## Troubleshooting
 
@@ -75,6 +78,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[l1-gas-limits]] | L1 gas limit tuning for OptimismPortal deposit transactions |
 | [[docker-health-checks]] | Backend health check timeouts and retry strategies |
 | [[l2-deposit-verification]] | Verifying L2 deposit transaction execution — polling strategy |
+| [[l1-deposit-tx-pitfalls]] | L1 Deposit Tx CrossTrade 배포 시 13개 주요 함정과 방지법 |
 
 ---
 

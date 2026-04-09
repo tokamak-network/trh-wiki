@@ -75,6 +75,26 @@ Key facts captured:
   - drb-node: Go 1.23, libp2p, Leader/Regular 2노드 아키텍처, PostgreSQL 영속성
   - tokamak-rollup-hub-v2: Next.js 16 마케팅 사이트, Three.js 3D, GitHub API로 trh-platform 릴리즈 조회
 
+## [2026-04-09] ingest | .planning/ → trh-wiki (CrossTrade 프로젝트 지식 이전)
+Sources added to raw/:
+  raw/architecture/deployment-pitfalls.md  ← .planning/research/PITFALLS.md
+  raw/architecture/testing-guide.md        ← .planning/codebase/TESTING.md
+  raw/decisions/tech-debt-and-risks.md     ← .planning/codebase/CONCERNS.md
+  raw/decisions/requirements-v1.md         ← .planning/REQUIREMENTS.md
+
+Pages created:
+  [[l1-deposit-tx-pitfalls]] — L1 Deposit Tx CrossTrade 배포 13개 함정 (Critical/Moderate/Minor)
+  [[testing]] — Vitest + Playwright 테스트 스택, 3가지 E2E 모드, 핵심 패턴
+  [[tech-debt-and-risks]] — Known bugs, security concerns, dependencies at risk, test coverage gaps
+  [[requirements-v1]] — CrossTrade 통합 v1 요구사항 30개 + Phase traceability
+
+Pages updated:
+  [[index]] — Workflows, Decisions, Troubleshooting 섹션에 5개 신규 항목 추가
+
+.planning 정리:
+  삭제: research/, codebase/, phases/01~04/, quick/, debug/, REQUIREMENTS.md
+  유지: phases/05/ (E2E Phase 미완료), PROJECT.md, ROADMAP.md, STATE.md
+
 ## [2026-04-09] refactor | raw/ 드롭존 구조 개편
 HTML 다이어그램 에셋 분리 및 inbox/ 드롭존 추가
 
