@@ -16,7 +16,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 
 ## Components
 
-### TRH 플랫폼
+### Core
 
 | Page | Summary |
 |------|---------|
@@ -24,15 +24,19 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[trh-sdk]] | Go CLI deployment engine — preset configs, L2 deployment orchestration |
 | [[trh-backend]] | Go REST API — Gin + GORM, endpoints, Docker lifecycle management |
 | [[trh-platform-ui]] | Next.js web frontend — embedded in Electron WebContentsView |
-| [[cross-trade]] | CrossTrade DeFi integration — L1→L2 deposit tx pattern, dApp service |
-
-### Thanos 인프라
-
-| Page | Summary |
-|------|---------|
 | [[tokamak-thanos]] | OP Stack v1.7.7 포크 — op-node, op-batcher, op-proposer, 컨트랙트, TypeScript SDK |
 | [[tokamak-thanos-stack]] | Terraform + Helm IaC — AWS EKS 인프라, 체인 노드 K8s 배포 |
 | [[tokamak-thanos-geth]] | go-ethereum OP Stack 포크 — L2 실행 계층, Deposit TX, Engine API |
+| [[tokamak-rollup-hub-v2]] | Rollup Hub 마케팅 웹사이트 — 제품 허브, TRH Desktop 릴리즈 연동 |
+
+### Integration
+
+| Page | Summary |
+|------|---------|
+| [[cross-trade]] | CrossTrade DeFi integration — L1→L2 deposit tx pattern, dApp service |
+| [[thanos-bridge]] | L1↔L2 자산 브리지 DApp — Next.js, Thanos SDK, Wagmi |
+| [[commit-reveal2]] | 분산 랜덤 비컨(DRB) 스마트 컨트랙트 — 2단계 Commit-Reveal, last revealer attack 방지 |
+| [[drb-node]] | DRB Go 노드 구현체 — Leader/Regular 아키텍처, LibP2P, PostgreSQL |
 
 ## Concepts
 

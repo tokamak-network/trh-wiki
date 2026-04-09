@@ -58,3 +58,19 @@ Key facts captured:
   - tokamak-thanos-stack: Terraform + Helm IaC, EKS + 6개 Helm 차트
   - tokamak-thanos-geth: go-ethereum v1.16.3 포크, Deposit TX (0x7E), Engine API 8551
   - 전체 7개 레포 아키텍처 맵 완성
+
+## [2026-04-09] ingest | 신규 레포 4종 추가 (integration 3 + core 1)
+Sources: 각 레포 소스 코드 직접 탐색
+
+Pages created:
+  integration/ → [[thanos-bridge]], [[commit-reveal2]], [[drb-node]]
+  core/ → [[tokamak-rollup-hub-v2]]
+
+Pages updated:
+  [[index]] — Core/Integration 서브섹션 재구성, 4개 신규 항목 추가
+
+Key facts captured:
+  - thanos-bridge: Next.js 15 DApp, @tokamak-network/thanos-sdk 0.0.14-dev, Wagmi/Viem
+  - commit-reveal2: Solidity 0.8.30, Foundry, 2단계 Commit-Reveal, last revealer attack 방지
+  - drb-node: Go 1.23, libp2p, Leader/Regular 2노드 아키텍처, PostgreSQL 영속성
+  - tokamak-rollup-hub-v2: Next.js 16 마케팅 사이트, Three.js 3D, GitHub API로 trh-platform 릴리즈 조회
