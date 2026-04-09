@@ -16,6 +16,8 @@ Master index of all wiki pages. Updated on every ingest operation.
 
 ## Components
 
+### TRH 플랫폼
+
 | Page | Summary |
 |------|---------|
 | [[trh-platform]] | Electron desktop app — main/renderer/preload architecture, IPC patterns |
@@ -23,6 +25,14 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[trh-backend]] | Go REST API — Gin + GORM, endpoints, Docker lifecycle management |
 | [[trh-platform-ui]] | Next.js web frontend — embedded in Electron WebContentsView |
 | [[cross-trade]] | CrossTrade DeFi integration — L1→L2 deposit tx pattern, dApp service |
+
+### Thanos 인프라
+
+| Page | Summary |
+|------|---------|
+| [[tokamak-thanos]] | OP Stack v1.7.7 포크 — op-node, op-batcher, op-proposer, 컨트랙트, TypeScript SDK |
+| [[tokamak-thanos-stack]] | Terraform + Helm IaC — AWS EKS 인프라, 체인 노드 K8s 배포 |
+| [[tokamak-thanos-geth]] | go-ethereum OP Stack 포크 — L2 실행 계층, Deposit TX, Engine API |
 
 ## Concepts
 

@@ -41,3 +41,20 @@ Key facts captured:
   - Genesis Predeploy 거부: constructor 미실행 + 15개 스토리지 슬롯 수동 계산 필요
   - ABI 패턴: abigen (OptimismPortal 직접 호출) + abi.Pack (L2 calldata)
   - dApp: docker-compose.crosstrade.yml 별도 파일 (v3.8 호환)
+
+## [2026-04-09] ingest | Thanos 인프라 레포 3종 추가
+Sources: 각 레포 소스 코드 직접 탐색 (raw source 없음)
+
+Pages created:
+  [[tokamak-thanos]], [[tokamak-thanos-stack]], [[tokamak-thanos-geth]]
+
+Pages updated:
+  [[architecture]] — Thanos 인프라 레이어 추가, 데이터 흐름 다이어그램 확장,
+                     Shared Technology 테이블 확장, EKS 배포 타겟 추가
+  [[index]] — Thanos 인프라 서브섹션 신설
+
+Key facts captured:
+  - tokamak-thanos: OP Stack v1.7.7 포크, Go 1.24 + TS 5.4.5, Nx 모노레포
+  - tokamak-thanos-stack: Terraform + Helm IaC, EKS + 6개 Helm 차트
+  - tokamak-thanos-geth: go-ethereum v1.16.3 포크, Deposit TX (0x7E), Engine API 8551
+  - 전체 7개 레포 아키텍처 맵 완성

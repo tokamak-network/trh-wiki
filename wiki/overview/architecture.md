@@ -7,6 +7,9 @@ related:
   - "[[trh-sdk]]"
   - "[[trh-backend]]"
   - "[[trh-platform-ui]]"
+  - "[[tokamak-thanos]]"
+  - "[[tokamak-thanos-stack]]"
+  - "[[tokamak-thanos-geth]]"
   - "[[presets]]"
   - "[[l2-deployment]]"
 tags: [overview]
@@ -14,11 +17,13 @@ tags: [overview]
 
 # TRH Platform Architecture
 
-TRH Platform은 L2 롤업 체인을 배포·운영하기 위한 4개 저장소로 구성된 풀스택 시스템이다.
+TRH Platform은 L2 롤업 체인을 배포·운영하기 위한 시스템이다. 사용자 인터페이스 레이어(4개 레포)와 L2 인프라 레이어(3개 레포)로 구성된다.
 
 ---
 
 ## Repository Map
+
+### TRH 플랫폼 레이어 (사용자 인터페이스 + 오케스트레이션)
 
 | Repository | Language | Role |
 |------------|----------|------|
@@ -27,7 +32,17 @@ TRH Platform은 L2 롤업 체인을 배포·운영하기 위한 4개 저장소�
 | [[trh-backend]] | Go 1.24 | REST API 서버 — Gin + GORM, 태스크 관리, RBAC |
 | [[trh-platform-ui]] | TypeScript | Next.js 웹 프론트엔드 — 배포 위자드, 대시보드 |
 
-## Data Flow
+### Thanos 인프라 레이어 (L2 롤업 엔진)
+
+| Repository | Language | Role |
+|------------|----------|------|
+| [[tokamak-thanos]] | Go + TypeScript | OP Stack 포크 — op-node, op-batcher, op-proposer, 컨트랙트 |
+| [[tokamak-thanos-stack]] | Terraform + Helm | AWS EKS 인프라 + K8s 배포 IaC |
+| [[tokamak-thanos-geth]] | Go | L2 실행 계층 — go-ethereum OP Stack 포크 (op-geth 역할) |
+
+---
+
+## 전체 데이터 흐름
 
 ```
 trh-platform (Electron)
@@ -43,8 +58,16 @@ trh-backend (Gin API, port 8000)
     │  Go import
     ▼
 trh-sdk (Go CLI)
-    │  L1 contract deploy, L2 node start
-    │  Docker Compose / AWS infra
+    │  L1 contract deploy, L2 node orchestration
+    │  ┌─────────────────────────────────┐
+    │  │  Local: Docker Compose          │
+    │  │  AWS: tokamak-thanos-stack      │
+    │  └─────────────────────────────────┘
+    ▼
+tokamak-thanos-geth (op-geth, port 8545/8546/8551)
+    │  Engine API (port 8551)
+tokamak-thanos op-node (port 9545)
+    │  op-batcher, op-proposer → L1 (Sepolia/Mainnet)
     ▼
 PostgreSQL (port 5432)
 ```
@@ -55,18 +78,17 @@ PostgreSQL (port 5432)
 
 ## Shared Technology
 
-| 기술 | platform | sdk | backend | ui |
-|-----|:--------:|:---:|:-------:|:--:|
-| TypeScript | ✅ | - | - | ✅ |
-| Go | - | ✅ | ✅ | - |
-| go-ethereum | - | ✅ | ✅ | - |
-| ethers.js | ✅ | - | - | ✅ |
-| AWS SDK | ✅ | ✅ | ✅ | - |
-| BIP39/BIP32 | ✅ | ✅ | ✅ | ✅ |
-| Docker | ✅ | ✅ | ✅ | - |
-| Zod | ✅ | - | - | ✅ |
-| PostgreSQL | - | - | ✅ | - |
-| Terraform | - | ✅ | - | - |
+| 기술 | platform | sdk | backend | ui | thanos | thanos-geth |
+|-----|:--------:|:---:|:-------:|:--:|:------:|:-----------:|
+| TypeScript | ✅ | - | - | ✅ | ✅ | - |
+| Go | - | ✅ | ✅ | - | ✅ | ✅ |
+| go-ethereum | - | ✅ | ✅ | - | ✅ | ✅ |
+| ethers.js | ✅ | - | - | ✅ | ✅ | - |
+| AWS SDK | ✅ | ✅ | ✅ | - | - | - |
+| Docker | ✅ | ✅ | ✅ | - | ✅ | ✅ |
+| Terraform | - | ✅ | - | - | - | - |
+| Helm / K8s | - | - | - | - | ✅ | - |
+| Solidity/Foundry | - | - | - | - | ✅ | - |
 
 ---
 
@@ -74,6 +96,7 @@ PostgreSQL (port 5432)
 
 - **local** — Docker Compose on developer machine (Sepolia L1 + local L2 nodes)
 - **ec2** — AWS EC2 via Terraform (Sepolia or Mainnet)
+- **eks** — AWS EKS via tokamak-thanos-stack Helm 차트 (프로덕션)
 
 자세한 내용 → [[l2-deploy-local]], [[ec2-deploy]]
 
