@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TRH Desktop — 설치 및 실행 가이드</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #232634;
+      --surface3: #2a2e3e;
+      --border: #2e3347;
+      --accent: #6c8ef5;
+      --accent2: #4ecb8d;
+      --accent3: #f5a623;
+      --danger: #f55252;
+      --text: #e2e6f3;
+      --text-muted: #8b92a8;
+      --text-dim: #5c6380;
+      --code-bg: #141720;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar Nav ── */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 28px 0 40px;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .sidebar-logo .logo-mark {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #6c8ef5, #4ecb8d);
+      border-radius: 8px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 14px; color: #fff;
+      margin-bottom: 8px;
+    }
+    .sidebar-logo .product-name {
+      font-size: 13px; font-weight: 700; color: var(--text);
+      display: block;
+    }
+    .sidebar-logo .product-sub {
+      font-size: 11px; color: var(--text-muted);
+    }
+
+    .nav-section-title {
+      font-size: 10px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-dim);
+      padding: 12px 20px 6px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 20px;
+      font-size: 13px; color: var(--text-muted);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all .15s;
+      cursor: pointer;
+    }
+    .nav-item:hover { color: var(--text); background: var(--surface2); }
+    .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(108,142,245,.07); }
+    .nav-item .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+    .nav-item .nav-badge {
+      margin-left: auto;
+      font-size: 10px; font-weight: 600; padding: 1px 6px;
+      border-radius: 10px; background: rgba(108,142,245,.2); color: var(--accent);
+    }
+
+    /* ── Main Content ── */
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      min-height: 100vh;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #1a1d27 0%, #0f1117 60%);
+      border-bottom: 1px solid var(--border);
+      padding: 60px 60px 50px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 80% 40%, rgba(108,142,245,.1) 0%, transparent 60%),
+                  radial-gradient(ellipse at 20% 80%, rgba(78,203,141,.06) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .hero-inner { max-width: 860px; position: relative; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(108,142,245,.12); border: 1px solid rgba(108,142,245,.25);
+      color: var(--accent); font-size: 11px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 20px; margin-bottom: 18px;
+    }
+    .hero h1 {
+      font-size: 38px; font-weight: 800; letter-spacing: -.8px;
+      line-height: 1.2; margin-bottom: 14px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p { color: var(--text-muted); font-size: 16px; max-width: 540px; line-height: 1.7; }
+
+    .hero-meta {
+      display: flex; gap: 24px; margin-top: 28px;
+    }
+    .meta-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text-muted);
+    }
+    .meta-item .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .dot-green { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+    .dot-blue { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .dot-yellow { background: var(--accent3); box-shadow: 0 0 6px var(--accent3); }
+
+    /* ── Content area ── */
+    .content {
+      max-width: 860px;
+      padding: 48px 60px 80px;
+    }
+
+    /* ── Section ── */
+    .section {
+      margin-bottom: 56px;
+      scroll-margin-top: 24px;
+    }
+
+    .section-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 24px;
+    }
+    .section-number {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, rgba(108,142,245,.2), rgba(108,142,245,.1));
+      border: 1px solid rgba(108,142,245,.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: var(--accent);
+      flex-shrink: 0;
+    }
+    .section h2 {
+      font-size: 22px; font-weight: 700; color: var(--text);
+    }
+
+    h3 {
+      font-size: 15px; font-weight: 700; color: var(--text);
+      margin: 28px 0 12px;
+    }
+
+    p { color: var(--text-muted); font-size: 14px; margin-bottom: 14px; }
+    p:last-child { margin-bottom: 0; }
+
+    /* ── Requirement cards ── */
+    .req-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+      margin-top: 4px;
+    }
+    .req-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .req-icon {
+      font-size: 22px; flex-shrink: 0; margin-top: 2px;
+    }
+    .req-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .req-value { font-size: 12px; color: var(--text-muted); }
+    .req-note { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+    /* ── Step cards ── */
+    .steps {
+      display: flex; flex-direction: column; gap: 0;
+      position: relative;
+    }
+    .steps::before {
+      content: '';
+      position: absolute; left: 19px; top: 40px; bottom: 40px;
+      width: 2px; background: var(--border);
+    }
+
+    .step-card {
+      display: flex; gap: 20px;
+      padding: 20px 0;
+      position: relative;
+    }
+    .step-dot {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      background: var(--surface2); border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; color: var(--accent);
+      z-index: 1;
+      transition: all .2s;
+    }
+    .step-card:hover .step-dot {
+      border-color: var(--accent);
+      background: rgba(108,142,245,.1);
+    }
+    .step-body { flex: 1; padding-top: 8px; }
+    .step-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .step-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── Screen mockups ── */
+    .screen-flow {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      margin: 20px 0;
+    }
+
+    .screen-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: transform .2s, border-color .2s;
+    }
+    .screen-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(108,142,245,.4);
+    }
+
+    .screen-header {
+      background: var(--surface2);
+      padding: 8px 12px;
+      display: flex; align-items: center; gap: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .traffic-lights { display: flex; gap: 5px; }
+    .tl { width: 10px; height: 10px; border-radius: 50%; }
+    .tl-red { background: #ff5f57; }
+    .tl-yellow { background: #febc2e; }
+    .tl-green { background: #28c840; }
+    .screen-title-bar { font-size: 11px; color: var(--text-dim); margin-left: 6px; }
+
+    .screen-body {
+      padding: 16px;
+      min-height: 160px;
+    }
+
+    .screen-label {
+      display: inline-block;
+      font-size: 10px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; padding: 2px 8px;
+      border-radius: 10px; margin-bottom: 8px;
+    }
+    .label-config { background: rgba(108,142,245,.15); color: var(--accent); }
+    .label-setup { background: rgba(245,166,35,.15); color: var(--accent3); }
+    .label-ready { background: rgba(78,203,141,.15); color: var(--accent2); }
+
+    .screen-mock-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .screen-mock-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
+
+    /* Config mock */
+    .mock-radio-group { display: flex; flex-direction: column; gap: 6px; }
+    .mock-radio {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid var(--border); border-radius: 6px;
+      font-size: 11px; color: var(--text-muted);
+      background: var(--surface2);
+    }
+    .mock-radio.selected { border-color: var(--accent); background: rgba(108,142,245,.07); color: var(--text); }
+    .mock-radio-dot {
+      width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--text-dim); flex-shrink: 0;
+    }
+    .mock-radio.selected .mock-radio-dot { border-color: var(--accent); background: var(--accent); }
+    .mock-btn {
+      margin-top: 10px; width: 100%;
+      padding: 7px; border-radius: 6px; font-size: 11px; font-weight: 600;
+      text-align: center; background: var(--accent); color: #fff;
+    }
+
+    /* Setup mock */
+    .mock-step-list { display: flex; flex-direction: column; gap: 5px; }
+    .mock-step-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 8px; border-radius: 5px;
+      font-size: 11px; color: var(--text-muted);
+      background: var(--surface2);
+    }
+    .mock-step-icon { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+    .icon-done { background: rgba(78,203,141,.2); color: var(--accent2); }
+    .icon-loading { background: rgba(108,142,245,.2); color: var(--accent); animation: pulse 1.5s infinite; }
+    .icon-pending { background: var(--border); color: var(--text-dim); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    /* Ready mock */
+    .mock-solar {
+      width: 80px; height: 80px; margin: 0 auto 10px;
+      border-radius: 50%; border: 1.5px dashed rgba(108,142,245,.3);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .mock-solar::before, .mock-solar::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%; border: 1px dashed rgba(108,142,245,.2);
+    }
+    .mock-solar::before { width: 55px; height: 55px; }
+    .mock-solar::after { width: 30px; height: 30px; }
+    .mock-solar-center {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+    .mock-ready-btns { display: flex; gap: 6px; margin-top: 10px; }
+    .mock-btn-secondary {
+      flex: 1; padding: 6px; border-radius: 5px; font-size: 10px; font-weight: 600;
+      text-align: center; border: 1px solid var(--border); color: var(--text-muted);
+      background: var(--surface2);
+    }
+    .mock-btn-primary {
+      flex: 1; padding: 6px; border-radius: 5px; font-size: 10px; font-weight: 600;
+      text-align: center; background: var(--accent); color: #fff;
+    }
+
+    /* ── Info/Warning/Tip boxes ── */
+    .callout {
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin: 16px 0;
+      display: flex; gap: 12px;
+      font-size: 13px;
+    }
+    .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { flex: 1; }
+    .callout-title { font-weight: 700; margin-bottom: 3px; }
+    .callout-text { color: var(--text-muted); line-height: 1.6; }
+    .callout-text code {
+      background: rgba(255,255,255,.08);
+      padding: 1px 5px; border-radius: 3px; font-size: 12px;
+    }
+
+    .callout-info { background: rgba(108,142,245,.08); border: 1px solid rgba(108,142,245,.2); }
+    .callout-info .callout-title { color: var(--accent); }
+    .callout-warn { background: rgba(245,166,35,.08); border: 1px solid rgba(245,166,35,.2); }
+    .callout-warn .callout-title { color: var(--accent3); }
+    .callout-tip { background: rgba(78,203,141,.08); border: 1px solid rgba(78,203,141,.2); }
+    .callout-tip .callout-title { color: var(--accent2); }
+    .callout-danger { background: rgba(245,82,82,.08); border: 1px solid rgba(245,82,82,.2); }
+    .callout-danger .callout-title { color: var(--danger); }
+
+    /* ── Code blocks ── */
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin: 12px 0;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 13px;
+      color: #c9d1e8;
+      overflow-x: auto;
+      position: relative;
+    }
+    .code-block .comment { color: var(--text-dim); }
+    .code-block .cmd { color: var(--accent2); }
+    .code-block .arg { color: var(--accent3); }
+
+    /* ── Troubleshoot accordion ── */
+    .faq-list { display: flex; flex-direction: column; gap: 8px; }
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .faq-question {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px;
+      font-size: 14px; font-weight: 600; color: var(--text);
+      cursor: pointer;
+      background: var(--surface);
+      user-select: none;
+      transition: background .15s;
+    }
+    .faq-question:hover { background: var(--surface2); }
+    .faq-chevron {
+      font-size: 12px; color: var(--text-dim);
+      transition: transform .2s;
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+    .faq-answer {
+      max-height: 0; overflow: hidden;
+      transition: max-height .3s ease, padding .2s;
+      background: var(--surface2);
+      font-size: 13px; color: var(--text-muted); line-height: 1.7;
+      padding: 0 16px;
+    }
+    .faq-item.open .faq-answer {
+      max-height: 400px;
+      padding: 14px 16px;
+    }
+    .faq-answer code {
+      background: var(--code-bg);
+      padding: 2px 6px; border-radius: 3px; font-size: 12px;
+    }
+    .faq-answer ul { padding-left: 18px; margin-top: 6px; }
+    .faq-answer li { margin-bottom: 4px; }
+
+    /* ── Port table ── */
+    .port-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin: 12px 0;
+    }
+    .port-table th {
+      text-align: left; padding: 10px 14px;
+      background: var(--surface2); color: var(--text-muted);
+      font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+    .port-table td {
+      padding: 10px 14px; border-bottom: 1px solid rgba(46,51,71,.6);
+      color: var(--text-muted); vertical-align: middle;
+    }
+    .port-table tr:last-child td { border-bottom: none; }
+    .port-table tr:hover td { background: rgba(255,255,255,.02); }
+    .port-pill {
+      font-family: 'SF Mono', monospace; font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 4px;
+      background: rgba(108,142,245,.12); color: var(--accent); border: 1px solid rgba(108,142,245,.2);
+    }
+    .port-name { font-weight: 600; color: var(--text); }
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 60px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: var(--text-dim);
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .hero, .content { padding: 32px 24px; }
+      .screen-flow { grid-template-columns: 1fr; }
+      .req-grid { grid-template-columns: 1fr; }
+      .footer { flex-direction: column; gap: 8px; text-align: center; }
+    }
+
+    /* ── Divider ── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+    /* ── Progress indicators ── */
+    .progress-bar {
+      height: 4px; border-radius: 2px;
+      background: var(--border); overflow: hidden; margin-top: 6px;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    /* highlight anchor */
+    :target { scroll-margin-top: 24px; }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">T</div>
+      <span class="product-name">TRH Desktop</span>
+      <span class="product-sub">설치 및 실행 가이드</span>
+    </div>
+
+    <div class="nav-section-title">시작하기</div>
+    <a class="nav-item active" href="#overview" onclick="setActive(this)">
+      <span class="nav-icon">🗺️</span> 개요
+    </a>
+    <a class="nav-item" href="#requirements" onclick="setActive(this)">
+      <span class="nav-icon">📋</span> 시스템 요구사항
+    </a>
+    <a class="nav-item" href="#install" onclick="setActive(this)">
+      <span class="nav-icon">⬇️</span> 앱 설치
+    </a>
+
+    <div class="nav-section-title">첫 실행</div>
+    <a class="nav-item" href="#setup-flow" onclick="setActive(this)">
+      <span class="nav-icon">🧭</span> 설정 플로우
+    </a>
+    <a class="nav-item" href="#step-config" onclick="setActive(this)">
+      <span class="nav-icon">🔑</span> 관리자 계정 설정
+    </a>
+    <a class="nav-item" href="#step-setup" onclick="setActive(this)">
+      <span class="nav-icon">⚙️</span> 자동 설치
+    </a>
+    <a class="nav-item" href="#step-ready" onclick="setActive(this)">
+      <span class="nav-icon">🚀</span> 대시보드
+    </a>
+
+    <div class="nav-section-title">레퍼런스</div>
+    <a class="nav-item" href="#ports" onclick="setActive(this)">
+      <span class="nav-icon">🔌</span> 포트 정보
+    </a>
+    <a class="nav-item" href="#troubleshoot" onclick="setActive(this)">
+      <span class="nav-icon">🔧</span> 문제 해결
+    </a>
+    <a class="nav-item" href="#faq" onclick="setActive(this)">
+      <span class="nav-icon">❓</span> FAQ
+    </a>
+  </nav>
+
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-inner">
+        <div class="hero-badge">📘 설치 가이드 v1.0</div>
+        <h1>TRH <span>Desktop</span> 설치 및 실행</h1>
+        <p>Tokamak Rollup Hub Desktop 앱으로 클릭 몇 번만에 나만의 L2 롤업을 로컬에서 배포하세요. Docker, 서버 설정 지식이 없어도 괜찮습니다.</p>
+        <div class="hero-meta">
+          <div class="meta-item"><div class="dot dot-green"></div> macOS 12+ 지원</div>
+          <div class="meta-item"><div class="dot dot-blue"></div> Docker 자동 설치</div>
+          <div class="meta-item"><div class="dot dot-yellow"></div> 설치 시간 약 10분</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- 1. Overview -->
+      <section class="section" id="overview">
+        <div class="section-header">
+          <div class="section-number">1</div>
+          <h2>TRH Desktop이란?</h2>
+        </div>
+        <p>TRH Desktop은 Tokamak Rollup Hub 플랫폼을 비기술적 사용자도 손쉽게 실행할 수 있도록 만든 Electron 기반 데스크탑 앱입니다.</p>
+        <p>앱을 실행하면 내부적으로 Docker 컨테이너를 자동 관리하고, 설치 완료 후 브라우저 없이 앱 내부에서 바로 L2 대시보드를 사용할 수 있습니다.</p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body">
+            <div class="callout-title">핵심 특징</div>
+            <div class="callout-text">
+              Docker Desktop이 설치되지 않은 경우 앱이 자동으로 다운로드·설치합니다. 별도로 설치할 필요가 없습니다.
+            </div>
+          </div>
+        </div>
+
+        <h3>내부 구조</h3>
+        <div class="table-wrap">
+          <table class="port-table">
+            <thead>
+              <tr>
+                <th>컴포넌트</th>
+                <th>역할</th>
+                <th>이미지</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="port-name">PostgreSQL 15</span></td>
+                <td>데이터베이스 (L2 상태 저장)</td>
+                <td><code style="font-size:11px;color:var(--text-muted)">postgres:15-alpine</code></td>
+              </tr>
+              <tr>
+                <td><span class="port-name">trh-backend</span></td>
+                <td>Node.js API 서버</td>
+                <td><code style="font-size:11px;color:var(--text-muted)">tokamaknetwork/trh-backend:latest</code></td>
+              </tr>
+              <tr>
+                <td><span class="port-name">trh-platform-ui</span></td>
+                <td>Next.js 웹 대시보드</td>
+                <td><code style="font-size:11px;color:var(--text-muted)">tokamaknetwork/trh-platform-ui:latest</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- 2. Requirements -->
+      <section class="section" id="requirements">
+        <div class="section-header">
+          <div class="section-number">2</div>
+          <h2>시스템 요구사항</h2>
+        </div>
+        <p>앱을 설치하기 전에 아래 요구사항을 확인하세요.</p>
+
+        <div class="req-grid">
+          <div class="req-card">
+            <div class="req-icon">🍎</div>
+            <div>
+              <div class="req-label">운영체제</div>
+              <div class="req-value">macOS 12 Monterey 이상</div>
+              <div class="req-note">Windows·Linux 지원 예정</div>
+            </div>
+          </div>
+          <div class="req-card">
+            <div class="req-icon">💾</div>
+            <div>
+              <div class="req-label">저장 공간</div>
+              <div class="req-value">최소 10GB 여유 공간</div>
+              <div class="req-note">Docker 이미지 약 5GB + Docker Desktop 약 2GB</div>
+            </div>
+          </div>
+          <div class="req-card">
+            <div class="req-icon">🧠</div>
+            <div>
+              <div class="req-label">메모리 (RAM)</div>
+              <div class="req-value">최소 8GB (권장 16GB)</div>
+              <div class="req-note">Docker 컨테이너 3개 동시 실행</div>
+            </div>
+          </div>
+          <div class="req-card">
+            <div class="req-icon">🌐</div>
+            <div>
+              <div class="req-label">네트워크</div>
+              <div class="req-value">초기 설치 시 인터넷 연결 필요</div>
+              <div class="req-note">Docker 이미지 다운로드 (~300MB)</div>
+            </div>
+          </div>
+          <div class="req-card">
+            <div class="req-icon">🐳</div>
+            <div>
+              <div class="req-label">Docker Desktop</div>
+              <div class="req-value">설치 불필요 — 앱이 자동 설치</div>
+              <div class="req-note">이미 설치되어 있으면 그대로 사용</div>
+            </div>
+          </div>
+          <div class="req-card">
+            <div class="req-icon">🔒</div>
+            <div>
+              <div class="req-label">권한</div>
+              <div class="req-value">관리자 권한 (sudo)</div>
+              <div class="req-note">Docker 설치 시 비밀번호 입력 필요</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warn" style="margin-top: 20px;">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body">
+            <div class="callout-title">포트 충돌 주의</div>
+            <div class="callout-text">
+              3000, 8000, 5433 포트가 다른 앱에서 사용 중이면 앱 실행 시 자동으로 감지하고 해제할지 물어봅니다.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- 3. Install -->
+      <section class="section" id="install">
+        <div class="section-header">
+          <div class="section-number">3</div>
+          <h2>앱 설치</h2>
+        </div>
+
+        <div class="steps">
+          <div class="step-card">
+            <div class="step-dot">1</div>
+            <div class="step-body">
+              <div class="step-title">DMG 파일 다운로드</div>
+              <div class="step-desc">
+                Tokamak Network 공식 페이지 또는 GitHub Releases에서 <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px;font-size:12px">TRH-Desktop-arm64.dmg</code> (Apple Silicon) 또는 <code style="background:var(--code-bg);padding:1px 5px;border-radius:3px;font-size:12px">TRH-Desktop-x64.dmg</code> (Intel Mac)을 다운로드합니다.
+              </div>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-dot">2</div>
+            <div class="step-body">
+              <div class="step-title">DMG 열기 및 앱 설치</div>
+              <div class="step-desc">
+                다운로드한 .dmg 파일을 더블클릭하여 엽니다. 마운트된 창에서 <strong>TRH Desktop.app</strong>을 <strong>/Applications</strong> 폴더로 드래그합니다.
+              </div>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-dot">3</div>
+            <div class="step-body">
+              <div class="step-title">처음 실행 시 보안 허용</div>
+              <div class="step-desc">
+                macOS Gatekeeper로 인해 "개발자를 확인할 수 없음" 경고가 표시될 수 있습니다. 아래 방법으로 실행하세요.
+              </div>
+              <div class="callout callout-tip" style="margin-top:10px">
+                <div class="callout-icon">✅</div>
+                <div class="callout-body">
+                  <div class="callout-title">해결 방법</div>
+                  <div class="callout-text">
+                    <strong>방법 1</strong>: Finder에서 앱 우클릭 → <em>열기</em> → <em>열기</em> 클릭<br>
+                    <strong>방법 2</strong>: 시스템 설정 → 개인 정보 보호 및 보안 → 하단 "그래도 열기" 클릭
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-dot">4</div>
+            <div class="step-body">
+              <div class="step-title">앱 실행</div>
+              <div class="step-desc">
+                Launchpad 또는 Applications 폴더에서 <strong>TRH Desktop</strong>을 클릭하여 실행합니다. 앱이 열리면 설정 화면이 표시됩니다.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- 4. Setup Flow Overview -->
+      <section class="section" id="setup-flow">
+        <div class="section-header">
+          <div class="section-number">4</div>
+          <h2>첫 실행 플로우</h2>
+        </div>
+        <p>앱을 처음 실행하면 3단계 플로우를 거쳐 L2 플랫폼이 자동으로 설정됩니다.</p>
+
+        <div class="screen-flow">
+          <!-- Config screen -->
+          <div class="screen-card">
+            <div class="screen-header">
+              <div class="traffic-lights">
+                <div class="tl tl-red"></div>
+                <div class="tl tl-yellow"></div>
+                <div class="tl tl-green"></div>
+              </div>
+              <span class="screen-title-bar">TRH Desktop</span>
+            </div>
+            <div class="screen-body">
+              <span class="screen-label label-config">1단계</span>
+              <div class="screen-mock-title">계정 설정</div>
+              <div class="screen-mock-sub">관리자 계정 선택</div>
+              <div class="mock-radio-group">
+                <div class="mock-radio selected">
+                  <div class="mock-radio-dot"></div>
+                  기본 계정 사용
+                </div>
+                <div class="mock-radio">
+                  <div class="mock-radio-dot"></div>
+                  커스텀 계정
+                </div>
+              </div>
+              <div class="mock-btn">Continue →</div>
+            </div>
+          </div>
+
+          <!-- Setup screen -->
+          <div class="screen-card">
+            <div class="screen-header">
+              <div class="traffic-lights">
+                <div class="tl tl-red"></div>
+                <div class="tl tl-yellow"></div>
+                <div class="tl tl-green"></div>
+              </div>
+              <span class="screen-title-bar">TRH Desktop</span>
+            </div>
+            <div class="screen-body">
+              <span class="screen-label label-setup">2단계</span>
+              <div class="screen-mock-title">자동 설치</div>
+              <div class="screen-mock-sub">서비스 시작 중...</div>
+              <div class="mock-step-list">
+                <div class="mock-step-item"><div class="mock-step-icon icon-done">✓</div> Docker 환경</div>
+                <div class="mock-step-item"><div class="mock-step-icon icon-done">✓</div> 이미지 다운로드</div>
+                <div class="mock-step-item"><div class="mock-step-icon icon-loading">●</div> 서비스 시작</div>
+                <div class="mock-step-item"><div class="mock-step-icon icon-pending">○</div> 의존성 설치</div>
+                <div class="mock-step-item"><div class="mock-step-icon icon-pending">○</div> 준비 완료</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ready screen -->
+          <div class="screen-card">
+            <div class="screen-header">
+              <div class="traffic-lights">
+                <div class="tl tl-red"></div>
+                <div class="tl tl-yellow"></div>
+                <div class="tl tl-green"></div>
+              </div>
+              <span class="screen-title-bar">TRH Desktop</span>
+            </div>
+            <div class="screen-body">
+              <span class="screen-label label-ready">3단계</span>
+              <div class="screen-mock-title">배포 완료</div>
+              <div class="mock-solar">
+                <div class="mock-solar-center"></div>
+              </div>
+              <div style="text-align:center;font-size:11px;color:var(--text-muted);margin-bottom:4px">L2 On-Demand</div>
+              <div class="mock-ready-btns">
+                <div class="mock-btn-secondary">Dashboard</div>
+                <div class="mock-btn-primary">Get Started →</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- 5. Config step detail -->
+      <section class="section" id="step-config">
+        <div class="section-header">
+          <div class="section-number">5</div>
+          <h2>1단계: 관리자 계정 설정</h2>
+        </div>
+        <p>앱 실행 직후 관리자 계정 설정 화면이 표시됩니다. 두 가지 옵션 중 하나를 선택하세요.</p>
+
+        <h3>옵션 A: 기본 계정 사용 (권장 — 빠른 시작)</h3>
+        <p>사전 설정된 기본 계정으로 즉시 시작합니다. 개발·테스트 목적에 적합합니다.</p>
+        <div class="table-wrap">
+          <table class="port-table">
+            <thead><tr><th>항목</th><th>값</th></tr></thead>
+            <tbody>
+              <tr><td class="port-name">Email</td><td><code style="font-size:12px">admin@gmail.com</code></td></tr>
+              <tr><td class="port-name">Password</td><td><code style="font-size:12px">admin123</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-warn">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body">
+            <div class="callout-title">보안 주의</div>
+            <div class="callout-text">기본 계정은 외부에 공개된 환경에서 사용하지 마세요. 프로덕션 배포 시에는 반드시 커스텀 계정을 설정하세요.</div>
+          </div>
+        </div>
+
+        <h3>옵션 B: 커스텀 계정 설정</h3>
+        <p>직접 이메일과 비밀번호를 입력합니다.</p>
+        <div class="callout callout-tip">
+          <div class="callout-icon">📝</div>
+          <div class="callout-body">
+            <div class="callout-title">입력 규칙</div>
+            <div class="callout-text">
+              이메일: 유효한 이메일 형식 (예: <code>you@example.com</code>)<br>
+              비밀번호: 최소 8자 이상
+            </div>
+          </div>
+        </div>
+
+        <p>설정 완료 후 <strong>Continue</strong> 버튼을 클릭하면 자동 설치 단계로 진행됩니다.</p>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- 6. Setup step detail -->
+      <section class="section" id="step-setup">
+        <div class="section-header">
+          <div class="section-number">6</div>
+          <h2>2단계: 자동 설치</h2>
+        </div>
+        <p>설정 완료 후 앱이 자동으로 환경을 구성합니다. 5가지 단계를 순서대로 진행하며, 완료까지 약 5~10분이 소요됩니다.</p>
+
+        <div class="steps">
+          <div class="step-card">
+            <div class="step-dot" style="font-size:18px">🐳</div>
+            <div class="step-body">
+              <div class="step-title">Step 1 — Docker 환경 확인</div>
+              <div class="step-desc">
+                Docker Desktop이 설치되어 있는지 확인합니다. 미설치 시 <strong>Install Docker</strong> 버튼이 표시되고, 클릭 시 자동으로 .dmg를 다운로드하여 설치합니다 (macOS 전용).
+              </div>
+              <div class="callout callout-info" style="margin-top:10px">
+                <div class="callout-icon">ℹ️</div>
+                <div class="callout-body">
+                  <div class="callout-title">자동 설치 과정</div>
+                  <div class="callout-text">
+                    Docker DMG 다운로드 (~600MB) → 마운트 → /Applications에 복사 → Docker.app 실행 → 재시도
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-dot" style="font-size:18px">📦</div>
+            <div class="step-body">
+              <div class="step-title">Step 2 — 컨테이너 이미지 다운로드</div>
+              <div class="step-desc">
+                Docker Hub에서 PostgreSQL, Backend, Platform UI 이미지를 다운로드합니다. 처음 실행 시 네트워크 속도에 따라 3~8분 소요될 수 있습니다. 진행률 표시줄로 확인할 수 있습니다.
+              </div>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-dot" style="font-size:18px">▶️</div>
+            <div class="step-body">
+              <div class="step-title">Step 3 — 서비스 시작</div>
+              <div class="step-desc">
+                3개의 Docker 컨테이너(postgres, backend, platform-ui)를 순서대로 시작합니다. 포트 충돌이 감지되면 모달로 안내하며 자동 해제할 수 있습니다.
+              </div>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-dot" style="font-size:18px">🔧</div>
+            <div class="step-body">
+              <div class="step-title">Step 4 — 백엔드 의존성 설치</div>
+              <div class="step-desc">
+                컨테이너 내부에 필요한 도구(pnpm, node, forge, aws-cli)를 설치합니다. 이미 설치된 경우 이 단계는 빠르게 완료됩니다.
+              </div>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-dot" style="font-size:18px">✅</div>
+            <div class="step-body">
+              <div class="step-title">Step 5 — 헬스 체크</div>
+              <div class="step-desc">
+                모든 서비스가 정상 응답하는지 확인합니다. 완료되면 자동으로 Ready 화면으로 이동합니다.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warn" style="margin-top:20px">
+          <div class="callout-icon">⏱️</div>
+          <div class="callout-body">
+            <div class="callout-title">시간이 오래 걸린다면?</div>
+            <div class="callout-text">
+              인터넷 속도에 따라 이미지 다운로드가 느릴 수 있습니다. 하단 터미널 패널에서 실시간 로그를 확인할 수 있습니다. 오류 발생 시 <strong>Retry</strong> 버튼이 표시됩니다.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- 7. Ready step detail -->
+      <section class="section" id="step-ready">
+        <div class="section-header">
+          <div class="section-number">7</div>
+          <h2>3단계: 대시보드 사용</h2>
+        </div>
+        <p>설치가 완료되면 소행성 애니메이션이 있는 Ready 화면이 표시됩니다.</p>
+
+        <h3>대시보드 열기</h3>
+        <p><strong>Get Started</strong> 또는 <strong>Dashboard</strong> 버튼을 클릭하면 앱 내부에서 L2 관리 대시보드(localhost:3000)가 열립니다.</p>
+
+        <div class="callout callout-tip">
+          <div class="callout-icon">🖥️</div>
+          <div class="callout-body">
+            <div class="callout-title">인앱 브라우저</div>
+            <div class="callout-text">
+              대시보드는 앱 내부 WebContentsView로 표시됩니다. 상단 네비게이션 바에서 뒤로/앞으로/새로고침 버튼과 <strong>← Dashboard</strong> 버튼으로 메인 화면으로 돌아올 수 있습니다.
+            </div>
+          </div>
+        </div>
+
+        <h3>업데이트 알림</h3>
+        <p>새로운 플랫폼 버전이 있으면 Ready 화면에 업데이트 배너가 표시됩니다. <strong>Update Now</strong>를 클릭하면 자동으로 최신 이미지를 받아 재시작합니다.</p>
+
+        <h3>앱 종료</h3>
+        <p>앱 창을 닫으면 macOS 트레이(상단 메뉴바)에 TRH 아이콘으로 남아 백그라운드에서 계속 실행됩니다. 완전히 종료하려면 트레이 아이콘 → <strong>Quit</strong>을 선택하세요. 종료 시 Docker 컨테이너가 자동으로 중지됩니다.</p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🔄</div>
+          <div class="callout-body">
+            <div class="callout-title">다음 실행부터는 빠릅니다</div>
+            <div class="callout-text">
+              처음 설치 후에는 이미지가 로컬에 캐시되므로, 다음 실행 시에는 컨테이너가 즉시 시작됩니다 (약 30초).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- 8. Ports -->
+      <section class="section" id="ports">
+        <div class="section-header">
+          <div class="section-number">8</div>
+          <h2>포트 정보</h2>
+        </div>
+        <p>TRH Desktop은 아래 포트를 사용합니다. 해당 포트를 사용하는 다른 서비스가 있으면 충돌이 발생할 수 있습니다.</p>
+
+        <div class="table-wrap">
+          <table class="port-table">
+            <thead>
+              <tr>
+                <th>포트</th>
+                <th>서비스</th>
+                <th>설명</th>
+                <th>접근 방법</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="port-pill">3000</span></td>
+                <td class="port-name">Platform UI</td>
+                <td>Next.js 웹 대시보드</td>
+                <td>앱 내 또는 <a href="http://localhost:3000" style="color:var(--accent)">localhost:3000</a></td>
+              </tr>
+              <tr>
+                <td><span class="port-pill">8000</span></td>
+                <td class="port-name">Backend API</td>
+                <td>Node.js REST API</td>
+                <td><a href="http://localhost:8000" style="color:var(--accent)">localhost:8000</a></td>
+              </tr>
+              <tr>
+                <td><span class="port-pill">5433</span></td>
+                <td class="port-name">PostgreSQL</td>
+                <td>데이터베이스</td>
+                <td>localhost:5433 (postgres/postgres)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-info" style="margin-top:16px">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-body">
+            <div class="callout-title">PostgreSQL 포트가 5433인 이유</div>
+            <div class="callout-text">
+              로컬에 이미 PostgreSQL(5432)이 설치된 경우 충돌을 방지하기 위해 5433을 사용합니다. 컨테이너 내부에서는 5432를 사용합니다.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- 9. Troubleshoot -->
+      <section class="section" id="troubleshoot">
+        <div class="section-header">
+          <div class="section-number">9</div>
+          <h2>문제 해결</h2>
+        </div>
+        <p>자주 발생하는 문제와 해결 방법입니다.</p>
+
+        <div class="faq-list">
+
+          <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-question">
+              🐳 Docker 자동 설치가 실패합니다
+              <span class="faq-chevron">▼</span>
+            </div>
+            <div class="faq-answer">
+              <p>자동 설치 실패 시 수동으로 설치할 수 있습니다.</p>
+              <ul>
+                <li><a href="https://www.docker.com/products/docker-desktop/" style="color:var(--accent)">docker.com</a>에서 Docker Desktop을 다운로드합니다</li>
+                <li>Apple Silicon Mac: <code>Docker-arm64.dmg</code> 선택</li>
+                <li>Intel Mac: <code>Docker-x86_64.dmg</code> 선택</li>
+                <li>설치 완료 후 Docker Desktop을 한 번 실행하여 초기화 완료</li>
+                <li>TRH Desktop에서 <strong>Retry</strong> 버튼 클릭</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-question">
+              🔴 포트 충돌 오류가 발생합니다
+              <span class="faq-chevron">▼</span>
+            </div>
+            <div class="faq-answer">
+              <p>앱이 포트 충돌을 감지하면 모달로 안내합니다. <strong>Confirm</strong>을 클릭하면 자동으로 해당 프로세스를 종료합니다.</p>
+              <p>수동으로 해제하려면:</p>
+              <div class="code-block"><span class="comment"># 3000 포트를 사용 중인 프로세스 확인</span>
+<span class="cmd">lsof</span> <span class="arg">-i :3000</span>
+<span class="comment"># PID로 종료</span>
+<span class="cmd">kill</span> <span class="arg">-9 &lt;PID&gt;</span></div>
+            </div>
+          </div>
+
+          <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-question">
+              ⏱️ 이미지 다운로드가 너무 오래 걸립니다
+              <span class="faq-chevron">▼</span>
+            </div>
+            <div class="faq-answer">
+              <p>처음 설치 시 약 300~500MB의 Docker 이미지를 다운로드합니다. 인터넷 속도에 따라 다르며 보통 3~10분 소요됩니다.</p>
+              <ul>
+                <li>와이파이 대신 유선 연결을 사용하면 더 빠릅니다</li>
+                <li>회사 VPN이 연결된 경우 속도가 느릴 수 있으니 VPN 해제 후 시도하세요</li>
+                <li>오류 발생 시 <strong>Retry</strong>를 클릭하면 이어받기를 시도합니다</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-question">
+              ❌ 헬스 체크에서 Timeout이 발생합니다
+              <span class="faq-chevron">▼</span>
+            </div>
+            <div class="faq-answer">
+              <p>컨테이너가 시작됐지만 서비스가 정상 응답하지 않는 경우입니다.</p>
+              <ul>
+                <li><strong>Retry</strong> 버튼 클릭 — 대부분의 경우 해결됩니다</li>
+                <li>Docker Desktop을 재시작한 뒤 앱을 다시 실행하세요</li>
+                <li>메모리 부족 시 다른 앱을 닫고 시도하세요 (8GB+ 권장)</li>
+              </ul>
+              <p>직접 컨테이너 상태를 확인하려면:</p>
+              <div class="code-block"><span class="cmd">docker</span> ps
+<span class="cmd">docker</span> <span class="arg">logs trh-backend --tail 50</span></div>
+            </div>
+          </div>
+
+          <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-question">
+              🔐 macOS "개발자를 확인할 수 없음" 경고
+              <span class="faq-chevron">▼</span>
+            </div>
+            <div class="faq-answer">
+              <p>앱이 Apple 공증(Notarization)을 받지 않은 경우 표시됩니다.</p>
+              <ul>
+                <li>Finder에서 앱 아이콘을 <strong>우클릭</strong> → <strong>열기</strong> 선택</li>
+                <li>"개발자를 확인할 수 없음" 경고에서 <strong>열기</strong> 클릭</li>
+                <li>이후 실행부터는 경고 없이 열립니다</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-question">
+              💾 "디스크 공간 부족" 오류
+              <span class="faq-chevron">▼</span>
+            </div>
+            <div class="faq-answer">
+              <p>Docker 이미지 다운로드 실패 시 자동으로 Docker 디스크 정리를 시도합니다. 수동으로 정리하려면:</p>
+              <div class="code-block"><span class="comment"># 사용하지 않는 Docker 데이터 정리</span>
+<span class="cmd">docker</span> system prune <span class="arg">-af</span>
+<span class="cmd">docker</span> volume prune <span class="arg">-f</span></div>
+              <p>⚠️ 위 명령은 다른 Docker 컨테이너 데이터도 삭제될 수 있으니 주의하세요.</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- 10. FAQ -->
+      <section class="section" id="faq">
+        <div class="section-header">
+          <div class="section-number">10</div>
+          <h2>자주 묻는 질문</h2>
+        </div>
+
+        <div class="faq-list">
+
+          <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-question">
+              앱을 닫으면 L2 노드도 종료되나요?
+              <span class="faq-chevron">▼</span>
+            </div>
+            <div class="faq-answer">
+              <p>macOS에서는 창을 닫아도 앱이 메뉴바 트레이에 남아 백그라운드에서 계속 실행됩니다. Docker 컨테이너도 계속 동작합니다. 완전히 종료하려면 메뉴바 트레이 아이콘 → <strong>Quit</strong>을 선택하세요. 종료 시 컨테이너가 자동 중지됩니다.</p>
+            </div>
+          </div>
+
+          <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-question">
+              데이터는 어디에 저장되나요?
+              <span class="faq-chevron">▼</span>
+            </div>
+            <div class="faq-answer">
+              <p>모든 데이터는 Docker 볼륨에 저장됩니다:</p>
+              <ul>
+                <li><code>trh_postgres_data</code> — 데이터베이스</li>
+                <li><code>trh_backend_data</code> — 백엔드 데이터</li>
+                <li><code>trh_backend_logs</code> — 로그</li>
+              </ul>
+              <p>앱을 재설치하거나 새 버전으로 업데이트해도 데이터는 보존됩니다.</p>
+            </div>
+          </div>
+
+          <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-question">
+              업데이트는 어떻게 하나요?
+              <span class="faq-chevron">▼</span>
+            </div>
+            <div class="faq-answer">
+              <p>새 버전이 있으면 Ready 화면에 업데이트 배너가 자동으로 표시됩니다. <strong>Update Now</strong>를 클릭하면:</p>
+              <ul>
+                <li>최신 Docker 이미지를 자동으로 Pull</li>
+                <li>컨테이너 재시작</li>
+                <li>헬스 체크 완료 후 새 버전 사용 가능</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-question">
+              대시보드 기본 로그인 정보가 무엇인가요?
+              <span class="faq-chevron">▼</span>
+            </div>
+            <div class="faq-answer">
+              <p>설정 단계에서 기본 계정을 선택한 경우:</p>
+              <ul>
+                <li>Email: <code>admin@gmail.com</code></li>
+                <li>Password: <code>admin123</code></li>
+              </ul>
+              <p>커스텀 계정을 선택했다면 설정 단계에서 입력한 계정을 사용하세요.</p>
+            </div>
+          </div>
+
+          <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-question">
+              완전히 삭제하려면 어떻게 하나요?
+              <span class="faq-chevron">▼</span>
+            </div>
+            <div class="faq-answer">
+              <p>앱과 데이터를 모두 제거하려면:</p>
+              <div class="code-block"><span class="comment"># 1. 컨테이너와 볼륨 삭제</span>
+<span class="cmd">docker</span> compose down <span class="arg">-v</span>
+<span class="comment"># (docker-compose.yml 파일이 있는 경로에서 실행)</span>
+
+<span class="comment"># 2. 앱 삭제</span>
+<span class="cmd">rm</span> <span class="arg">-rf /Applications/"TRH Desktop.app"</span></div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div><!-- .content -->
+
+    <!-- Footer -->
+    <div class="footer">
+      <div>TRH Desktop Installation Guide · Tokamak Network</div>
+      <div>
+        <a href="https://github.com/tokamak-network/trh-platform" target="_blank">GitHub</a> ·
+        <a href="https://tokamak.network" target="_blank">tokamak.network</a>
+      </div>
+    </div>
+
+  </div><!-- .main -->
+
+</div><!-- .layout -->
+
+<script>
+  // FAQ toggle
+  function toggleFaq(el) {
+    el.classList.toggle('open');
+  }
+
+  // Sidebar active nav
+  function setActive(el) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // Auto-highlight nav on scroll
+  const sections = document.querySelectorAll('.section[id]');
+  const navItems = document.querySelectorAll('.nav-item[href]');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0.3, rootMargin: '-60px 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

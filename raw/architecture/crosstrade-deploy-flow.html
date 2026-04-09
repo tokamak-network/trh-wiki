@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CrossTrade 배포 플로우</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f8f9fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 24px 64px;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #111;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+    .header p {
+      font-size: 14px;
+      color: #888;
+    }
+
+    /* ── Flow container ── */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 560px;
+      gap: 0;
+    }
+
+    /* ── Step card ── */
+    .step {
+      width: 100%;
+      background: #fff;
+      border-radius: 16px;
+      padding: 22px 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      position: relative;
+    }
+
+    .step-icon {
+      width: 52px;
+      height: 52px;
+      min-width: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-num {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .step-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 5px;
+      line-height: 1.3;
+    }
+
+    .step-desc {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .step-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-top: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    /* Step color variants */
+    .step-1 .step-icon { background: #e8f0fe; }
+    .step-1 .step-num  { color: #4285f4; }
+    .step-1 .step-tag  { background: #e8f0fe; color: #4285f4; }
+
+    .step-2 .step-icon { background: #fce8e6; }
+    .step-2 .step-num  { color: #ea4335; }
+    .step-2 .step-tag  { background: #fce8e6; color: #ea4335; }
+
+    .step-3 .step-icon { background: #e6f4ea; }
+    .step-3 .step-num  { color: #34a853; }
+    .step-3 .step-tag  { background: #e6f4ea; color: #34a853; }
+
+    .step-4 .step-icon { background: #fef7e0; }
+    .step-4 .step-num  { color: #fbbc04; }
+    .step-4 .step-tag  { background: #fef7e0; color: #b8860b; }
+
+    .step-5 .step-icon { background: #f3e8fd; }
+    .step-5 .step-num  { color: #9334e6; }
+    .step-5 .step-tag  { background: #f3e8fd; color: #9334e6; }
+
+    .step-6 .step-icon { background: #e6f4f1; }
+    .step-6 .step-num  { color: #1a73e8; }
+    .step-6 .step-tag  { background: #e6f4f1; color: #0d7057; }
+
+    /* ── Arrow ── */
+    .arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4px 0;
+      gap: 0;
+    }
+    .arrow-line {
+      width: 2px;
+      height: 28px;
+      background: linear-gradient(to bottom, #ddd, #bbb);
+    }
+    .arrow-head {
+      width: 0;
+      height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 10px solid #bbb;
+    }
+
+    /* ── Highlight arrow with label ── */
+    .arrow-labeled {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2px 0;
+      gap: 0;
+    }
+    .arrow-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #aaa;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin: 6px 0;
+    }
+
+    /* ── Sub-steps (inner breakdown) ── */
+    .sub-steps {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .sub-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #555;
+    }
+    .sub-dot {
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    /* ── Outcome box ── */
+    .outcome {
+      width: 100%;
+      background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(26,115,232,0.35);
+    }
+    .outcome-icon { font-size: 36px; margin-bottom: 8px; }
+    .outcome h2 { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+    .outcome p  { font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.6; }
+
+    /* ── Divider line inside step ── */
+    .inner-divider {
+      height: 1px;
+      background: #f0f0f0;
+      margin: 10px 0;
+    }
+
+    /* ── Two-column mini layout for "what happens" ── */
+    .what-happens {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .what-pill {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #f5f5f5;
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 11px;
+      color: #444;
+      font-weight: 500;
+    }
+    .what-pill .pill-icon { font-size: 13px; }
+
+    /* ── Emphasize box ── */
+    .emphasis {
+      background: #f0f9ff;
+      border-left: 3px solid #1a73e8;
+      border-radius: 0 8px 8px 0;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #1a73e8;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>CrossTrade 배포 플로우</h1>
+    <p>DeFi Preset을 선택하면 무슨 일이 일어나는가</p>
+  </div>
+
+  <div class="flow">
+
+    <!-- STEP 1 -->
+    <div class="step step-1">
+      <div class="step-icon">🖥️</div>
+      <div class="step-content">
+        <div class="step-num">Step 1</div>
+        <div class="step-title">DeFi Preset 선택</div>
+        <div class="step-desc">
+          TRH Platform 앱에서 L2 체인 유형을 고릅니다.<br/>
+          <strong>DeFi</strong> 또는 <strong>Full</strong>을 선택하면 CrossTrade가 자동으로 포함됩니다.
+        </div>
+        <div class="step-tag">trh-platform (Electron)</div>
+      </div>
+    </div>
+
+    <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- STEP 2 -->
+    <div class="step step-2">
+      <div class="step-icon">⛓️</div>
+      <div class="step-content">
+        <div class="step-num">Step 2</div>
+        <div class="step-title">새로운 L2 블록체인 배포</div>
+        <div class="step-desc">
+          OP Stack 기반의 새 L2 네트워크가 생성됩니다.<br/>
+          배포가 완료되면 CrossTrade 통합이 자동으로 시작됩니다.
+        </div>
+        <div class="step-tag">trh-backend + trh-sdk</div>
+      </div>
+    </div>
+
+    <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- STEP 3 -->
+    <div class="step step-3">
+      <div class="step-icon">📦</div>
+      <div class="step-content">
+        <div class="step-num">Step 3</div>
+        <div class="step-title">CrossTrade 스마트 컨트랙트를 L2에 배포</div>
+        <div class="step-desc">
+          새 L2에서 직접 배포하는 것이 아니라, <strong>L1(Sepolia)의 브릿지</strong>를 통해 배포합니다.<br/>
+          이 방식으로 L2의 보안과 브릿지 연결이 보장됩니다.
+        </div>
+
+        <div class="inner-divider"></div>
+
+        <div class="sub-steps">
+          <div class="sub-step">
+            <div class="sub-dot" style="background:#e6f4ea;color:#34a853;">1</div>
+            <span><strong>L2CrossTrade</strong> 배포 — L2↔L1 토큰 교환용 컨트랙트</span>
+          </div>
+          <div class="sub-step">
+            <div class="sub-dot" style="background:#e6f4ea;color:#34a853;">2</div>
+            <span><strong>L2toL2CrossTrade</strong> 배포 — L2↔L2 토큰 교환용 컨트랙트</span>
+          </div>
+          <div class="sub-step">
+            <div class="sub-dot" style="background:#e6f4ea;color:#34a853;">3</div>
+            <span>각 컨트랙트에 <strong>USDC, ETH 토큰 쌍</strong> 등록</span>
+          </div>
+        </div>
+
+        <div class="emphasis">
+          각 배포 후 L2에서 실제로 실행됐는지 자동으로 검증합니다.
+        </div>
+
+        <div class="step-tag">trh-sdk — OptimismPortal Deposit Tx</div>
+      </div>
+    </div>
+
+    <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- STEP 4 -->
+    <div class="step step-4">
+      <div class="step-icon">🔗</div>
+      <div class="step-content">
+        <div class="step-num">Step 4</div>
+        <div class="step-title">L1에 새 L2 체인 정보 등록</div>
+        <div class="step-desc">
+          Sepolia에 이미 배포된 CrossTrade 인프라 컨트랙트에<br/>
+          새로 만든 L2의 주소를 알려줍니다.
+        </div>
+
+        <div class="what-happens">
+          <div class="what-pill"><span class="pill-icon">📝</span> L1CrossTradeProxy 등록</div>
+          <div class="what-pill"><span class="pill-icon">📝</span> L2toL2CrossTradeL1 등록</div>
+        </div>
+
+        <div class="step-desc" style="margin-top:8px;">
+          이 단계가 완료되어야 L1과 L2 간 토큰 이동이 가능합니다.
+        </div>
+        <div class="step-tag">trh-backend — L1 setChainInfo</div>
+      </div>
+    </div>
+
+    <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- STEP 5 -->
+    <div class="step step-5">
+      <div class="step-icon">⚙️</div>
+      <div class="step-content">
+        <div class="step-num">Step 5</div>
+        <div class="step-title">CrossTrade dApp 환경 자동 설정 및 실행</div>
+        <div class="step-desc">
+          배포된 컨트랙트 주소와 RPC URL을 기반으로<br/>
+          dApp 설정 파일이 자동으로 생성되고 컨테이너가 실행됩니다.
+        </div>
+
+        <div class="what-happens">
+          <div class="what-pill"><span class="pill-icon">📄</span> .env.crosstrade 자동 생성</div>
+          <div class="what-pill"><span class="pill-icon">🐳</span> Docker 컨테이너 실행</div>
+        </div>
+
+        <div class="step-tag">trh-backend + docker-compose.crosstrade.yml</div>
+      </div>
+    </div>
+
+    <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- STEP 6 -->
+    <div class="step step-6">
+      <div class="step-icon">🔍</div>
+      <div class="step-content">
+        <div class="step-num">Step 6</div>
+        <div class="step-title">Platform UI에 dApp URL 표시</div>
+        <div class="step-desc">
+          Integrations 탭의 CrossTrade 카드에 dApp 주소가 나타납니다.<br/>
+          버튼 하나로 dApp을 바로 열거나 주소를 복사할 수 있습니다.
+        </div>
+        <div class="step-tag">trh-platform-ui — CrossTradeCard</div>
+      </div>
+    </div>
+
+    <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+    <!-- OUTCOME -->
+    <div class="outcome">
+      <div class="outcome-icon">🎉</div>
+      <h2>CrossTrade 배포 완료</h2>
+      <p>
+        DeFi Preset 선택 하나로 L2 컨트랙트 배포, L1 등록,<br/>
+        dApp 실행까지 모두 자동으로 처리됩니다.<br/>
+        운영자가 추가로 할 일은 없습니다.
+      </p>
+    </div>
+
+  </div>
+
+</body>
+</html>

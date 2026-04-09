@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRH Platform — Preset Deployment Flow</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 40px 48px 24px;
+      border-bottom: 1px solid #1e2535;
+    }
+
+    header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      margin-top: 6px;
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 48px;
+    }
+
+    /* ── Section titles ── */
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #475569;
+      margin-bottom: 24px;
+    }
+
+    /* ── Shared Flow ── */
+    .shared-flow {
+      margin-bottom: 56px;
+    }
+
+    .flow-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .flow-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .node-box {
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      min-width: 130px;
+      line-height: 1.4;
+      border: 1px solid transparent;
+    }
+
+    .node-sub {
+      font-size: 11px;
+      font-weight: 400;
+      opacity: 0.75;
+      margin-top: 2px;
+    }
+
+    .node-label {
+      font-size: 10px;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .arrow {
+      color: #334155;
+      font-size: 20px;
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+
+    /* Node colors */
+    .n-desktop  { background: #1e293b; border-color: #334155; color: #94a3b8; }
+    .n-ui       { background: #1e3a5f; border-color: #2563eb; color: #93c5fd; }
+    .n-backend  { background: #1a3a2e; border-color: #16a34a; color: #86efac; }
+    .n-sdk      { background: #3b2a1a; border-color: #d97706; color: #fcd34d; }
+    .n-l1       { background: #2d1b4e; border-color: #7c3aed; color: #c4b5fd; }
+    .n-l2       { background: #1e3a5f; border-color: #0891b2; color: #67e8f9; }
+    .n-module   { background: #1a1a2e; border-color: #6366f1; color: #a5b4fc; }
+
+    /* ── Wizard steps ── */
+    .wizard-steps {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .wizard-step {
+      flex: 1;
+      min-width: 200px;
+      background: #141824;
+      border: 1px solid #1e2535;
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+
+    .step-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .step-badge.step1 { background: #1e293b; color: #64748b; }
+    .step-badge.step2 { background: #1e3a5f; color: #60a5fa; }
+    .step-badge.step3 { background: #1a3a2e; color: #4ade80; }
+
+    .wizard-step h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+    }
+
+    .wizard-step ul {
+      list-style: none;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .wizard-step ul li::before {
+      content: '·';
+      margin-right: 6px;
+      color: #475569;
+    }
+
+    /* ── Preset grid ── */
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 56px;
+    }
+
+    @media (max-width: 1000px) {
+      .preset-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .preset-card {
+      border-radius: 14px;
+      border: 1px solid;
+      overflow: hidden;
+    }
+
+    .preset-header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid;
+    }
+
+    .preset-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 6px;
+    }
+
+    .preset-name {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .preset-desc {
+      font-size: 11px;
+      line-height: 1.5;
+      opacity: 0.65;
+    }
+
+    .preset-body {
+      padding: 16px 20px;
+    }
+
+    .preset-section {
+      margin-bottom: 14px;
+    }
+
+    .preset-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .ps-title {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.5;
+      margin-bottom: 6px;
+    }
+
+    .module-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .module-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .mod-on  { background: #22c55e; }
+    .mod-off { background: #1e293b; }
+    .mod-text-on  { color: #e2e8f0; }
+    .mod-text-off { color: #334155; text-decoration: line-through; }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 12px;
+      font-size: 11px;
+    }
+
+    .cfg-key { color: #475569; }
+    .cfg-val { color: #94a3b8; font-weight: 600; text-align: right; }
+
+    .time-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .predeploys-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .pill {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    /* Preset-specific colors */
+    .p-general .preset-card  { border-color: #1e4a8a; }
+    .p-general .preset-header { background: #0d1f3c; border-color: #1e4a8a; }
+    .p-general .preset-badge, .p-general .preset-name { color: #60a5fa; }
+    .p-general .preset-body { background: #0a1628; }
+    .p-general .time-badge { background: #1e3a5f; color: #93c5fd; }
+    .p-general .pill { background: #1e3358; color: #93c5fd; }
+
+    .p-defi .preset-card  { border-color: #166534; }
+    .p-defi .preset-header { background: #0a2218; border-color: #166534; }
+    .p-defi .preset-badge, .p-defi .preset-name { color: #4ade80; }
+    .p-defi .preset-body { background: #071810; }
+    .p-defi .time-badge { background: #14532d; color: #86efac; }
+    .p-defi .pill { background: #14532d; color: #86efac; }
+    .p-defi .pill.extra { background: #1a3d15; color: #bbf7d0; }
+
+    .p-gaming .preset-card  { border-color: #7c2d12; }
+    .p-gaming .preset-header { background: #2d1000; border-color: #7c2d12; }
+    .p-gaming .preset-badge, .p-gaming .preset-name { color: #fb923c; }
+    .p-gaming .preset-body { background: #1c0a00; }
+    .p-gaming .time-badge { background: #7c2d12; color: #fdba74; }
+    .p-gaming .pill { background: #431407; color: #fdba74; }
+    .p-gaming .pill.extra { background: #431407; color: #fde68a; }
+
+    .p-full .preset-card  { border-color: #5b21b6; }
+    .p-full .preset-header { background: #1c0d3d; border-color: #5b21b6; }
+    .p-full .preset-badge, .p-full .preset-name { color: #c084fc; }
+    .p-full .preset-body { background: #130826; }
+    .p-full .time-badge { background: #4c1d95; color: #d8b4fe; }
+    .p-full .pill { background: #2e1065; color: #d8b4fe; }
+    .p-full .pill.extra { background: #3b0764; color: #e9d5ff; }
+
+    /* ── Deployment sequence ── */
+    .sequence {
+      margin-bottom: 56px;
+    }
+
+    .seq-track {
+      position: relative;
+      padding-left: 28px;
+    }
+
+    .seq-track::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, #1e2535 0%, #334155 30%, #1e2535 100%);
+    }
+
+    .seq-item {
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .seq-dot {
+      position: absolute;
+      left: -22px;
+      top: 10px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid;
+      background: #0f1117;
+    }
+
+    .seq-box {
+      border-radius: 10px;
+      border: 1px solid #1e2535;
+      padding: 12px 16px;
+      background: #141824;
+    }
+
+    .seq-box-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .seq-box-sub {
+      font-size: 11px;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    .seq-layer {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-right: 6px;
+    }
+
+    .ly-desktop { background: #1e293b; color: #94a3b8; }
+    .ly-ui      { background: #1e3a5f; color: #93c5fd; }
+    .ly-backend { background: #1a3a2e; color: #86efac; }
+    .ly-sdk     { background: #3b2a1a; color: #fcd34d; }
+
+    /* dot colors per layer */
+    .dot-desktop { border-color: #475569; }
+    .dot-ui      { border-color: #2563eb; }
+    .dot-backend { border-color: #16a34a; }
+    .dot-sdk     { border-color: #d97706; }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      padding: 20px 24px;
+      background: #141824;
+      border: 1px solid #1e2535;
+      border-radius: 12px;
+      margin-bottom: 40px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #1e2535;
+      margin: 48px 0;
+    }
+
+    /* ── Comparison table ── */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .compare-table th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #475569;
+      border-bottom: 1px solid #1e2535;
+    }
+
+    .compare-table td {
+      padding: 10px 16px;
+      border-bottom: 1px solid #141824;
+      vertical-align: middle;
+    }
+
+    .compare-table tr:hover td {
+      background: #141824;
+    }
+
+    .th-general { color: #60a5fa !important; }
+    .th-defi    { color: #4ade80 !important; }
+    .th-gaming  { color: #fb923c !important; }
+    .th-full    { color: #c084fc !important; }
+
+    .check { color: #22c55e; font-size: 14px; }
+    .cross { color: #1e293b; font-size: 14px; }
+
+    .td-key { color: #64748b; font-weight: 500; }
+
+    .tag {
+      display: inline-block;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>TRH Platform — Preset Deployment Flow</h1>
+  <p>Deployment flow and configuration comparison for 4 rollup presets (General · DeFi · Gaming · Full)</p>
+</header>
+
+<div class="container">
+
+  <!-- ── Legend ── -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="border-color:#475569;background:#0f1117"></div> Desktop App (Electron)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="border-color:#2563eb;background:#0f1117"></div> Platform UI (Next.js)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="border-color:#16a34a;background:#0f1117"></div> Backend API (Go)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="border-color:#d97706;background:#0f1117"></div> trh-sdk (CLI)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="border-color:#7c3aed;background:#0f1117"></div> L1 Chain (Ethereum)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="border-color:#0891b2;background:#0f1117"></div> L2 Chain (Thanos)
+    </div>
+  </div>
+
+  <!-- ── Shared Flow ── -->
+  <div class="shared-flow">
+    <div class="section-title">Shared Deployment Flow</div>
+
+    <div class="flow-row" style="margin-bottom:8px;">
+      <div class="flow-node">
+        <div class="node-box n-desktop">
+          Desktop App
+          <div class="node-sub">docker compose up</div>
+        </div>
+        <span class="node-label">Electron</span>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-node">
+        <div class="node-box n-ui">
+          Platform UI
+          <div class="node-sub">localhost:3000</div>
+        </div>
+        <span class="node-label">Next.js · webview</span>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-node">
+        <div class="node-box n-ui" style="min-width:150px;">
+          /rollup/create
+          <div class="node-sub">Preset Wizard</div>
+        </div>
+        <span class="node-label">3-Step Wizard</span>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-node">
+        <div class="node-box n-backend">
+          Backend API
+          <div class="node-sub">POST /preset-deploy</div>
+        </div>
+        <span class="node-label">Go · :8000</span>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-node">
+        <div class="node-box n-sdk">
+          trh-sdk
+          <div class="node-sub">--preset &lt;id&gt;</div>
+        </div>
+        <span class="node-label">CLI · Go</span>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-node">
+        <div class="node-box n-l1">
+          L1 Contracts
+          <div class="node-sub">Ethereum / Testnet</div>
+        </div>
+        <span class="node-label">L1 Deploy</span>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-node">
+        <div class="node-box n-l2">
+          L2 Chain
+          <div class="node-sub">Genesis + Sequencer</div>
+        </div>
+        <span class="node-label">L2 Bootstrap</span>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-node">
+        <div class="node-box n-module">
+          Modules
+          <div class="node-sub">Helm · Kubernetes</div>
+        </div>
+        <span class="node-label">Module Install</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Wizard Steps ── -->
+  <div style="margin-bottom: 48px;">
+    <div class="section-title">Platform UI — 3-Step Preset Wizard</div>
+    <div class="wizard-steps">
+      <div class="wizard-step">
+        <span class="step-badge step1">Step 1</span>
+        <h3>Preset Selection</h3>
+        <ul>
+          <li>General / DeFi / Gaming / Full</li>
+          <li>Module configuration preview</li>
+          <li>Estimated deploy time display</li>
+        </ul>
+      </div>
+      <div class="wizard-step">
+        <span class="step-badge step2">Step 2</span>
+        <h3>Basic Configuration</h3>
+        <ul>
+          <li>Chain Name · Network (testnet/mainnet)</li>
+          <li>Fee Token (TON / ETH / USDT / USDC)</li>
+          <li>L1 RPC URL · Beacon URL</li>
+          <li>Seed Phrase (BIP44 key derivation)</li>
+          <li>AWS Credentials (for Helm deployment)</li>
+        </ul>
+      </div>
+      <div class="wizard-step">
+        <span class="step-badge step3">Step 3</span>
+        <h3>Review &amp; Funding Check</h3>
+        <ul>
+          <li>ConfigReview — final configuration review</li>
+          <li>FundingStatus — real-time L1 wallet balance</li>
+          <li>sequencer / batcher / proposer address display</li>
+          <li>Deploy button enabled when minimum balance met</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Preset Cards ── -->
+  <div class="section-title">Preset Configuration</div>
+  <div class="preset-grid">
+
+    <!-- General -->
+    <div class="p-general">
+      <div class="preset-card">
+        <div class="preset-header">
+          <div class="preset-badge">General</div>
+          <div class="preset-name">General Purpose</div>
+          <div class="preset-desc">Baseline rollup preset for standard application workloads</div>
+        </div>
+        <div class="preset-body">
+          <div class="preset-section">
+            <div class="ps-title">Deploy Time</div>
+            <span class="time-badge">⏱ 20–30 min</span>
+          </div>
+          <div class="preset-section">
+            <div class="ps-title">Modules</div>
+            <div class="module-list">
+              <div class="module-item"><div class="module-dot mod-on"></div><span class="mod-text-on">Bridge</span></div>
+              <div class="module-item"><div class="module-dot mod-on"></div><span class="mod-text-on">Block Explorer</span></div>
+              <div class="module-item"><div class="module-dot mod-off"></div><span class="mod-text-off">Monitoring</span></div>
+              <div class="module-item"><div class="module-dot mod-off"></div><span class="mod-text-off">Uptime Service</span></div>
+            </div>
+          </div>
+          <div class="preset-section">
+            <div class="ps-title">Chain Config</div>
+            <div class="config-grid">
+              <span class="cfg-key">BatchFreq</span><span class="cfg-val">1800s</span>
+              <span class="cfg-key">OutputFreq</span><span class="cfg-val">1800s</span>
+              <span class="cfg-key">ChallengePeriod</span><span class="cfg-val">86400s</span>
+              <span class="cfg-key">Backup</span><span class="cfg-val">off</span>
+              <span class="cfg-key">RegisterCandidate</span><span class="cfg-val">off</span>
+            </div>
+          </div>
+          <div class="preset-section">
+            <div class="ps-title">Genesis Predeploys</div>
+            <div class="predeploys-pills">
+              <span class="pill">L1Block</span>
+              <span class="pill">L2ToL1Passer</span>
+              <span class="pill">L2StandardBridge</span>
+              <span class="pill">GasPriceOracle</span>
+              <span class="pill">+9 OP Standard</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DeFi -->
+    <div class="p-defi">
+      <div class="preset-card">
+        <div class="preset-header">
+          <div class="preset-badge">DeFi</div>
+          <div class="preset-name">DeFi</div>
+          <div class="preset-desc">Preset for exchange, liquidity, and settlement-heavy workloads</div>
+        </div>
+        <div class="preset-body">
+          <div class="preset-section">
+            <div class="ps-title">Deploy Time</div>
+            <span class="time-badge">⏱ 30–40 min</span>
+          </div>
+          <div class="preset-section">
+            <div class="ps-title">Modules</div>
+            <div class="module-list">
+              <div class="module-item"><div class="module-dot mod-on"></div><span class="mod-text-on">Bridge</span></div>
+              <div class="module-item"><div class="module-dot mod-on"></div><span class="mod-text-on">Block Explorer</span></div>
+              <div class="module-item"><div class="module-dot mod-on"></div><span class="mod-text-on">Monitoring</span></div>
+              <div class="module-item"><div class="module-dot mod-on"></div><span class="mod-text-on">Uptime Service</span></div>
+            </div>
+          </div>
+          <div class="preset-section">
+            <div class="ps-title">Chain Config</div>
+            <div class="config-grid">
+              <span class="cfg-key">BatchFreq</span><span class="cfg-val">900s</span>
+              <span class="cfg-key">OutputFreq</span><span class="cfg-val">900s</span>
+              <span class="cfg-key">ChallengePeriod</span><span class="cfg-val">86400s</span>
+              <span class="cfg-key">Backup</span><span class="cfg-val" style="color:#4ade80">on</span>
+              <span class="cfg-key">RegisterCandidate</span><span class="cfg-val">off</span>
+            </div>
+          </div>
+          <div class="preset-section">
+            <div class="ps-title">Genesis Predeploys</div>
+            <div class="predeploys-pills">
+              <span class="pill">+13 OP Standard</span>
+              <span class="pill extra">UniswapV3Factory</span>
+              <span class="pill extra">SwapRouter</span>
+              <span class="pill extra">PositionManager</span>
+              <span class="pill extra">USDCBridge</span>
+              <span class="pill extra">WrappedETH</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gaming -->
+    <div class="p-gaming">
+      <div class="preset-card">
+        <div class="preset-header">
+          <div class="preset-badge">Gaming</div>
+          <div class="preset-name">Gaming</div>
+          <div class="preset-desc">Preset optimized for higher throughput and player-facing observability</div>
+        </div>
+        <div class="preset-body">
+          <div class="preset-section">
+            <div class="ps-title">Deploy Time</div>
+            <span class="time-badge">⏱ 35–45 min</span>
+          </div>
+          <div class="preset-section">
+            <div class="ps-title">Modules</div>
+            <div class="module-list">
+              <div class="module-item"><div class="module-dot mod-on"></div><span class="mod-text-on">Bridge</span></div>
+              <div class="module-item"><div class="module-dot mod-on"></div><span class="mod-text-on">Block Explorer</span></div>
+              <div class="module-item"><div class="module-dot mod-on"></div><span class="mod-text-on">Monitoring</span></div>
+              <div class="module-item"><div class="module-dot mod-on"></div><span class="mod-text-on">Uptime Service</span></div>
+            </div>
+          </div>
+          <div class="preset-section">
+            <div class="ps-title">Chain Config</div>
+            <div class="config-grid">
+              <span class="cfg-key">BatchFreq</span><span class="cfg-val" style="color:#fb923c">300s</span>
+              <span class="cfg-key">OutputFreq</span><span class="cfg-val">600s</span>
+              <span class="cfg-key">ChallengePeriod</span><span class="cfg-val">86400s</span>
+              <span class="cfg-key">Backup</span><span class="cfg-val" style="color:#fb923c">on</span>
+              <span class="cfg-key">RegisterCandidate</span><span class="cfg-val">off</span>
+            </div>
+          </div>
+          <div class="preset-section">
+            <div class="ps-title">Genesis Predeploys</div>
+            <div class="predeploys-pills">
+              <span class="pill">+13 OP Standard</span>
+              <span class="pill extra">VRF</span>
+              <span class="pill extra">VRFCoordinator</span>
+              <span class="pill extra">AA EntryPoint</span>
+              <span class="pill extra">Paymaster</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full -->
+    <div class="p-full">
+      <div class="preset-card">
+        <div class="preset-header">
+          <div class="preset-badge">Full Suite</div>
+          <div class="preset-name">Full Suite</div>
+          <div class="preset-desc">All recommended modules enabled for demos, staging, or managed environments</div>
+        </div>
+        <div class="preset-body">
+          <div class="preset-section">
+            <div class="ps-title">Deploy Time</div>
+            <span class="time-badge">⏱ 40–50 min</span>
+          </div>
+          <div class="preset-section">
+            <div class="ps-title">Modules</div>
+            <div class="module-list">
+              <div class="module-item"><div class="module-dot mod-on"></div><span class="mod-text-on">Bridge</span></div>
+              <div class="module-item"><div class="module-dot mod-on"></div><span class="mod-text-on">Block Explorer</span></div>
+              <div class="module-item"><div class="module-dot mod-on"></div><span class="mod-text-on">Monitoring</span></div>
+              <div class="module-item"><div class="module-dot mod-on"></div><span class="mod-text-on">Uptime Service</span></div>
+            </div>
+          </div>
+          <div class="preset-section">
+            <div class="ps-title">Chain Config</div>
+            <div class="config-grid">
+              <span class="cfg-key">BatchFreq</span><span class="cfg-val">600s</span>
+              <span class="cfg-key">OutputFreq</span><span class="cfg-val">600s</span>
+              <span class="cfg-key">ChallengePeriod</span><span class="cfg-val">86400s</span>
+              <span class="cfg-key">Backup</span><span class="cfg-val" style="color:#c084fc">on</span>
+              <span class="cfg-key">RegisterCandidate</span><span class="cfg-val">off</span>
+            </div>
+          </div>
+          <div class="preset-section">
+            <div class="ps-title">Genesis Predeploys</div>
+            <div class="predeploys-pills">
+              <span class="pill">+13 OP Standard</span>
+              <span class="pill extra">UniswapV3Factory</span>
+              <span class="pill extra">USDCBridge</span>
+              <span class="pill extra">VRF</span>
+              <span class="pill extra">AA EntryPoint</span>
+              <span class="pill extra">Paymaster</span>
+              <span class="pill extra">+4 more</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /preset-grid -->
+
+  <hr class="divider">
+
+  <!-- ── Deployment Sequence ── -->
+  <div class="sequence">
+    <div class="section-title">Deployment Sequence — Backend → SDK Detail</div>
+
+    <div class="seq-track">
+
+      <div class="seq-item">
+        <div class="seq-dot dot-ui"></div>
+        <div class="seq-box">
+          <div class="seq-box-title">
+            <span class="seq-layer ly-ui">Platform UI</span>
+            POST /api/v1/stacks/thanos/preset-deploy
+          </div>
+          <div class="seq-box-sub">
+            { presetId, chainName, network, feeToken, seedPhrase, l1RpcUrl, beaconUrl, awsCredentials, overrides }
+          </div>
+        </div>
+      </div>
+
+      <div class="seq-item">
+        <div class="seq-dot dot-backend"></div>
+        <div class="seq-box">
+          <div class="seq-box-title">
+            <span class="seq-layer ly-backend">Backend</span>
+            BIP44 Key Derivation (seed phrase → 5 accounts)
+          </div>
+          <div class="seq-box-sub">
+            admin · proposer · batcher · challenger · sequencer — paths m/44'/60'/0'/0/{0-4}
+          </div>
+        </div>
+      </div>
+
+      <div class="seq-item">
+        <div class="seq-dot dot-backend"></div>
+        <div class="seq-box">
+          <div class="seq-box-title">
+            <span class="seq-layer ly-backend">Backend</span>
+            L1 Funding Status Check
+          </div>
+          <div class="seq-box-sub">
+            Poll sequencer / batcher / proposer balances — testnet: 0.5 ETH · mainnet: 2 ETH minimum
+          </div>
+        </div>
+      </div>
+
+      <div class="seq-item">
+        <div class="seq-dot dot-backend"></div>
+        <div class="seq-box">
+          <div class="seq-box-title">
+            <span class="seq-layer ly-backend">Backend</span>
+            trh-sdk Invocation
+          </div>
+          <div class="seq-box-sub">
+            thanos deploy --preset &lt;id&gt; --fee-token &lt;token&gt; --network &lt;net&gt; --chain-name &lt;name&gt; ...
+          </div>
+        </div>
+      </div>
+
+      <div class="seq-item">
+        <div class="seq-dot dot-sdk"></div>
+        <div class="seq-box">
+          <div class="seq-box-title">
+            <span class="seq-layer ly-sdk">trh-sdk</span>
+            Deploy Config Initialization (preset-specific overrides)
+          </div>
+          <div class="seq-box-sub">
+            Apply preset defaults for batchSubmissionFrequency · outputRootFrequency · l2BlockTime
+          </div>
+        </div>
+      </div>
+
+      <div class="seq-item">
+        <div class="seq-dot dot-sdk"></div>
+        <div class="seq-box">
+          <div class="seq-box-title">
+            <span class="seq-layer ly-sdk">trh-sdk</span>
+            L1 Contract Deployment
+          </div>
+          <div class="seq-box-sub">
+            OptimismPortal · L1CrossDomainMessenger · L1StandardBridge · L2OutputOracle · SystemConfig
+          </div>
+        </div>
+      </div>
+
+      <div class="seq-item">
+        <div class="seq-dot dot-sdk"></div>
+        <div class="seq-box">
+          <div class="seq-box-title">
+            <span class="seq-layer ly-sdk">trh-sdk</span>
+            L2 Genesis + Chain Bootstrap
+          </div>
+          <div class="seq-box-sub">
+            Insert GenesisPredeploys (preset-specific) → Start Sequencer · Batcher · Proposer → Helm deploy
+          </div>
+        </div>
+      </div>
+
+      <div class="seq-item">
+        <div class="seq-dot dot-sdk"></div>
+        <div class="seq-box">
+          <div class="seq-box-title">
+            <span class="seq-layer ly-sdk">trh-sdk</span>
+            Preset Module Auto-Install
+          </div>
+          <div class="seq-box-sub">
+            Based on PresetModules map — bridge · blockExplorer · monitoring · uptimeService
+            (uptimeService installs automatically; others configurable in the Integration tab post-deploy)
+          </div>
+        </div>
+      </div>
+
+      <div class="seq-item">
+        <div class="seq-dot dot-backend"></div>
+        <div class="seq-box">
+          <div class="seq-box-title">
+            <span class="seq-layer ly-backend">Backend</span>
+            Save Deployment Result + Status Response
+          </div>
+          <div class="seq-box-sub">
+            Returns deploymentId, stackId, rollupRpcUrl, explorerUrl, bridgeUrl
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ── Comparison Table ── -->
+  <div style="margin-bottom: 48px;">
+    <div class="section-title">Preset Comparison</div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th class="th-general">General</th>
+          <th class="th-defi">DeFi</th>
+          <th class="th-gaming">Gaming</th>
+          <th class="th-full">Full Suite</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-key">Est. Deploy Time</td>
+          <td>20–30 min</td>
+          <td>30–40 min</td>
+          <td>35–45 min</td>
+          <td>40–50 min</td>
+        </tr>
+        <tr>
+          <td class="td-key">Batch Frequency</td>
+          <td>1800s</td>
+          <td>900s</td>
+          <td style="color:#fb923c;font-weight:600">300s</td>
+          <td>600s</td>
+        </tr>
+        <tr>
+          <td class="td-key">Output Root Frequency</td>
+          <td>1800s</td>
+          <td>900s</td>
+          <td>600s</td>
+          <td>600s</td>
+        </tr>
+        <tr>
+          <td class="td-key">Bridge</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td class="td-key">Block Explorer</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td class="td-key">Monitoring</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td class="td-key">Uptime Service</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td class="td-key">Backup</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td class="td-key">Register Candidate</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="cross">—</span></td>
+          <td><span class="cross">—</span></td>
+          <td><span class="cross">—</span></td>
+        </tr>
+        <tr>
+          <td class="td-key">DeFi Predeploys</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td class="td-key">Gaming Predeploys (VRF/AA)</td>
+          <td><span class="cross">—</span></td>
+          <td><span class="cross">—</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td class="td-key">Available Fee Tokens</td>
+          <td>TON, ETH, USDT, USDC</td>
+          <td>TON, ETH, USDT, USDC</td>
+          <td>TON, ETH, USDT, USDC</td>
+          <td>TON, ETH, USDT, USDC</td>
+        </tr>
+        <tr>
+          <td class="td-key">Overridable Fields</td>
+          <td>l2BlockTime, batchFreq, outputFreq, challengePeriod, backupEnabled</td>
+          <td>batchFreq, outputFreq, challengePeriod</td>
+          <td>l2BlockTime, batchFreq, outputFreq</td>
+          <td>l2BlockTime, batchFreq, outputFreq, challengePeriod</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- /container -->
+
+</body>
+</html>
