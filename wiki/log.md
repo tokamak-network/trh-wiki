@@ -23,7 +23,21 @@ Pages created:
   [[sequential-l2-deploy]], [[port-conflicts]], [[l1-gas-limits]]
 
 Pages still stub (raw source 없음):
-  [[cross-trade]], [[deposit-tx]], [[aws-sso]], [[docker-compose-lifecycle]],
-  [[ec2-deploy]], [[release]], [[abigen-vs-manual-calldata]],
-  [[deposit-tx-vs-genesis-predeploy]], [[separate-compose-for-crosstrade]],
+  [[aws-sso]], [[docker-compose-lifecycle]], [[ec2-deploy]], [[release]],
   [[docker-health-checks]], [[l2-deposit-verification]]
+
+## [2026-04-09] ingest | crossTrade/ (CrossTrade integration)
+Sources added to raw/decisions/:
+  PRD-CrossTrade-TRH-Integration-v2.1.md, Genesis-Predeploy-Storage-Analysis.md
+
+Pages created:
+  [[cross-trade]], [[deposit-tx]],
+  [[deposit-tx-vs-genesis-predeploy]], [[abigen-vs-manual-calldata]],
+  [[separate-compose-for-crosstrade]]
+
+Key facts captured:
+  - CrossTrade: DeFi/Full Preset만 (Gaming 제외 — PRD v2.1 수정사항)
+  - L2 컨트랙트 배포: L1 Deposit Tx (12 트랜잭션, ~5분)
+  - Genesis Predeploy 거부: constructor 미실행 + 15개 스토리지 슬롯 수동 계산 필요
+  - ABI 패턴: abigen (OptimismPortal 직접 호출) + abi.Pack (L2 calldata)
+  - dApp: docker-compose.crosstrade.yml 별도 파일 (v3.8 호환)
