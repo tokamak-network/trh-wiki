@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-09
+updated: 2026-04-11
 source: raw/architecture/testing-guide.md
 ---
 
@@ -46,9 +46,10 @@ tests/
 │   ├── deploy-local.test.ts      # 로컬 배포 플로우
 │   └── funding-flow.test.ts      # 펀딩 트랜잭션 시퀀싱
 ├── e2e/                      # Playwright E2E
-│   ├── preset-wizard.spec.ts     # MSW 모드 preset 선택 플로우
-│   ├── electron-*.live.spec.ts   # Electron + 실제 서비스
-│   └── matrix/run-matrix.sh      # 4개 preset 매트릭스 스크립트
+│   ├── preset-wizard.spec.ts         # MSW 모드 preset 선택 플로우
+│   ├── electron-*.live.spec.ts       # Electron + 실제 서비스
+│   ├── crosstrade-tx.live.spec.ts    # CrossTrade 실거래 트랜잭션 (CRT-01~07)
+│   └── matrix/run-matrix.sh          # 4개 preset 매트릭스 스크립트
 ├── helpers/
 │   ├── load-fixtures.ts          # tests/fixtures/에서 preset 데이터 로드
 │   └── load-compose.ts           # docker-compose.yml 파싱
@@ -160,4 +161,61 @@ Backend 스키마 변경 시 반드시 실행. `preflight` 명령에 포함됨.
 
 ---
 
-*Source: `.planning/codebase/TESTING.md` (2026-04-09)*
+---
+
+## CrossTrade Live TX 테스트 (CRT)
+
+**파일:** `tests/e2e/crosstrade-tx.live.spec.ts`
+
+**실행 조건:**
+- DeFi 또는 Full preset 스택 배포 + CrossTrade 컨트랙트 통합 완료
+- Sepolia L1 RPC 접근 가능 (`LIVE_L1_RPC_URL`)
+- Admin 지갑에 L1(Sepolia)과 L2 모두 ETH 잔고 필요
+
+**실행 명령어:**
+```bash
+LIVE_CHAIN_NAME=ect-defi-crosstrade \
+LIVE_L1_RPC_URL=https://eth-sepolia... \
+npx playwright test --config playwright.live.config.ts tests/e2e/crosstrade-tx.live.spec.ts
+```
+
+**테스트 ID:**
+
+| ID | 플로우 | 검증 포인트 |
+|----|--------|------------|
+| CRT-01 | L1-L2: L2 `requestNonRegisteredToken` | `NonRequestCT` 또는 `RequestCT` 이벤트 emit |
+| CRT-02 | L1-L2: L1 `provideCT` | `ProvideCT` 이벤트 emit (auto gas estimation) |
+| CRT-03 | L1-L2: L2 claim 확인 | `ProviderClaimCT` 이벤트 폴링 (최대 20분) |
+| CRT-04 | L2-L2: L2 `requestNonRegisteredToken` | `NonRequestCT` 또는 `RequestCT` 이벤트 emit |
+| CRT-05 | L2-L2: L1 `provideCT` | `ProvideCT` 이벤트 emit (CDM 2회, ~800k gas) |
+| CRT-06 | L2-L2: L2 claim 확인 | `ProviderClaimCT` 이벤트 폴링 (최대 20분) |
+| CRT-07 | dApp UI 스크린샷 | EIP-6963 mock provider 주입 → 페이지 접근 가능 |
+
+**타임아웃:** TX 2분, L1→L2 cross-domain message relay 최대 20분 (5초 간격 폴링).
+
+### EIP-6963 Mock Provider 주입 (CRT-07)
+
+dApp은 `window.ethereum` 대신 EIP-6963 `eip6963:announceProvider` 이벤트를 통해 지갑을 감지한다. Playwright에서 지갑 없이 dApp UI를 로드하려면 mock provider를 page context에 주입해야 한다:
+
+```typescript
+await page.addInitScript(() => {
+  const mockProvider = {
+    request: async ({ method }: { method: string }) => {
+      if (method === 'eth_requestAccounts') return ['0x1234...'];
+      if (method === 'eth_chainId') return '0x1';
+      return null;
+    },
+    on: () => {},
+    removeListener: () => {},
+  };
+  window.dispatchEvent(new CustomEvent('eip6963:announceProvider', {
+    detail: { info: { uuid: 'mock', name: 'Mock Wallet', rdns: 'mock.wallet', icon: '' }, provider: mockProvider }
+  }));
+});
+```
+
+→ [[cross-trade]], [[l1-gas-limits]]
+
+---
+
+*Source: `.planning/codebase/TESTING.md` (2026-04-09), 추가 업데이트: 2026-04-11*

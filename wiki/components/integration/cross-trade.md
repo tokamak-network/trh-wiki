@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-10
+updated: 2026-04-11
 sources:
   - raw/decisions/PRD-CrossTrade-TRH-Integration-v2.1.md
   - raw/inbox/crosstrade-deployment-guide.md
@@ -147,3 +147,26 @@ CrossTrade 프록시(L1CrossTradeProxy, L2CrossTradeProxy 등)의 `setChainInfo`
 문제: 나머지 모든 비즈니스 로직 함수는 implementation에 위임되므로, upgradeTo 없이 setChainInfo만 실행된 프록시는 **체인 등록은 되어 있지만 실제 기능은 전혀 동작하지 않는** 상태가 된다. `chainData()` 같은 조회 함수조차 "Proxy: impl OR proxy is false"로 revert.
 
 → [[l1-deposit-tx-pitfalls]] Pitfall #14 참고
+
+---
+
+## E2E 테스트
+
+**파일:** `tests/e2e/crosstrade-tx.live.spec.ts` (2026-04-11 기준 CRT-01~07 전체 통과)
+
+| ID | 플로우 | 컨트랙트 |
+|----|--------|---------|
+| CRT-01 | L1-L2: L2 request | `L2CrossTradeProxy.requestNonRegisteredToken` |
+| CRT-02 | L1-L2: L1 provide | `L1CrossTradeProxy.provideCT` |
+| CRT-03 | L1-L2: L2 claim | `ProviderClaimCT` event on L2 |
+| CRT-04 | L2-L2: L2 request | `L2ToL2CrossTradeProxy.requestNonRegisteredToken` |
+| CRT-05 | L2-L2: L1 provide | `L2toL2CrossTradeL1Proxy.provideCT` |
+| CRT-06 | L2-L2: L2 claim | `ProviderClaimCT` event on L2 |
+| CRT-07 | dApp UI 스크린샷 | EIP-6963 mock provider 주입 |
+
+**가스 정책:**
+- L1 `provideCT` (L1→L2): explicit gasLimit 없음, ethers.js 자동 추정
+- L1 `provideCT` (L2→L2): explicit gasLimit 없음, 자동 추정 (~800k; CDM 2회 처리)
+- `_minGasLimit` (CDM relay용): `200_000` 고정
+
+→ [[testing]], [[l1-gas-limits]]

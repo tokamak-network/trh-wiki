@@ -111,6 +111,22 @@ CLAUDE.md 업데이트:
   - wiki/components/ core/integration 서브섹션 반영
   - 컴포넌트 canonical names 12개 레포로 확장
 
+## [2026-04-11] update | CrossTrade E2E 테스트 스위트 완성 반영
+Pages updated:
+  [[testing]] — CrossTrade Live TX 테스트 섹션 신설 (CRT-01~07 전체 통과 기록),
+               EIP-6963 mock provider 주입 패턴 추가,
+               crosstrade-tx.live.spec.ts 파일 구조에 추가
+  [[cross-trade]] — E2E 테스트 섹션 신설 (테스트 ID × 컨트랙트 대응 테이블, 가스 정책)
+  [[l1-gas-limits]] — provideCT 관련 행 2개 추가 (auto estimation),
+                      "explicit gasLimit 제거 배경" 섹션 신설
+
+Key facts captured:
+  - CRT-01~07 전체 통과 (2026-04-11)
+  - L1 provideCT gasLimit: explicit 제거 → ethers.js 자동 추정 (commit: 8ec40d8)
+  - L2-L2 provideCT: CDM 2회 overhead → ~800k (explicit 제거 후 자동 추정으로 해결)
+  - CRT-07: EIP-6963 eip6963:announceProvider 이벤트로 mock wallet 주입 패턴 확립
+  - _minGasLimit 파라미터(CDM relay용 200k)는 L1 TX gasLimit과 별개
+
 ## [2026-04-10] ingest | raw/inbox/crosstrade-deployment-guide.md
 Source: crossTrade/docs/deployment-guide.md (Foundry 기반 배포 가이드)
 
