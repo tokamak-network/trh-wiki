@@ -141,3 +141,19 @@ Key facts captured (비자명한 것만):
   - Admin key 없으면 기존 프록시에 새 체인 영구 등록 불가 → 재배포 필요. 사전에 isAdmin() 확인 필수.
   - L2toL2CrossTradeProxy.setChainInfo는 proxy-direct 구현 → implementation() == 0x0에서도 성공. 나머지 함수는 impl 위임 → silent broken 상태 가능.
   - 실제 발생: ect-defi L2toL2CrossTradeProxy(0x2452ceB6...) 이전 세션에서 setChainInfo 성공했으나 upgradeTo 미실행 → chainData() revert로 뒤늦게 발견.
+
+## [2026-04-13] ingest | thanos-bridge 로컬 Docker 배포 트러블슈팅
+Sources added to raw/sessions/:
+  debug-network-switch-failure-on-local-bridge-withdraw.md
+  debug-env-vars-not-applied-localhost-3001-bridge.md
+  debug-bridge-info-data-truncated-with-ellipsis.md
+  debug-withdraw-network-switch-balance-zero.md
+
+Pages created:
+  [[thanos-bridge-local-docker-deployment]] — 로컬 Docker 배포 시 발생하는 4가지 문제 트러블슈팅
+
+Key facts captured:
+  - next-runtime-env는 빌드 타임이 아닌 런타임에 NEXT_PUBLIC_* 읽음 → Next.js standalone 모드에서 docker run -e 플래그 필수
+  - host.docker.internal은 컨테이너 내부에서만 동작, 브라우저(wagmi)에서는 localhost 사용 필요
+  - isHTTPS() 유틸: localhost / 127.0.0.1 / host.docker.internal 모두 허용 (useNetwork.ts에서 사용)
+  - BridgeInfoItem truncate 버그: Chakra UI truncate prop + maxWidth 제거로 수정
