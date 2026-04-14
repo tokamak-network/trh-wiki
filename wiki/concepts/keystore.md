@@ -5,7 +5,6 @@ sources:
 related:
   - "[[trh-platform]]"
   - "[[l2-deployment]]"
-  - "[[aws-sso]]"
 tags: [concept]
 ---
 

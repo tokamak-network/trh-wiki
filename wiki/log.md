@@ -23,7 +23,6 @@ Pages created:
   [[sequential-l2-deploy]], [[port-conflicts]], [[l1-gas-limits]]
 
 Pages still stub (raw source 없음):
-  [[aws-sso]], [[docker-compose-lifecycle]], [[ec2-deploy]], [[release]],
   [[docker-health-checks]], [[l2-deposit-verification]]
 
 ## [2026-04-09] ingest | crossTrade/ (CrossTrade integration)
@@ -173,6 +172,14 @@ Key facts captured:
   - trh-sdk AWS 경로: Foundry(L1) → Terraform 2단계(S3+DynamoDB backend, VPC+EKS+EFS) → Helm 2-pass(PVC → workloads) → ingress 폴링
   - SSH/raw EC2 없음. 모든 L2 노드는 EKS Helm 파드. "ec2-deploy" 명칭은 레거시.
   - Gotchas: AWS creds Postgres 평문 저장, SSO 토큰 리프레시 없음(1h TTL), DTO required-field 비일관성, trh-sdk static creds only
+
+## [2026-04-15] housekeeping | aws-sso 삭제 + 미작성 페이지 3종 ingest
+Pages deleted: [[aws-sso]] (참조 5곳 제거 — keystore, index, ec2-deploy, trh-platform×2)
+New pages: [[docker-compose-lifecycle]], [[local-dev]], [[release]]
+Key additions:
+  - docker-compose-lifecycle: Preset별 compose file 분기, 컨테이너 포트 목록, 레이어 구조
+  - local-dev: 레포별 개발 서버 기동법, VITE_MOCK_ELECTRON/ELECTRON_USE_BUILD 환경 변수
+  - release: Electron DMG/NSIS/AppImage 빌드 타겟, GitHub Releases 연동, Docker Hub 패턴
 
 ## [2026-04-15] ingest | DRB-node + Commit-Reveal2 repo analysis
 Pages updated: [[drb-node]], [[commit-reveal2]], [[index]]

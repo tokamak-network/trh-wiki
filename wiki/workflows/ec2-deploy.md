@@ -16,7 +16,6 @@ related:
   - "[[trh-sdk]]"
   - "[[tokamak-thanos-stack]]"
   - "[[presets]]"
-  - "[[aws-sso]]"
 tags: [workflow]
 ---
 

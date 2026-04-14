@@ -47,17 +47,16 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[deposit-tx]] | L1→L2 Deposit Transaction pattern via OptimismPortal |
 | [[l2-deployment]] | End-to-end L2 deployment flow — from preset selection to running chain |
 | [[keystore]] | Electron safeStorage + BIP44 key derivation — mnemonic → deployer keys |
-| [[aws-sso]] | AWS SSO credential flow — profile listing, OIDC login, role assumption |
 | [[docker-compose-lifecycle]] | How the platform manages Docker Compose services at runtime |
 
 ## Workflows
 
 | Page | Summary |
 |------|---------|
-| [[local-dev]] | Local development environment setup |
+| [[local-dev]] | 레포별 개발 서버 기동, 환경 변수, mock 패턴 |
 | [[l2-deploy-local]] | Full walkthrough: deploying an L2 chain locally via Docker Compose |
 | [[ec2-deploy]] | AWS EC2 deployment via Terraform — one-time setup and update flow |
-| [[release]] | Release process — building macOS/Windows/Linux binaries, versioning |
+| [[release]] | Electron DMG/NSIS/AppImage 빌드, Docker 이미지 배포, 버전 고정 패턴 |
 | [[testing]] | 테스트 스택, 실행 명령어, E2E 3가지 모드, Vitest/Playwright 패턴 |
 
 ## Decisions

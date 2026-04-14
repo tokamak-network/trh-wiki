@@ -7,7 +7,6 @@ related:
   - "[[trh-platform-ui]]"
   - "[[trh-backend]]"
   - "[[keystore]]"
-  - "[[aws-sso]]"
   - "[[docker-compose-lifecycle]]"
 tags: [component]
 ---
@@ -74,7 +73,7 @@ Main Process (Node.js)           Renderer Process (React)
 ## 주요 모듈
 
 - **[[keystore]]** — `src/main/keystore.ts`
-- **[[aws-sso]]** — `src/main/aws-auth.ts`
+- AWS auth — `src/main/aws-auth.ts` (SSO OIDC flow → [[ec2-deploy]])
 - **[[docker-compose-lifecycle]]** — `src/main/docker.ts`
 - Network Guard — `src/main/network-guard.ts`
 - WebView — `src/main/webview.ts`
