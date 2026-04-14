@@ -157,3 +157,19 @@ Key facts captured:
   - host.docker.internal은 컨테이너 내부에서만 동작, 브라우저(wagmi)에서는 localhost 사용 필요
   - isHTTPS() 유틸: localhost / 127.0.0.1 / host.docker.internal 모두 허용 (useNetwork.ts에서 사용)
   - BridgeInfoItem truncate 버그: Chakra UI truncate prop + maxWidth 제거로 수정
+
+## [2026-04-14] ingest | workflows/ec2-deploy.md (AWS L2 deploy flow)
+Sources: trh-platform/src/main/{aws-auth,webview,webview-preload,index}.ts,
+         trh-backend/pkg/{api,services,stacks}/thanos/*,
+         trh-sdk/pkg/{stacks/thanos,cloud-provider/aws}/*
+
+Page filled: [[ec2-deploy]] (replaces 2026-04-09 stub)
+Scope: 6-Phase 전체 경로 — Electron SSO creds 획득 → Next.js POST → trh-backend goroutine (TaskManager) → trh-sdk Foundry L1 deploy → trh-sdk Terraform+Helm 2-pass on EKS
+
+Key facts captured:
+  - Electron은 "자격증명 전달자"일 뿐. 실제 배포는 임베디드 Next.js UI → localhost:8000 HTTP 직통.
+  - 자격증명 전달 경로: SSO temp creds → window.__TRH_AWS_CREDENTIALS__ JS 글로벌 → POST body
+  - trh-backend는 trh-sdk를 Go 모듈로 import (셸아웃 아님). in-process goroutine으로 순차 실행.
+  - trh-sdk AWS 경로: Foundry(L1) → Terraform 2단계(S3+DynamoDB backend, VPC+EKS+EFS) → Helm 2-pass(PVC → workloads) → ingress 폴링
+  - SSH/raw EC2 없음. 모든 L2 노드는 EKS Helm 파드. "ec2-deploy" 명칭은 레거시.
+  - Gotchas: AWS creds Postgres 평문 저장, SSO 토큰 리프레시 없음(1h TTL), DTO required-field 비일관성, trh-sdk static creds only
