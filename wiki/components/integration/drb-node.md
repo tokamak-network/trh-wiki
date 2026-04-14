@@ -1,13 +1,16 @@
 ---
-updated: 2026-04-09
+updated: 2026-04-15
 sources: []
 related:
+  - "[[drb-project]]"
   - "[[commit-reveal2]]"
   - "[[trh-sdk]]"
 tags: [component, integration]
 ---
 
 # DRB-node
+
+> Part of the [[drb-project]] umbrella — protocol flow, round state machine, operator lifecycle, dispute/slashing은 그쪽을 참조.
 
 **분산 랜덤 비컨(DRB) Go 노드 구현체**. Commit-Reveal2 스마트 컨트랙트와 상호작용하며 Leader / Regular 두 가지 노드 타입으로 분산 랜덤 넘버 생성 라운드를 조율한다.
 
@@ -123,8 +126,28 @@ go test ./integration_test -v -timeout 180m  # 터미널 2
 
 ---
 
+## 빌드 주의사항
+
+- `go.mod`는 `go 1.23.0`이지만 README는 Go 1.24+를 요구사항으로 명시. 실제 사용 toolchain: `go1.23.9`.
+- `pkg/fallback_ethclient/` — 여러 RPC 엔드포인트를 페일오버하는 다중 RPC 클라이언트. `ETH_RPC_URLS` 콤마 구분으로 N개 지정 가능.
+
+---
+
 ## TRH 레포와의 관계
 
+- **[[drb-project]]** → 두 레포를 DRB 프로젝트로 묶은 umbrella 페이지
 - **[[commit-reveal2]]** → 이 노드가 상호작용하는 스마트 컨트랙트 (ABI 직접 import)
 - **trh-sdk** → DRB 모듈 활성화 시 DRB-node 컨테이너를 Docker Compose로 기동하는 주체
 - 직접 코드 의존성 없음 — Ethereum RPC + LibP2P로 독립 운영
+
+---
+
+## 1차 문서 참조
+
+| 파일 | 내용 |
+|------|------|
+| `DRB-node/STATE_DIAGRAM.md` | 온체인/노드/네트워크/에러 복구 4가지 상태 머신 (Mermaid) |
+| `DRB-node/TEST_COVERAGE_MAPPING.md` | 테스트 커버리지 매핑 (16KB) |
+| `DRB-node/integration_test/INTEGRATION_TEST_COVERAGE.md` | 통합 테스트 커버리지 |
+| `DRB-node/docs/network-limits.md` | 네트워크별 가스/calldata 한계 |
+| `DRB-node/CLAUDE.md` | 레포 내부 개발 가이드 |

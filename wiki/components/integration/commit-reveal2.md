@@ -1,13 +1,16 @@
 ---
-updated: 2026-04-09
+updated: 2026-04-15
 sources: []
 related:
+  - "[[drb-project]]"
   - "[[drb-node]]"
   - "[[trh-sdk]]"
 tags: [component, integration]
 ---
 
 # Commit-Reveal2
+
+> Part of the [[drb-project]] umbrella — protocol flow, round state machine, operator lifecycle, dispute/slashing은 그쪽을 참조.
 
 **Tokamak Network의 분산 랜덤 비컨(DRB) 스마트 컨트랙트 구현체**. 기존 Commit-Reveal 방식의 "last revealer attack" 취약점을 제거한 2단계 reveal 프로토콜.
 
@@ -109,8 +112,30 @@ make deploy ARGS="--network thanossepolia"  # Thanos Sepolia
 
 ---
 
+## Operator 상세 (OperatorManager.sol)
+
+- **최대 Operator 수**: `MAX_ACTIVATED_OPERATORS = 32` (`MAX_OPERATOR_INDEX = 31`, 1-based 인덱싱)
+- **활성화 조건**: `depositAmount ≥ s_activationThreshold` && 오너(Leader 주소)는 activate 불가
+- **슬래시 보상**: X8 fixed-point(`s_slashRewardPerOperatorX8`) MasterChef 패턴으로 분배. 활성화 시점 이전 슬래시 보상은 소급 적용 안 됨
+- **인출 Gate**: `notInProcess` 수식자로 `IN_PROGRESS` 중 인출/비활성화 차단
+- **원자적 등록**: `depositAndActivate()` 로 예치+활성화 한 번에 처리
+
+---
+
+## 테스트 구조
+
+| 경로 | 내용 |
+|------|------|
+| `test/staging/CommitReveal2Flowchart.t.sol` | 성공 8가지(a~h) + 실패 23가지(i~w) 전체 경로 |
+| `test/fuzz/` | 퍼즈 테스트 (1000 runs) |
+| `test/gas/ForManuscriptGas.t.sol` | 논문 제출용 가스 측정 수치 |
+| `test/unit/` | 단위 테스트 |
+
+---
+
 ## TRH 레포와의 관계
 
+- **[[drb-project]]** → 두 레포를 DRB 프로젝트로 묶은 umbrella 페이지
 - **[[drb-node]]** → 이 컨트랙트와 직접 상호작용하는 Go 노드 구현체
 - **trh-sdk** → DRB 서비스를 Gaming/Full Preset에서 활성화 가능한 구조 (DRB 관련 배포 로직은 SDK에서 관리)
-- ABI는 `artifacts/` 에서 추출해 다른 레포에서 import 가능
+- ABI는 `artifacts/` 에서 추출해 다른 레포에서 import 가능 (단, DRB-node는 수동 복사 방식 — [[drb-project]] ABI Sync 섹션 참조)

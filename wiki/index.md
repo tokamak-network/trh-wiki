@@ -35,8 +35,9 @@ Master index of all wiki pages. Updated on every ingest operation.
 |------|---------|
 | [[cross-trade]] | CrossTrade DeFi integration — L1→L2 deposit tx pattern, dApp service |
 | [[thanos-bridge]] | L1↔L2 자산 브리지 DApp — Next.js, Thanos SDK, Wagmi |
-| [[commit-reveal2]] | 분산 랜덤 비컨(DRB) 스마트 컨트랙트 — 2단계 Commit-Reveal, last revealer attack 방지 |
-| [[drb-node]] | DRB Go 노드 구현체 — Leader/Regular 아키텍처, LibP2P, PostgreSQL |
+| [[drb-project]] | DRB 프로젝트 umbrella — 프로토콜 흐름, 상태 머신, operator lifecycle, dispute/slashing, L2 gas |
+| [[commit-reveal2]] | 분산 랜덤 비컨(DRB) 스마트 컨트랙트 — 2단계 Commit-Reveal, last revealer attack 방지 (part of [[drb-project]]) |
+| [[drb-node]] | DRB Go 노드 구현체 — Leader/Regular 아키텍처, LibP2P, PostgreSQL (part of [[drb-project]]) |
 
 ## Concepts
 
