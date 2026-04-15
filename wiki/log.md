@@ -203,3 +203,19 @@ Key facts:
   - tokamak-thanos commit 8e67bbce, trh-sdk commit 13e1465
   - OP_BATCHER_DATA_AVAILABILITY_TYPE=calldata 임시 우회 해제됨
 Key additions: DRB umbrella page — shared protocol flow (8 success + 23 failure paths), round state machine (IN_PROGRESS 6-branch HALTED), operator lifecycle (32 max, X8 slash accounting, notInProcess gate), dispute/slashing matrix, L2 gas model (CommitReveal2L2 + OVM oracle), ABI sync workflow (수동 복사 + abigen), environment matrix (Sepolia/OpSepolia/ThanosSepolia), integration test harness reference (128KB docker_nodes_quick_test.go, failure/stress/perf suites).
+
+## [2026-04-15] update | CrossTrade dApp 버그 픽스 3종 — defi-eth 프리셋 환경
+Sources: trh-sdk commits 8af71e6, trh-backend commit e13669c, crossTrade commit 1103393
+
+Pages updated:
+  [[cross-trade]] — dApp 환경변수 포맷 변경, Thanos Sepolia destination_chains 설계 결정,
+                    destination picker 버그 픽스, defi-eth native token 메타데이터 버그 픽스 섹션 추가
+
+Key facts captured (비자명한 것만):
+  - OKX 등 지갑은 서명 팝업 전 eth_estimateGas로 사전 시뮬레이션 → 컨트랙트 revert시 팝업 자체를 차단 ("서명이 안된다" 증상)
+  - Thanos Sepolia L2toL2CTProxy(0x7BbEC...) 에는 우리가 배포한 신규 L2 chain ID가 미등록 → Thanos→신규L2 방향 시뮬레이션 revert
+  - 해결: thanosL2L2Tokens destination_chains: [] → UI가 해당 경로를 애초에 차단
+  - NEXT_PUBLIC_CHAIN_CONFIG (구버전) → NEXT_PUBLIC_CHAIN_CONFIG_L2_L1 + NEXT_PUBLIC_CHAIN_CONFIG_L2_L2 로 분리. trh-sdk local-compose.yml.tmpl도 동기화 (이전에 env var 이름 불일치로 L2_L2 config가 dApp에 전달되지 않았음)
+  - L2_L2 토큰 포맷: [{name, address, destination_chains}] 배열. L2_L1 토큰 포맷: {ETH: addr, USDC: addr} flat map — 두 포맷이 다름
+  - defi-eth 프리셋: L2NativeTokenName/Symbol을 "Ethereum"/"ETH"로 분기. 미전달시 지갑에 체인 추가할 때 "TON"으로 잘못 표시됨
+  - 반대 방향(신규L2 → Thanos Sepolia)은 정상 — 신규L2 proxy에는 우리가 admin, Thanos chain ID 등록 완료

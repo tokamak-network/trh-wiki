@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-11
+updated: 2026-04-15
 sources:
   - raw/decisions/PRD-CrossTrade-TRH-Integration-v2.1.md
   - raw/inbox/crosstrade-deployment-guide.md
@@ -104,6 +104,41 @@ L2 운영자가 7일 출금 대기 없이 빠른 크로스체인 토큰 교환�
 
 → [[separate-compose-for-crosstrade]]
 
+### 환경 변수 포맷 (2026-04-15 기준)
+
+dApp은 세 개의 env var를 읽는다:
+
+| 변수 | 역할 |
+|------|------|
+| `NEXT_PUBLIC_PROJECT_ID` | WalletConnect project ID |
+| `NEXT_PUBLIC_CHAIN_CONFIG_L2_L1` | L2→L1 모드용 체인 설정 (snake_case, flat token map) |
+| `NEXT_PUBLIC_CHAIN_CONFIG_L2_L2` | L2→L2 모드용 체인 설정 (array-of-token 포맷) |
+
+> **이전 이름 (`NEXT_PUBLIC_CHAIN_CONFIG`) 은 더 이상 사용하지 않는다.** trh-sdk `local-compose.yml.tmpl`도 이에 맞게 수정됨 (commit `8af71e6`).
+
+**L2_L2 체인 설정 토큰 포맷** (array-of-object, destination_chains 포함):
+```json
+{
+  "17001": {
+    "name": "...", "rpc_url": "...", "contracts": {...},
+    "tokens": [
+      {"name": "ETH", "address": "0x000...000", "destination_chains": [111551119090]},
+      {"name": "USDC", "address": "0x420...778", "destination_chains": [111551119090]}
+    ]
+  }
+}
+```
+
+**L2_L1 체인 설정 토큰 포맷** (flat map):
+```json
+{
+  "17001": {
+    "rpc_url": "http://host.docker.internal:9545",
+    "tokens": {"ETH": "0x000...000", "USDC": "0x420...778"}
+  }
+}
+```
+
 ---
 
 ## L1 setChainInfo (Feature 2)
@@ -127,6 +162,40 @@ L2toL2CrossTradeL1.setChainInfo(l2ChainId, crossDomainMessenger, l2toL2CrossTrad
 |------|---------|---------|
 | AWS (K8s) | Foundry 스크립트 | Helm chart |
 | Local (Docker) | L1 Deposit Tx (신규) | Docker Compose (신규) |
+
+---
+
+## dApp 알려진 버그 및 설계 결정
+
+### Thanos Sepolia → 신규 L2 방향 비활성화
+
+**증상:** Thanos Sepolia를 source로 선택하고 신규 L2를 destination으로 설정하면, OKX 같은 지갑이 서명 팝업을 전혀 띄우지 않는다 ("서명이 안된다").
+
+**근본 원인:** 지갑(OKX 포함)은 서명 팝업 전에 `eth_estimateGas`로 트랜잭션을 사전 시뮬레이션한다. Thanos Sepolia의 `L2toL2CrossTradeProxy(0x7BbEC445F9BDF6c579e81EAda5df86654184BcE3)`는 Tokamak 팀이 관리하는 프록시로, 우리가 배포한 신규 L2 체인 ID가 등록되어 있지 않다. 따라서 시뮬레이션 단계에서 컨트랙트가 revert → 지갑이 팝업 자체를 차단한다.
+
+**해결책 (2026-04-15):** trh-backend `BuildDAppEnvConfig()`에서 Thanos Sepolia 토큰의 `destination_chains`를 `[]` (빈 배열)로 설정. dApp destination picker는 `destination_chains`가 빈 체인을 후보에서 제외하므로, 사용자가 애초에 Thanos→신규L2 경로에 도달하지 못하게 된다.
+
+**코드:** `trh-backend/pkg/services/thanos/integrations/cross_trade_local.go` — `thanosL2L2Tokens` 세 항목(ETH, TON, USDC) 모두 `DestinationChains: []uint64{}`
+
+**반대 방향(신규L2 → Thanos Sepolia)은 정상 동작.** 신규 L2의 `L2toL2CrossTradeProxy`에는 우리가 admin이므로 Thanos Sepolia 체인 ID를 등록할 수 있다. `destination_chains: [111551119090]`으로 설정되어 있다.
+
+### destination picker에서 L1 체인이 누락되는 문제
+
+**증상 (defi-eth 프리셋):** L2 → Sepolia (출금) 플로우에서 destination 드롭다운에 Sepolia가 나타나지 않는다.
+
+**근본 원인:** `getAllowedDestinationChains()`가 `L2_L2` config의 `destination_chains`만 조회했다. `requestTo`가 비어 있을 때 `getCommunicationMode()`가 항상 `L2_L2`를 반환하므로, Sepolia(L1)는 `L2_L2` config에 없어 항상 걸러졌다.
+
+**해결책 (2026-04-15):** `getAllowedDestinationChains()`를 mode-agnostic하게 변경 — `L2_L2`와 `L2_L1` 양쪽 destination을 union으로 반환. 사용자가 Sepolia를 선택하는 순간 `getCommunicationMode()`가 자동으로 `L2_L1`로 전환된다.
+
+**코드:** `crossTrade/frontend/cross-trade-dapp/src/components/CreateRequest.tsx` — `getAllowedDestinationChains()` 함수
+
+### defi-eth 프리셋 native token 메타데이터 오류
+
+**증상:** defi-eth 프리셋(fee token = ETH)으로 배포한 L2가 CrossTrade dApp에서 native token이 "TON"으로 잘못 표시된다.
+
+**근본 원인:** `cross_trade_local.go`가 preset과 무관하게 `NativeTokenName: "Tokamak Network"`, `NativeTokenSymbol: "TON"`을 하드코딩.
+
+**해결책 (2026-04-15):** `CrossTradeDAppConfig`에 `L2NativeTokenName`/`L2NativeTokenSymbol` 필드 추가. `deployment.go`에서 preset fee token 타입에 따라 `"Ethereum"/"ETH"` vs `"Tokamak Network"/"TON"`을 분기해 전달.
 
 ---
 
