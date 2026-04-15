@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-15
+updated: 2026-04-16
 component: tokamak-thanos / op-batcher
 ---
 
@@ -22,7 +22,9 @@ blob base fee가 스파이크하면 이미 조회한 cap이 stale 상태가 되�
 - 업스트림 PR optimism#11212 (`max-l1-blob-base-fee` 플래그)가 이 포크에 미백포트.
 - `FeeLimitMultiplier` (5×) 설정도 stale cap 기준 상대값이라 무력.
 
-## Fix (tokamak-thanos `main`, commit `8e67bbce`)
+## Fix History
+
+### 1차 수정 — commit `8e67bbce` (Apr 15)
 
 | 변경 | 파일 |
 |------|------|
@@ -31,6 +33,31 @@ blob base fee가 스파이크하면 이미 조회한 cap이 stale 상태가 되�
 | `(m *SimpleTxManager).calcBlobFeeCap()` — 배수 설정화 (기본 4×) | `op-service/txmgr/txmgr.go` |
 | `craftTx`: 임계값 선검사 + `finishBlobTx` 직전 blob base fee 재조회 | `op-service/txmgr/txmgr.go` |
 | `ErrBlobBaseFeeTooHigh` sentinel + driver Warn 로그 | `op-batcher/batcher/driver.go` |
+
+**재발 원인**: `8e67bbce` 이전 `2a9e294c` (Apr 14)에서 `suggestGasPriceCaps`를
+`CalcBlobFeeCancun(0) = 1 wei` 반환으로 바꿨는데, `8e67bbce`가 이를 되돌리지 않아
+두 커밋이 충돌했다:
+
+- `suggestGasPriceCaps` → blobBaseFee = 1 wei
+- 임계값 체크: `1 wei < MaxBlobBaseFee (50 gwei)` → 항상 통과 → `ErrBlobBaseFeeTooHigh` 미발동
+- `EstimateGas`에 `BlobGasFeeCap = 1 wei` 전달 → Sepolia 실제 fee > 1 wei → 동일 에러 재발
+
+### 2차 수정 — commit `d8202223` (Apr 16)
+
+`suggestGasPriceCaps`에서 `CalcBlobFeeCancun(0)` hack 제거:
+
+```go
+// Before (2a9e294c hack — incompatible with 8e67bbce threshold check)
+blobFee = eth.CalcBlobFeeCancun(0)
+
+// After — real excessBlobGas makes threshold check meaningful
+blobFee = eth.CalcBlobFeeCancun(*head.ExcessBlobGas)
+```
+
+이제 실제 `excessBlobGas`가 반환되므로:
+- Sepolia의 비정상적 excessBlobGas → blobBaseFee >> 50 gwei
+- 임계값 체크 발동 → `ErrBlobBaseFeeTooHigh` → EstimateGas 건너뜀
+- 로그: `"Blob base fee above threshold, pausing submission"`
 
 ## Configuration
 

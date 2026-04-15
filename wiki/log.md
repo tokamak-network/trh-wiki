@@ -236,6 +236,17 @@ Key facts captured (비자명한 것만):
   - defi-eth 프리셋: L2NativeTokenName/Symbol을 "Ethereum"/"ETH"로 분기. 미전달시 지갑에 체인 추가할 때 "TON"으로 잘못 표시됨
   - 반대 방향(신규L2 → Thanos Sepolia)은 정상 — 신규L2 proxy에는 우리가 admin, Thanos chain ID 등록 완료
 
+## [2026-04-16] fix | op-batcher blob fee 에러 재발 — suggestGasPriceCaps hack 제거
+Repo: tokamak-thanos commit d8202223
+Pages updated: [[op-batcher-blob-fee-spike]] — 재발 원인 + 2차 수정 히스토리 추가
+
+Root cause: `8e67bbce`의 MaxBlobBaseFee 임계값 체크가 `2a9e294c`의 `CalcBlobFeeCancun(0)` hack과 충돌.
+  suggestGasPriceCaps가 1 wei를 반환 → 임계값 체크 항상 통과 → EstimateGas에 BlobGasFeeCap=1 wei 전달
+  → Sepolia 실제 fee > 1 wei → "max fee per blob gas less than block blob gas fee" 재발
+
+Fix: suggestGasPriceCaps에서 CalcBlobFeeCancun(0) 제거, 실제 *head.ExcessBlobGas 복원.
+  이제 Sepolia 비정상 excessBlobGas → blobBaseFee >> 50 gwei → ErrBlobBaseFeeTooHigh 발동 → EstimateGas 건너뜀.
+
 ## [2026-04-15] update | trh-platform DeploymentWatcher — 배포 실패 원인 표시
 Pages updated: [[trh-platform]]
 
