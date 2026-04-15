@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>trh-wiki: LLM-Maintained Knowledge Base</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #000;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    gap: 32px;
+  }
+
+  .slide {
+    width: 1200px;
+    height: 675px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 52px 64px 52px;
+  }
+
+  .slide::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent4) 50%, var(--accent2) 100%);
+  }
+
+  .slide-num {
+    position: absolute;
+    bottom: 24px;
+    right: 40px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  h1 { font-size: 52px; font-weight: 700; line-height: 1.1; letter-spacing: -1.5px; }
+  h2 { font-size: 34px; font-weight: 700; letter-spacing: -0.8px; margin-bottom: 28px; }
+  h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+
+  p, li { font-size: 14px; line-height: 1.6; color: var(--text-muted); }
+  strong { color: var(--text); font-weight: 600; }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent5);
+  }
+
+  /* ─── NAV HINT ─── */
+  .nav-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ════════════════════════════════ SLIDE 1 ════════ */
+  .slide-title { background: var(--bg); justify-content: center; }
+  .slide-title .bg-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.35;
+  }
+  .slide-title .glow {
+    position: absolute; top: -80px; left: -80px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(88,166,255,0.12) 0%, transparent 70%);
+  }
+  .slide-title .glow2 {
+    position: absolute; bottom: -100px; right: -40px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(210,168,255,0.1) 0%, transparent 70%);
+  }
+  .title-content { position: relative; z-index: 1; }
+  .title-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(88,166,255,0.1);
+    border: 1px solid rgba(88,166,255,0.3);
+    border-radius: 20px; padding: 6px 14px;
+    font-size: 12px; font-weight: 600; color: var(--accent);
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 24px;
+  }
+  .title-badge::before { content: '●'; font-size: 8px; }
+  h1 .highlight {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent4) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .title-sub { font-size: 17px; color: var(--text-muted); margin-top: 20px; max-width: 620px; line-height: 1.6; }
+  .title-meta { margin-top: 40px; display: flex; gap: 32px; font-size: 13px; color: var(--text-muted); }
+  .title-meta span { font-weight: 600; color: var(--text); }
+
+  /* ════════════════════════════════ SLIDE 2 ════════ */
+  .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex: 1; }
+  .repo-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 18px;
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .repo-icon {
+    width: 34px; height: 34px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .repo-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 3px;
+  }
+  .repo-card p { font-size: 11.5px; line-height: 1.45; }
+  .problem-arrow {
+    grid-column: 1 / -1;
+    background: rgba(247,129,102,0.08); border: 1px solid rgba(247,129,102,0.25);
+    border-radius: 10px; padding: 13px 18px;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 13.5px; color: var(--accent3); font-weight: 500;
+  }
+
+  /* ════════════════════════════════ SLIDE 3 ════════ */
+  .karpathy-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; flex: 1; }
+  .concept-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .concept-icon { font-size: 22px; margin-bottom: 10px; }
+  .three-layer { display: flex; flex-direction: column; gap: 7px; }
+  .layer {
+    display: flex; align-items: center; gap: 12px; padding: 9px 13px;
+    border-radius: 8px; background: var(--bg); border: 1px solid var(--border); font-size: 12.5px;
+  }
+  .layer-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .layer-path { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent5); font-weight: 500; }
+  .ops-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .op-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; }
+  .op-badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 4px; flex-shrink: 0; margin-top: 1px;
+  }
+
+  /* ════════════════════════════════ SLIDE 4 — DIR DIAGRAM ════════ */
+  .dir-diagram { display: flex; gap: 24px; flex: 1; align-items: stretch; }
+
+  /* SVG tree on left */
+  .tree-svg-wrap {
+    flex: 0 0 520px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Legend + stats on right */
+  .dir-right { display: flex; flex-direction: column; gap: 14px; flex: 1; }
+
+  .legend-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .legend-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 9px; padding: 12px 14px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 3px;
+    flex-shrink: 0; margin-top: 3px;
+  }
+  .legend-card strong { font-size: 12px; display: block; margin-bottom: 2px; }
+  .legend-card span { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+
+  .stat-row { display: flex; gap: 10px; }
+  .stat-pill {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 9px; padding: 12px 14px; text-align: center;
+  }
+  .stat-pill .n { font-size: 28px; font-weight: 700; letter-spacing: -1px; line-height: 1; }
+  .stat-pill .l { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+  .rule-banner {
+    background: rgba(88,166,255,0.06); border: 1px solid rgba(88,166,255,0.22);
+    border-radius: 9px; padding: 13px 16px;
+    font-size: 12.5px; color: var(--text-muted); line-height: 1.6;
+  }
+
+  /* ════════════════════════════════ SLIDE 5 ════════ */
+  .format-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; flex: 1; }
+  .code-block {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px 22px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8; overflow: auto;
+  }
+  .code-block .kw { color: var(--accent4); }
+  .code-block .str { color: var(--accent2); }
+  .code-block .cmt { color: #6e7681; font-style: italic; }
+  .code-block .lnk { color: var(--accent); }
+  .rules-list { display: flex; flex-direction: column; gap: 9px; }
+  .rule-item {
+    display: flex; gap: 11px; padding: 11px 14px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; font-size: 13px; line-height: 1.5; align-items: flex-start;
+  }
+  .rule-icon { flex-shrink: 0; font-size: 15px; }
+
+  /* ════════════════════════════════ SLIDE 6 ════════ */
+  .flow-top { display: flex; align-items: center; justify-content: center; gap: 0; flex: 0 0 auto; margin-bottom: 20px; }
+  .flow-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 18px; text-align: center; min-width: 138px;
+  }
+  .flow-box .fi { font-size: 26px; margin-bottom: 6px; }
+  .flow-box .ft { font-size: 12.5px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .flow-box .fd { font-size: 11px; color: var(--text-muted); line-height: 1.35; }
+  .flow-box.hl { border-color: rgba(88,166,255,0.4); background: rgba(88,166,255,0.06); }
+  .flow-arrow { font-size: 18px; color: var(--text-muted); padding: 0 6px; flex-shrink: 0; }
+  .flow-bottom { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .flow-op {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 13px 15px; font-size: 12.5px;
+  }
+  .flow-op .on { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600; margin-bottom: 5px; }
+
+  /* ════════════════════════════════ SLIDE 7 — RULE DIAGRAM ════════ */
+  .rule-diagram { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 24px; flex: 1; }
+
+  .enforcement-flow {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 24px;
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .ef-title {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px;
+  }
+
+  .ef-step {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 11px 0;
+  }
+  .ef-step + .ef-step { border-top: 1px dashed var(--border); }
+
+  .ef-connector {
+    display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 28px;
+  }
+  .ef-circle {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+  }
+
+  .ef-body { flex: 1; padding-top: 2px; }
+  .ef-head { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .ef-desc { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; }
+  .ef-tag {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px; padding: 1px 7px; border-radius: 4px; margin-top: 5px;
+  }
+
+  .effect-list { display: flex; flex-direction: column; gap: 11px; }
+  .effect-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 13px 16px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .effect-icon { font-size: 18px; flex-shrink: 0; }
+  .effect-card h3 { font-size: 13px; margin-bottom: 3px; }
+  .effect-card p { font-size: 11.5px; }
+
+  /* ════════════════════════════════ SLIDE 8 ════════ */
+  .automation-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 26px; flex: 1; }
+  .pipeline-steps { display: flex; flex-direction: column; gap: 0; }
+  .pipeline-step {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 13px 0; border-bottom: 1px solid var(--border);
+  }
+  .pipeline-step:last-child { border-bottom: none; }
+  .step-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(88,166,255,0.15); border: 1px solid rgba(88,166,255,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--accent);
+    flex-shrink: 0; font-family: 'JetBrains Mono', monospace;
+  }
+  .step-content h3 { font-size: 13.5px; margin-bottom: 2px; }
+  .step-content p { font-size: 12px; }
+  .future-box {
+    background: rgba(63,185,80,0.06); border: 1px solid rgba(63,185,80,0.25);
+    border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .future-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 2px;
+  }
+  .future-item {
+    display: flex; gap: 10px; font-size: 12.5px;
+    padding: 10px 12px; background: rgba(63,185,80,0.06);
+    border-radius: 8px; align-items: flex-start;
+  }
+  .future-item strong { font-size: 12.5px; display: block; margin-bottom: 2px; }
+  .future-item p { font-size: 11.5px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ SLIDE 1 ══ -->
+<section class="slide slide-title" id="s1">
+  <div class="bg-grid"></div>
+  <div class="glow"></div>
+  <div class="glow2"></div>
+  <div class="title-content">
+    <div class="title-badge">LLM-Maintained Knowledge Base</div>
+    <h1><span class="highlight">trh-wiki</span></h1>
+    <p class="title-sub">
+      A knowledge base for the TRH Platform ecosystem,<br>
+      inspired by Andrej Karpathy's LLM Wiki pattern.
+    </p>
+    <div class="title-meta">
+      <div>Repositories <span>13+</span></div>
+      <div>Wiki Pages <span>35+</span></div>
+      <div>Auto-updated <span>Daily</span></div>
+    </div>
+  </div>
+  <div class="slide-num">01 / 08</div>
+</section>
+
+<!-- ═══════════════════════════════════════ SLIDE 2 ══ -->
+<section class="slide" id="s2">
+  <div class="label">Problem</div>
+  <h2>One App. Too Many Repositories.</h2>
+  <div class="problem-grid">
+    <div class="repo-card">
+      <div class="repo-icon" style="background:rgba(88,166,255,0.12)">🖥</div>
+      <div>
+        <div class="repo-name">trh-platform</div>
+        <p>Electron desktop app — main / renderer / preload IPC architecture</p>
+      </div>
+    </div>
+    <div class="repo-card">
+      <div class="repo-icon" style="background:rgba(63,185,80,0.12)">⚙️</div>
+      <div>
+        <div class="repo-name">trh-sdk</div>
+        <p>Go CLI deployment engine — preset configs, L2 orchestration</p>
+      </div>
+    </div>
+    <div class="repo-card">
+      <div class="repo-icon" style="background:rgba(210,168,255,0.12)">🗄</div>
+      <div>
+        <div class="repo-name">trh-backend</div>
+        <p>Go REST API — Gin + GORM, Docker lifecycle management</p>
+      </div>
+    </div>
+    <div class="repo-card">
+      <div class="repo-icon" style="background:rgba(255,166,87,0.12)">🌐</div>
+      <div>
+        <div class="repo-name">trh-platform-ui</div>
+        <p>Next.js web frontend — embedded via Electron WebContentsView</p>
+      </div>
+    </div>
+    <div class="repo-card">
+      <div class="repo-icon" style="background:rgba(247,129,102,0.12)">🔗</div>
+      <div>
+        <div class="repo-name">tokamak-thanos</div>
+        <p>OP Stack v1.7.7 fork — op-node, op-batcher, op-proposer</p>
+      </div>
+    </div>
+    <div class="repo-card">
+      <div class="repo-icon" style="background:rgba(88,166,255,0.12)">🎲</div>
+      <div>
+        <div class="repo-name">drb-node · cross-trade · thanos-bridge …</div>
+        <p>Multiple integration repos — DRB, Bridge, CrossTrade DeFi</p>
+      </div>
+    </div>
+    <div class="problem-arrow">
+      <span style="font-size:18px">⚠️</span>
+      Every time work starts in a new repo, the <strong>full picture must be explained from scratch</strong> — paste docs, rebuild context, re-solve already-solved problems.
+    </div>
+  </div>
+  <div class="slide-num">02 / 08</div>
+</section>
+
+<!-- ═══════════════════════════════════════ SLIDE 3 ══ -->
+<section class="slide" id="s3">
+  <div class="label">Inspiration</div>
+  <h2>Andrej Karpathy's LLM Wiki Pattern</h2>
+  <div class="karpathy-layout">
+    <div>
+      <div class="concept-box" style="margin-bottom:14px">
+        <div class="concept-icon">💡</div>
+        <h3>Core Idea</h3>
+        <p style="font-size:13px">Instead of re-synthesizing knowledge on every query like RAG, build a <strong>compounding wiki that LLMs actively maintain</strong>. Knowledge is linked at ingest time, not query time.</p>
+      </div>
+      <div class="concept-box">
+        <h3 style="margin-bottom:12px">Three-Layer Architecture</h3>
+        <div class="three-layer">
+          <div class="layer">
+            <div class="layer-dot" style="background:var(--accent3)"></div>
+            <div>
+              <div class="layer-path">raw/</div>
+              <div style="font-size:11px;color:var(--text-muted)">Immutable source documents — never edit</div>
+            </div>
+          </div>
+          <div class="layer" style="border-color:rgba(88,166,255,0.35);background:rgba(88,166,255,0.04)">
+            <div class="layer-dot" style="background:var(--accent)"></div>
+            <div>
+              <div class="layer-path">wiki/</div>
+              <div style="font-size:11px;color:var(--text-muted)">LLM-written and maintained markdown</div>
+            </div>
+          </div>
+          <div class="layer">
+            <div class="layer-dot" style="background:var(--accent2)"></div>
+            <div>
+              <div class="layer-path">CLAUDE.md</div>
+              <div style="font-size:11px;color:var(--text-muted)">Schema — defines structure and workflows</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="concept-box" style="height:100%">
+        <h3 style="margin-bottom:14px">Three Core Operations</h3>
+        <div class="ops-list">
+          <div class="op-item">
+            <div class="op-badge" style="background:rgba(88,166,255,0.15);color:var(--accent)">ingest</div>
+            <div style="font-size:13px;color:var(--text-muted)">Process new source → auto-update relevant pages, build cross-references</div>
+          </div>
+          <div class="op-item">
+            <div class="op-badge" style="background:rgba(63,185,80,0.15);color:var(--accent2)">query</div>
+            <div style="font-size:13px;color:var(--text-muted)">Search wiki → synthesize answer with inline citations → save valuable Q&A as new pages</div>
+          </div>
+          <div class="op-item">
+            <div class="op-badge" style="background:rgba(210,168,255,0.15);color:var(--accent4)">lint</div>
+            <div style="font-size:13px;color:var(--text-muted)">Detect broken links, orphan pages, contradictions, unsourced claims</div>
+          </div>
+        </div>
+        <div style="margin-top:18px;padding:13px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+          <p style="font-size:12px;color:var(--text-muted);line-height:1.6">
+            Karpathy's research wiki grew to <strong style="color:var(--text)">~100 articles and 400,000 words</strong>.<br>
+            Realizing Vannevar Bush's 1945 <em>Memex</em> concept — through LLMs.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">03 / 08</div>
+</section>
+
+<!-- ═══════════════════════════════════════ SLIDE 4 — STRUCTURE DIAGRAM ══ -->
+<section class="slide" id="s4">
+  <div class="label">Structure</div>
+  <h2>trh-wiki Directory Structure</h2>
+  <div class="dir-diagram">
+
+    <!-- Visual tree diagram -->
+    <div class="tree-svg-wrap">
+      <svg width="472" height="480" viewBox="0 0 472 480" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
+        <!-- styles -->
+        <style>
+          .nd { font-family:'JetBrains Mono',monospace; font-size:12px; }
+          .nd-dir { fill:#58a6ff; font-weight:600; }
+          .nd-file { fill:#8b949e; }
+          .nd-badge { font-family:'Inter',sans-serif; font-size:10px; fill:#3fb950; font-style:italic; }
+          .ln { stroke:#30363d; stroke-width:1.2; }
+          .ln-hl { stroke:#58a6ff; stroke-width:1.2; opacity:0.5; }
+        </style>
+
+        <!-- ROOT -->
+        <rect x="0" y="4" width="120" height="24" rx="6" fill="rgba(88,166,255,0.12)" stroke="rgba(88,166,255,0.4)" stroke-width="1"/>
+        <text x="10" y="20" class="nd nd-dir">trh-wiki/</text>
+
+        <!-- vertical stem from root -->
+        <line x1="16" y1="28" x2="16" y2="440" class="ln"/>
+
+        <!-- ── raw/ ── -->
+        <line x1="16" y1="60" x2="36" y2="60" class="ln"/>
+        <rect x="36" y="48" width="58" height="22" rx="5" fill="rgba(247,129,102,0.1)" stroke="rgba(247,129,102,0.3)" stroke-width="1"/>
+        <text x="46" y="63" class="nd" fill="#f78166" font-weight="600">raw/</text>
+        <text x="100" y="63" class="nd nd-badge">  source zone</text>
+
+        <!-- raw children -->
+        <line x1="52" y1="70" x2="52" y2="148" class="ln"/>
+        <line x1="52" y1="90" x2="70" y2="90" class="ln"/>
+        <text x="72" y="94" class="nd nd-file">inbox/</text>
+        <text x="150" y="94" class="nd nd-badge">drop zone</text>
+        <line x1="52" y1="110" x2="70" y2="110" class="ln"/>
+        <text x="72" y="114" class="nd nd-file">architecture/</text>
+        <line x1="52" y1="130" x2="70" y2="130" class="ln"/>
+        <text x="72" y="134" class="nd nd-file">decisions/</text>
+        <line x1="52" y1="148" x2="70" y2="148" class="ln"/>
+        <text x="72" y="152" class="nd nd-file">assets/</text>
+
+        <!-- ── wiki/ ── -->
+        <line x1="16" y1="180" x2="36" y2="180" class="ln-hl"/>
+        <rect x="36" y="168" width="56" height="22" rx="5" fill="rgba(88,166,255,0.12)" stroke="rgba(88,166,255,0.45)" stroke-width="1"/>
+        <text x="46" y="183" class="nd nd-dir">wiki/</text>
+        <text x="98" y="183" class="nd nd-badge">  LLM-maintained</text>
+
+        <!-- wiki children vertical -->
+        <line x1="52" y1="190" x2="52" y2="430" class="ln"/>
+
+        <!-- index.md, log.md -->
+        <line x1="52" y1="210" x2="70" y2="210" class="ln"/>
+        <text x="72" y="214" class="nd nd-file">index.md</text>
+        <text x="168" y="214" class="nd nd-badge">master index</text>
+        <line x1="52" y1="232" x2="70" y2="232" class="ln"/>
+        <text x="72" y="236" class="nd nd-file">log.md</text>
+        <text x="152" y="236" class="nd nd-badge">append-only log</text>
+
+        <!-- overview/ -->
+        <line x1="52" y1="256" x2="70" y2="256" class="ln"/>
+        <text x="72" y="260" class="nd" fill="#8b949e">overview/</text>
+        <text x="166" y="260" class="nd nd-badge">architecture maps</text>
+
+        <!-- components/ -->
+        <line x1="52" y1="280" x2="70" y2="280" class="ln"/>
+        <text x="72" y="284" class="nd nd-dir">components/</text>
+        <line x1="88" y1="288" x2="88" y2="316" class="ln"/>
+        <line x1="88" y1="298" x2="106" y2="298" class="ln"/>
+        <text x="108" y="302" class="nd nd-file">core/</text>
+        <text x="152" y="302" class="nd nd-badge">8 repos</text>
+        <line x1="88" y1="316" x2="106" y2="316" class="ln"/>
+        <text x="108" y="320" class="nd nd-file">integration/</text>
+        <text x="194" y="320" class="nd nd-badge">5 repos</text>
+
+        <!-- concepts/ workflows/ decisions/ troubleshooting/ -->
+        <line x1="52" y1="344" x2="70" y2="344" class="ln"/>
+        <text x="72" y="348" class="nd" fill="#8b949e">concepts/</text>
+        <text x="164" y="348" class="nd nd-badge">5 pages</text>
+
+        <line x1="52" y1="366" x2="70" y2="366" class="ln"/>
+        <text x="72" y="370" class="nd" fill="#8b949e">workflows/</text>
+        <text x="166" y="370" class="nd nd-badge">5 pages</text>
+
+        <line x1="52" y1="388" x2="70" y2="388" class="ln"/>
+        <text x="72" y="392" class="nd" fill="#8b949e">decisions/</text>
+        <text x="164" y="392" class="nd nd-badge">6 pages (ADR)</text>
+
+        <line x1="52" y1="410" x2="70" y2="410" class="ln"/>
+        <text x="72" y="414" class="nd" fill="#8b949e">troubleshooting/</text>
+        <text x="208" y="414" class="nd nd-badge">5 pages</text>
+
+        <!-- CLAUDE.md -->
+        <line x1="16" y1="440" x2="36" y2="440" class="ln"/>
+        <rect x="36" y="428" width="78" height="22" rx="5" fill="rgba(63,185,80,0.1)" stroke="rgba(63,185,80,0.3)" stroke-width="1"/>
+        <text x="46" y="443" class="nd" fill="#3fb950" font-weight="600">CLAUDE.md</text>
+        <text x="120" y="443" class="nd nd-badge">  schema / ops definition</text>
+      </svg>
+    </div>
+
+    <!-- Right: legend + stats -->
+    <div class="dir-right">
+      <div class="legend-grid">
+        <div class="legend-card">
+          <div class="legend-dot" style="background:var(--accent3)"></div>
+          <div>
+            <strong style="color:var(--accent3)">raw/</strong>
+            <span>Read-only source zone. New docs go into <code>inbox/</code>. Never edited.</span>
+          </div>
+        </div>
+        <div class="legend-card">
+          <div class="legend-dot" style="background:var(--accent)"></div>
+          <div>
+            <strong style="color:var(--accent)">wiki/</strong>
+            <span>Entirely LLM-written. Humans read, LLMs write and cross-reference.</span>
+          </div>
+        </div>
+        <div class="legend-card">
+          <div class="legend-dot" style="background:var(--accent2)"></div>
+          <div>
+            <strong style="color:var(--accent2)">CLAUDE.md</strong>
+            <span>Schema file. Defines ingest, query, lint operations and conventions.</span>
+          </div>
+        </div>
+        <div class="legend-card">
+          <div class="legend-dot" style="background:var(--text-muted)"></div>
+          <div>
+            <strong style="color:var(--text)">log.md</strong>
+            <span>Append-only operation log. Every ingest, query, lint is recorded.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-pill">
+          <div class="n" style="color:var(--accent)">35+</div>
+          <div class="l">Wiki Pages</div>
+        </div>
+        <div class="stat-pill">
+          <div class="n" style="color:var(--accent4)">13</div>
+          <div class="l">Repositories</div>
+        </div>
+        <div class="stat-pill">
+          <div class="n" style="color:var(--accent2)">6</div>
+          <div class="l">Categories</div>
+        </div>
+      </div>
+
+      <div class="rule-banner">
+        <strong style="color:var(--accent)">Rule:</strong> To correct a source, add a new correction file — never edit <code>raw/</code> originals.
+        All factual claims in wiki pages must trace back to a <code>raw/</code> source file.
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">04 / 08</div>
+</section>
+
+<!-- ═══════════════════════════════════════ SLIDE 5 ══ -->
+<section class="slide" id="s5">
+  <div class="label">Page Format</div>
+  <h2>Wiki Page Conventions</h2>
+  <div class="format-layout">
+    <div>
+      <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:9px;font-family:'JetBrains Mono',monospace">wiki/troubleshooting/l1-deposit-tx-pitfalls.md</div>
+      <div class="code-block">
+<span class="kw">---</span>
+<span class="kw">updated:</span> <span class="str">2026-04-09</span>
+<span class="kw">sources:</span>
+  <span class="cmt">- raw/inbox/crosstrade-pitfalls.md</span>
+<span class="kw">related:</span>
+  <span class="lnk">- "[[deposit-tx]]"</span>
+  <span class="lnk">- "[[cross-trade]]"</span>
+  <span class="lnk">- "[[separate-compose-for-crosstrade]]"</span>
+<span class="kw">tags:</span> <span class="str">[troubleshooting]</span>
+<span class="kw">---</span>
+
+<span class="cmt"># L1 Deposit Tx CrossTrade — 13 Pitfalls</span>
+
+One-paragraph summary of this page...
+
+<span class="cmt">## Pitfall 1: ...</span>
+See <span class="lnk">[[deposit-tx]]</span> for the base pattern.
+      </div>
+    </div>
+    <div class="rules-list">
+      <div class="rule-item">
+        <div class="rule-icon">🔗</div>
+        <div>
+          <strong>Internal links use <code>[[page-name]]</code></strong><br>
+          <span style="font-size:12px">Obsidian wiki-link format — filename only, no path prefix</span>
+        </div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-icon">📎</div>
+        <div>
+          <strong>Every claim cites a <code>raw/</code> source</strong><br>
+          <span style="font-size:12px">All facts traceable back to an original source file</span>
+        </div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-icon">📝</div>
+        <div>
+          <strong>Present vs. past tense</strong><br>
+          <span style="font-size:12px">Current state → present tense · Past decisions → past tense</span>
+        </div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-icon">🚫</div>
+        <div>
+          <strong>What NOT to capture</strong><br>
+          <span style="font-size:12px">Things readable from code, git history, resolved debugging steps</span>
+        </div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-icon">✅</div>
+        <div>
+          <strong>What TO capture</strong><br>
+          <span style="font-size:12px">Why decisions were made, non-obvious constraints, cross-repo interactions, known failure modes</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">05 / 08</div>
+</section>
+
+<!-- ═══════════════════════════════════════ SLIDE 6 ══ -->
+<section class="slide" id="s6">
+  <div class="label">Workflow</div>
+  <h2>The Ingest Flow</h2>
+  <div class="flow-top">
+    <div class="flow-box">
+      <div class="fi">📄</div>
+      <div class="ft">New Document</div>
+      <div class="fd">Drop file into<br>raw/inbox/</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box hl">
+      <div class="fi">🤖</div>
+      <div class="ft">LLM Analysis</div>
+      <div class="fd">Extract facts,<br>decisions, keywords</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">
+      <div class="fi">🗂</div>
+      <div class="ft">index.md Lookup</div>
+      <div class="fd">Identify pages<br>to update</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box hl">
+      <div class="fi">✏️</div>
+      <div class="ft">Wiki Update</div>
+      <div class="fd">5–15 pages<br>with cross-refs</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">
+      <div class="fi">📋</div>
+      <div class="ft">log.md Entry</div>
+      <div class="fd">Append-only<br>change record</div>
+    </div>
+  </div>
+  <div class="flow-bottom">
+    <div class="flow-op">
+      <div class="on" style="color:var(--accent)">ingest</div>
+      <p style="font-size:12px">One source touches 5–15 pages. Cross-references built automatically at ingest time — not query time.</p>
+    </div>
+    <div class="flow-op">
+      <div class="on" style="color:var(--accent2)">query</div>
+      <p style="font-size:12px">Search wiki → synthesize answer with inline citations. Valuable Q&A saved as a new wiki page.</p>
+    </div>
+    <div class="flow-op">
+      <div class="on" style="color:var(--accent4)">lint</div>
+      <p style="font-size:12px">Detect broken links, orphan pages, contradictions. Report findings — no auto-fix, user decides.</p>
+    </div>
+  </div>
+  <div class="slide-num">06 / 08</div>
+</section>
+
+<!-- ═══════════════════════════════════════ SLIDE 7 — RULE DIAGRAM ══ -->
+<section class="slide" id="s7">
+  <div class="label">Integration</div>
+  <h2>Enforced via Global Rules</h2>
+  <div class="rule-diagram">
+
+    <!-- Left: visual enforcement flow diagram -->
+    <div class="enforcement-flow">
+      <div class="ef-title">~/.claude/CLAUDE.md — Enforcement Flow</div>
+
+      <div class="ef-step">
+        <div class="ef-connector">
+          <div class="ef-circle" style="background:rgba(88,166,255,0.15);border:1px solid rgba(88,166,255,0.5);color:var(--accent)">1</div>
+        </div>
+        <div class="ef-body">
+          <div class="ef-head">Start work in any TRH repo</div>
+          <div class="ef-desc">trh-platform · trh-sdk · trh-backend · cross-trade · drb-node · …</div>
+          <div class="ef-tag" style="background:rgba(88,166,255,0.1);color:var(--accent)">trigger</div>
+        </div>
+      </div>
+
+      <div class="ef-step">
+        <div class="ef-connector">
+          <div class="ef-circle" style="background:rgba(255,166,87,0.15);border:1px solid rgba(255,166,87,0.5);color:var(--accent5)">2</div>
+        </div>
+        <div class="ef-body">
+          <div class="ef-head">Check <code>wiki/index.md</code> first</div>
+          <div class="ef-desc">Read the master index → navigate to relevant component / troubleshooting pages → check <code>wiki/log.md</code> for recent changes</div>
+          <div class="ef-tag" style="background:rgba(255,166,87,0.1);color:var(--accent5)">mandatory</div>
+        </div>
+      </div>
+
+      <div class="ef-step">
+        <div class="ef-connector">
+          <div class="ef-circle" style="background:rgba(210,168,255,0.15);border:1px solid rgba(210,168,255,0.5);color:var(--accent4)">3</div>
+        </div>
+        <div class="ef-body">
+          <div class="ef-head">Wiki hit? Share findings with user</div>
+          <div class="ef-desc">Summarize relevant decisions, pitfalls, and prior solutions <strong>before touching any code</strong> — not after</div>
+          <div class="ef-tag" style="background:rgba(210,168,255,0.1);color:var(--accent4)">before code</div>
+        </div>
+      </div>
+
+      <div class="ef-step">
+        <div class="ef-connector">
+          <div class="ef-circle" style="background:rgba(63,185,80,0.15);border:1px solid rgba(63,185,80,0.5);color:var(--accent2)">4</div>
+        </div>
+        <div class="ef-body">
+          <div class="ef-head">After work: update the wiki</div>
+          <div class="ef-desc">New component, design decision, or resolved pitfall → ingest into wiki → commit &amp; push</div>
+          <div class="ef-tag" style="background:rgba(63,185,80,0.1);color:var(--accent2)">compound</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: effects -->
+    <div class="effect-list">
+      <div class="effect-card">
+        <div class="effect-icon">⚡</div>
+        <div>
+          <h3>Instant Context</h3>
+          <p>Any repo, any session — the LLM already knows the full TRH picture from the first message</p>
+        </div>
+      </div>
+      <div class="effect-card">
+        <div class="effect-icon">🔄</div>
+        <div>
+          <h3>No Repeated Explanations</h3>
+          <p>Background docs never need to be pasted again — the wiki always provides up-to-date context</p>
+        </div>
+      </div>
+      <div class="effect-card">
+        <div class="effect-icon">🧠</div>
+        <div>
+          <h3>Compounding Knowledge</h3>
+          <p>Resolved bugs, ADRs, known pitfalls — the <strong>Why</strong> that lives nowhere in the code accumulates in the wiki</p>
+        </div>
+      </div>
+      <div class="effect-card">
+        <div class="effect-icon">🛡</div>
+        <div>
+          <h3>Pitfall Prevention</h3>
+          <p>13 known L1 deposit-tx pitfalls, sequential deploy constraints, port conflicts — reviewed <em>before</em> work begins</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">07 / 08</div>
+</section>
+
+<!-- ═══════════════════════════════════════ SLIDE 8 ══ -->
+<section class="slide" id="s8">
+  <div class="label">Automation &amp; Roadmap</div>
+  <h2>Daily Automation Pipeline</h2>
+  <div class="automation-layout">
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Scheduled repo change detection</h3>
+          <p>openclaw scheduler checks recent commits and PRs across all TRH repositories at a fixed daily time</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Collect changes → drop into raw/inbox/</h3>
+          <p>Diffs, PR descriptions, and merge commit messages are saved as source files in <code>raw/inbox/</code></p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Run ingest operation</h3>
+          <p>LLM analyzes each source, identifies affected wiki pages, updates content and cross-references automatically</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Commit &amp; push</h3>
+          <p>Updated wiki pages and the new <code>log.md</code> entry are committed and pushed automatically</p>
+        </div>
+      </div>
+    </div>
+    <div class="future-box">
+      <div class="future-title">Roadmap</div>
+      <div class="future-item">
+        <span>📚</span>
+        <div>
+          <strong>Docs automation</strong>
+          <p>Auto-generate official documentation drafts from accumulated wiki data</p>
+        </div>
+      </div>
+      <div class="future-item">
+        <span>📝</span>
+        <div>
+          <strong>Release notes</strong>
+          <p>Auto-summarize version changes from ingest log history per release</p>
+        </div>
+      </div>
+      <div class="future-item">
+        <span>🤝</span>
+        <div>
+          <strong>Onboarding acceleration</strong>
+          <p>New team members understand the full TRH architecture via wiki query alone</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num">08 / 08</div>
+</section>
+
+<p class="nav-hint">↑ scroll to navigate slides</p>
+
+</body>
+</html>
