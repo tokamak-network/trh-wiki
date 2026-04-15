@@ -193,4 +193,13 @@ Key decision: 시스템이 L1 인프라 및 계정 설정 자동 결정 → 사�
 ## [2026-04-15] ingest | DRB-node + Commit-Reveal2 repo analysis
 Pages updated: [[drb-node]], [[commit-reveal2]], [[index]]
 New pages: [[drb-project]]
+
+## [2026-04-15] ingest | op-batcher blob fee spike fix
+New pages: [[op-batcher-blob-fee-spike]] (troubleshooting/)
+Key facts:
+  - 원인: calcBlobFeeCap 하드코딩 2×, suggestGasPriceCaps→finishBlobTx 사이 stale cap
+  - 해결: BlobFeeCapMultiplier(4×) + MaxBlobBaseFee(50 gwei) 임계값 플래그 추가
+  - retry.Unrecoverable로 ErrBlobBaseFeeTooHigh 발생 시 30회 retry 없이 즉시 재큐
+  - tokamak-thanos commit 8e67bbce, trh-sdk commit 13e1465
+  - OP_BATCHER_DATA_AVAILABILITY_TYPE=calldata 임시 우회 해제됨
 Key additions: DRB umbrella page — shared protocol flow (8 success + 23 failure paths), round state machine (IN_PROGRESS 6-branch HALTED), operator lifecycle (32 max, X8 slash accounting, notInProcess gate), dispute/slashing matrix, L2 gas model (CommitReveal2L2 + OVM oracle), ABI sync workflow (수동 복사 + abigen), environment matrix (Sepolia/OpSepolia/ThanosSepolia), integration test harness reference (128KB docker_nodes_quick_test.go, failure/stress/perf suites).
