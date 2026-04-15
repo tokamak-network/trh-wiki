@@ -235,3 +235,19 @@ Key facts captured (비자명한 것만):
   - L2_L2 토큰 포맷: [{name, address, destination_chains}] 배열. L2_L1 토큰 포맷: {ETH: addr, USDC: addr} flat map — 두 포맷이 다름
   - defi-eth 프리셋: L2NativeTokenName/Symbol을 "Ethereum"/"ETH"로 분기. 미전달시 지갑에 체인 추가할 때 "TON"으로 잘못 표시됨
   - 반대 방향(신규L2 → Thanos Sepolia)은 정상 — 신규L2 proxy에는 우리가 admin, Thanos chain ID 등록 완료
+
+## [2026-04-15] update | trh-platform DeploymentWatcher — 배포 실패 원인 표시
+Pages updated: [[trh-platform]]
+
+Changes:
+  - 핵심 역할에 "Deployment watcher" 추가 (6번)
+  - 주요 모듈에 DeploymentWatcher + NotificationStore 링크 추가
+  - DeploymentWatcher 섹션 신설: 감지 전환 테이블, 실패 원인 추출 흐름, AppNotification 인터페이스, 주의사항
+
+Key facts captured:
+  - `FailedToDeploy`/`FailedToUpdate` 감지 시 `/api/v1/stacks/thanos/:stackId/deployments?limit=1` → logs?limit=50 순차 호출
+  - 로그 포맷: JSON Lines. 추출 우선순위: 마지막 level==="error" message → 마지막 raw 줄 → undefined
+  - 로그 조회 실패 시에도 notification은 반드시 발송 (fetchFailureReason 전체 try-catch → undefined)
+  - AppNotification 인터페이스에 `detail?: string` 추가 (main + renderer 양쪽)
+  - URL 패턴: `/api/v1/stacks/thanos/{stackId}/...` — "thanos" 세그먼트 필수
+  - NotificationPage.tsx: `detail` 있으면 알림 카드에 모노스페이스 빨간 텍스트로 인라인 표시
