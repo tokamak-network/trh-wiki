@@ -196,6 +196,11 @@ New pages: [[drb-project]]
 
 ## [2026-04-15] ingest | op-batcher blob fee spike fix
 New pages: [[op-batcher-blob-fee-spike]] (troubleshooting/)
+
+## [2026-04-15] ingest | preset-deploy 409 트러블슈팅
+New pages: [[preset-deploy-409]] (troubleshooting/)
+Pages updated: [[l2-deploy-local]] — 알려진 이슈 섹션에 [[preset-deploy-409]] 링크 추가
+Code fix: trh-platform-ui/src/features/rollup/hooks/usePresetWizard.ts — catch 블록이 handleApiError plain object의 message 필드를 직접 읽도록 수정 (기존: instanceof Error fallback으로 generic 메시지만 표시됨)
 Key facts:
   - 원인: calcBlobFeeCap 하드코딩 2×, suggestGasPriceCaps→finishBlobTx 사이 stale cap
   - 해결: BlobFeeCapMultiplier(4×) + MaxBlobBaseFee(50 gwei) 임계값 플래그 추가

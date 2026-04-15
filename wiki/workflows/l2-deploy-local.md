@@ -102,5 +102,6 @@ Dashboard → Stack → Delete → `docker compose down -v`
 ## 알려진 이슈
 
 - **동시 배포 불가**: L2 배포는 반드시 순차 실행 → [[sequential-l2-deploy]]
+- **Deploy Rollup 버튼 409 오류**: 이전 local stack이 DB에 잔존하는 경우 → [[preset-deploy-409]]
 - **포트 충돌**: 8545 등 포트가 점유된 경우 Docker Compose 실패 → [[port-conflicts]]
 - **가스 리밋**: L1 컨트랙트 배포 실패 시 → [[l1-gas-limits]]
