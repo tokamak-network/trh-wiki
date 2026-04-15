@@ -209,6 +209,17 @@ Key facts:
   - OP_BATCHER_DATA_AVAILABILITY_TYPE=calldata 임시 우회 해제됨
 Key additions: DRB umbrella page — shared protocol flow (8 success + 23 failure paths), round state machine (IN_PROGRESS 6-branch HALTED), operator lifecycle (32 max, X8 slash accounting, notInProcess gate), dispute/slashing matrix, L2 gas model (CommitReveal2L2 + OVM oracle), ABI sync workflow (수동 복사 + abigen), environment matrix (Sepolia/OpSepolia/ThanosSepolia), integration test harness reference (128KB docker_nodes_quick_test.go, failure/stress/perf suites).
 
+## [2026-04-15] fix | 로컬 L2 재배포 불가 버그 수정 (DB↔Docker 상태 불일치)
+Repos: trh-backend (e70ebec, 8065a0f), trh-sdk (6077386)
+Pages updated: [[tech-debt-and-risks]] — Known Bugs 섹션에 해결 기록
+
+Root cause 1: `checkNoActiveLocalStack()` DB만 확인 → 컨테이너 없어도 409 반환
+Root cause 2: `destroyLocalNetwork()` compose 파일 없을 때 nil 반환 → 볼륨 고아 상태
+
+Fix A (trh-backend): `docker ps --filter label=com.docker.compose.project=<uuid>` 조회 추가.
+  컨테이너 없으면 DB 자동 Terminated 보정 → 새 배포 허용.
+Fix C (trh-sdk): compose 파일 없을 때 `docker volume rm -f trh-local-config trh-local-monitoring <uuid>_op-geth-data` 직접 실행.
+
 ## [2026-04-15] update | CrossTrade dApp 버그 픽스 3종 — defi-eth 프리셋 환경
 Sources: trh-sdk commits 8af71e6, trh-backend commit e13669c, crossTrade commit 1103393
 

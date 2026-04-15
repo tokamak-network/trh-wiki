@@ -37,6 +37,12 @@ trh-platform의 알려진 버그, 기술 부채, 보안 우려, 의존성 위험
 
 ## Known Bugs
 
+### ~~로컬 L2 재배포 불가 (DB↔Docker 상태 불일치)~~ — **Fixed 2026-04-15**
+- **증상:** 컨테이너를 앱 외부에서 수동 제거(docker rm)하거나 백엔드 컨테이너 재시작 후 새 로컬 L2 배포 시도 시 409 Conflict 반환
+- **근본 원인 1:** `trh-backend/pkg/services/thanos/stack_lifecycle.go` `checkNoActiveLocalStack()`이 DB 상태만 보고 실제 Docker 컨테이너 존재 여부를 확인하지 않음 → DB=Deployed, 컨테이너=없음 상태에서 영구 블록
+- **근본 원인 2:** `trh-sdk/pkg/stacks/thanos/local_network.go` `destroyLocalNetwork()`가 compose 파일 없으면 nil 반환 → 볼륨(trh-local-config, trh-local-monitoring, `<uuid>_op-geth-data`) 정리 안 됨
+- **수정:** A) `checkNoActiveLocalStack()`에 `docker ps --filter label=com.docker.compose.project=<uuid>` 조회 추가, 컨테이너 없으면 DB 자동 Terminated 보정; C) compose 파일 없을 때 `docker volume rm -f` 직접 실행
+
 ### Docker 컨테이너 수 하드코딩 (`>= 3`)
 - **위치:** `src/main/docker.ts:334`
 - **증상:** General/Gaming preset (CrossTrade dApp 없음) 배포 시 헬스체크가 "unhealthy" 잘못 보고
