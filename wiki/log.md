@@ -181,6 +181,15 @@ Key additions:
   - local-dev: 레포별 개발 서버 기동법, VITE_MOCK_ELECTRON/ELECTRON_USE_BUILD 환경 변수
   - release: Electron DMG/NSIS/AppImage 빌드 타겟, GitHub Releases 연동, Docker Hub 패턴
 
+## [2026-04-15] update | trh-platform-ui Preset Wizard 2-step 간소화
+Pages updated: [[trh-platform-ui]]
+Changes:
+  - 배포 위자드 플로우: Preset Mode 4-step → 2-step (Step1: Preset 선택, Step2: Basic Info & Deploy)
+  - 입력 필드: 26개 → 5개 (presetId, chainName, network, awsAccessKey, awsSecretKey)
+  - 제거 항목: seedPhrase, l1RpcUrl, l1BeaconUrl, feeToken, infraProvider, reuseDeployment, awsRegion
+  - Classic Mode(4-step) 설명 추가 (기존 유지)
+Key decision: 시스템이 L1 인프라 및 계정 설정 자동 결정 → 사용자 입력 최소화 (docs/preset-deploy-prd.md 기반)
+
 ## [2026-04-15] ingest | DRB-node + Commit-Reveal2 repo analysis
 Pages updated: [[drb-node]], [[commit-reveal2]], [[index]]
 New pages: [[drb-project]]

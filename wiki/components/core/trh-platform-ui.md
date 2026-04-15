@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-09
+updated: 2026-04-15
 sources:
   - raw/architecture/tech-stack.md
 related:
@@ -44,27 +44,32 @@ Next.js 15.5 (App Router) 기반 웹 프론트엔드. trh-platform Electron 앱�
 
 ## 배포 위자드 플로우
 
+### Preset Mode (2-step, 권장)
+
 ```
 Step 1: Preset 선택
     General | DeFi | Gaming | Full
-Step 2: Basic Info
-    Infrastructure Provider: [AWS Cloud] [Local Docker]
+    → 선택 시 서비스 상세 패널(ServicePanel) 표시
+Step 2: Basic Info & Deploy
+    Chain Name (3-32자, lowercase/숫자/하이픈)
     Network: Mainnet / Testnet (Sepolia)
-    L1 RPC URL, L1 Beacon URL
-    Seed Phrase
-Step 3: Config Review
-    파라미터 확인, Expert Mode 수정 가능
-    Funding Status (계정 잔액 체크)
-Step 4: 배포 실행
-    진행 상황 스트리밍
+    AWS Access Key ID
+    AWS Secret Access Key
+    → "Deploy Rollup" 버튼으로 즉시 배포 요청
 ```
 
-Local Docker 선택 시:
-- AWS Configuration 섹션 숨김
-- Mainnet 옵션 비활성화 (Testnet 강제)
-- "Local Docker Deployment" 안내 카드 표시
+입력 5개 필드만 수집. Seed Phrase, L1 RPC URL, Beacon URL, Fee Token, Infra Provider 등은 시스템이 자동 결정.
 
-→ 상세 검증 항목: [[l2-deploy-local]]
+### Classic Mode (4-step, 고급)
+
+```
+Step 1: Network & Chain 설정
+Step 2: Account & AWS 설정 (Seed Phrase, L1 RPC URL 등)
+Step 3: DAO Candidate (선택)
+Step 4: Review & Deploy
+```
+
+→ Local Docker 관련 검증 항목: [[l2-deploy-local]]
 
 ---
 
