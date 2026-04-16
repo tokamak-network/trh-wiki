@@ -111,6 +111,34 @@ Pages updated:
   삭제: research/, codebase/, phases/01~04/, quick/, debug/, REQUIREMENTS.md
   유지: phases/05/ (E2E Phase 미완료), PROJECT.md, ROADMAP.md, STATE.md
 
+## [2026-04-17] fix | tokamak-deployer release pipeline — monorepo tag format support
+Problem: Pushing `tokamak-deployer-v0.0.1` tag was creating GitHub Release `v1.0.2` instead of `v0.0.1`
+Root causes: 4 cascading issues in CI/CD configuration
+
+Solutions implemented:
+  1. Goreleaser strict tag validation → Added `--skip-validate` flag
+  2. Invalid trimPrefix template function → Removed; use workflow env var extraction instead
+  3. Hardhat build failure on missing foundry.lock → Removed unnecessary `pnpm install`
+  4. Goreleaser changelog generation failure → Added `changelog: {skip: true}`
+
+Commits:
+  - 45a4b520da: remove pnpm install from build contracts step
+  - cd12b6d146: add --skip-validate flag to goreleaser
+  - e73b9d3312: remove invalid trimPrefix template function
+  - 62a6e6a5a5: disable changelog generation for monorepo-scoped release
+
+Outcome: ✓ v0.0.1 release successfully created with all 4 platform binaries
+  - tokamak-deployer-darwin-amd64.tar.gz
+  - tokamak-deployer-darwin-arm64.tar.gz
+  - tokamak-deployer-linux-amd64.tar.gz
+  - tokamak-deployer-linux-arm64.tar.gz
+  - checksums.txt
+  - Incorrect v1.0.2 release deleted
+
+Key learning: Workflow files must exist on default branch before tag push to trigger workflow
+  Problem: Tag pushed before workflow changes merged → workflow never ran
+  Solution: Merge workflow changes to main first, then push tag to trigger workflow
+
 ## [2026-04-09] refactor | raw/ 드롭존 구조 개편
 HTML 다이어그램 에셋 분리 및 inbox/ 드롭존 추가
 
