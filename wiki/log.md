@@ -320,3 +320,31 @@ Not covered: AWS infrastructure, Solidity implementation details, local Docker d
 
 Verification checklist included (8 grep commands for validation).
 Cross-references: blob fee fixes (tokamak-thanos commits), ec2-deploy, preset-system, design-decisions.
+
+## [2026-04-17] fix | tokamak-deployer gasPrice zero bug (v0.0.1 pre-release)
+Repos: tokamak-thanos (451224b6aa), trh-sdk (567e617), trh-backend (30929b0)
+Workflow: release-deployer.yml updated + CI/CD v0.0.1 tag trigger (Run #24523146838 in progress)
+
+Root cause: `big.Int.Div(gasPrice, 1e9)` modifies receiver in-place.
+  - Log line: `fmt.Printf("Suggested gas price: %v Gwei", gasPrice.Div(gasPrice, 1e9))`
+  - Result: gasPrice destroyed (0), subsequent TX creation fails with "transaction underpriced: Suggested gas price: 0 Gwei"
+  - Symptom observed: Sepolia L1 OptimismPortal deployment fails on AddressManager TX
+
+Fix applied (commit 451224b6aa):
+  - Changed: `gasPrice.Div(gasPrice, big.NewInt(1e9))`
+  - To: `new(big.Int).Div(gasPrice, big.NewInt(1e9))`
+  - Preserves original gasPrice for TX creation
+
+CI/CD changes:
+  - release-deployer.yml: Added `tokamak-deployer-v*` pattern to tag triggers (commit ff9aa87f8e)
+  - Enables pre-release workflow for tokamak-deployer-v0.0.1 tag (v0.0.x format to avoid monorepo name collision)
+  - Rationale: tokamak-deployer is a separate binary tool, not monorepo version
+
+Dependency chain synchronized:
+  - trh-sdk TokamakDeployerVersion: "v0.0.1" (commit 567e617)
+  - trh-backend go.mod: Points to trh-sdk commit 567e617a633d (30929b0)
+
+Verification pending:
+  - GitHub Release v0.0.1 creation (Run #24523146838 in progress)
+  - Binary artifacts: tokamak-deployer-{linux,darwin}-{amd64,arm64}.tar.gz
+  - Pre-release flag status
