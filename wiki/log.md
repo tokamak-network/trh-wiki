@@ -78,6 +78,23 @@ Key facts captured:
 Sources added to raw/:
   raw/architecture/deployment-pitfalls.md  ← .planning/research/PITFALLS.md
   raw/architecture/testing-guide.md        ← .planning/codebase/TESTING.md
+
+## [2026-04-16] ingest | tokamak-deployer v1.0.1 logging improvements
+Sources: tokamak-thanos feat/tokamak-deployer branch
+
+Pages created:
+  [[tokamak-deployer-logging]] — Comprehensive logging for debugging contract deployment hangs
+
+Pages updated:
+  [[index]] — Added tokamak-deployer-logging to Troubleshooting section
+
+Key facts captured:
+  - tokamak-deployer v1.0.0 had zero logging, making hangs undiagnosable
+  - v1.0.1 adds 50+ log statements across two levels:
+    * High-level: step progress (Step X/32), deployer address, L1 RPC connection
+    * Low-level: transaction hashes, gas prices, block confirmations, deployed addresses
+  - Enables root cause analysis of deployment hangs and silent failures
+  - trh-sdk version pinned updated from v1.0.0 to v1.0.1
   raw/decisions/tech-debt-and-risks.md     ← .planning/codebase/CONCERNS.md
   raw/decisions/requirements-v1.md         ← .planning/REQUIREMENTS.md
 

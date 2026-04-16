@@ -79,6 +79,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[docker-health-checks]] | Backend health check timeouts and retry strategies |
 | [[l2-deposit-verification]] | Verifying L2 deposit transaction execution — polling strategy |
 | [[l1-deposit-tx-pitfalls]] | L1 Deposit Tx CrossTrade 배포 시 13개 주요 함정과 방지법 |
+| [[tokamak-deployer-logging]] | Debugging contract deployment hangs via comprehensive logging (v1.0.1+) |
 
 ---
 
