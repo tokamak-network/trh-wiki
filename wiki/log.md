@@ -279,3 +279,44 @@ Key facts captured:
   - AppNotification 인터페이스에 `detail?: string` 추가 (main + renderer 양쪽)
   - URL 패턴: `/api/v1/stacks/thanos/{stackId}/...` — "thanos" 세그먼트 필수
   - NotificationPage.tsx: `detail` 있으면 알림 카드에 모노스페이스 빨간 텍스트로 인라인 표시
+
+## [2026-04-16] ingest | thanos-deployer deployment logic analysis (final)
+Sources: Complete code-level analysis from 45 files across 3 repos (tokamak-thanos, trh-sdk, trh-backend)
+
+Page created:
+  [[thanos-deployer-analysis]] — Executive summary with key findings, 8-layer architecture, 6-phase flow
+
+Analysis documents added to tokamak-thanos/docs/analysis/:
+  PHASE_2_ANALYSIS.md (37.4KB) — Web UI request → HTTP POST → trh-backend handler
+  PHASE_3_ANALYSIS.md (57.2KB) — Backend queuing, TaskManager goroutine orchestration
+  PHASE_4_ANALYSIS.md (55.9KB) — L1 contract deployment via Foundry (35+ contracts, 4 phases)
+  PHASE_5_ANALYSIS.md (70.1KB) — L2 Genesis generation (op-chain-ops, 14+ steps, 40+ predeploys)
+  PHASE_6_ANALYSIS.md (46.6KB) — Result persistence, StackMetadata updates, client notification
+  code-reference-table.md (26.6KB) — 51 functions mapped across 45 files
+  thanos-deployer-flow-analysis.md (48.9KB) — Main document with 6 appendices
+
+Key facts captured (6 phases):
+  - Phase 1: Electron SSO auth (AWS SigV4 token exchange)
+  - Phase 2: Next.js embedded UI → POST /api/v1/stacks/thanos with DeployThanosRequest JSON
+  - Phase 3: Go TaskManager enqueues → goroutine loop → sequential phase execution
+  - Phase 4: trh-sdk calls start-deploy.sh (Foundry forge script) → deploy.json with 35+ contract addresses
+  - Phase 5: op-chain-ops NewL2Genesis() reads deploy.json → bytecode patching → genesis.json/rollup.json
+  - Phase 6: UpdateStackMetadata() writes to DB → webhook notification → UI notification
+
+Critical pitfalls documented:
+  1. Blob fee spike (excessBlobGas edge case) — tokamak-thanos commit d8202223 fix
+  2. Bytecode patching (hardcoded offsets per Openzeppelin version)
+  3. Environment validation (missing .env checks → zero contract addresses)
+  4. Cross-Trade scope isolation (local-only vs L2-L2 cross-chain)
+  5. Hard fork compatibility (Ecotone/Fjord/Granite mismatch)
+
+Risk analysis: 3 high, 3 medium, 2 low risks with mitigation strategies.
+Call depth: 8+ synchronous calls from HTTP handler to op-chain-ops.
+Data transformations: JSON → .env → deploy.json → op-chain-ops → genesis.json (3 steps).
+State mutations: 6 major transforms, 14+ predeploy bytecode operations.
+
+Analysis scope: Electron → trh-backend → trh-sdk → Foundry → op-chain-ops → StackMetadata → Client.
+Not covered: AWS infrastructure, Solidity implementation details, local Docker deployment.
+
+Verification checklist included (8 grep commands for validation).
+Cross-references: blob fee fixes (tokamak-thanos commits), ec2-deploy, preset-system, design-decisions.

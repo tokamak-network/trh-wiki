@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-09
+updated: 2026-04-16
 ---
 
 # TRH Wiki Index
@@ -58,6 +58,12 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[ec2-deploy]] | AWS EC2 deployment via Terraform — one-time setup and update flow |
 | [[release]] | Electron DMG/NSIS/AppImage 빌드, Docker 이미지 배포, 버전 고정 패턴 |
 | [[testing]] | 테스트 스택, 실행 명령어, E2E 3가지 모드, Vitest/Playwright 패턴 |
+
+## Deployment Analysis
+
+| Page | Summary |
+|------|---------|
+| [[thanos-deployer-analysis]] | Complete deployment logic analysis — 8-layer architecture, 6-phase flow, 51 functions, critical pitfalls |
 
 ## Decisions
 
