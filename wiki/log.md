@@ -6,6 +6,50 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-18] update | drb-local-compose-path-template-bugs — Fix #5/#7 runtime verified + Bug #8 신규 (미해결)
+
+Updated page: [[drb-local-compose-path-template-bugs]] (troubleshooting/)
+Source: 2026-04-18 runtime 검증 세션 (trh-backend + docker compose resume-deploy)
+
+실행 환경:
+  - trh-backend image digest `sha256:84347f2d...` (2026-04-17 18:54Z build,
+    trh-sdk `4c3e33b` 포함)
+  - 기존 deployment `5ffe7da8-6bb4-4734-bd5e-6313672286c4`
+    (status=FailedToDeploy, preset gaming, feeToken USDT, faultProof ON)
+  - Stale volume 상태 준비:
+    - `_op-geth-data`: `.genesis-hash=5bf1dbf...` 현재 genesis.json 과 **일치**
+    - `_drb-leader-keys/leadernode.bin`: Jan 6 image-layer default key
+    - `deploy-config.json` at `<deployPath>/` (new tokamak-deployer path)
+
+Changes:
+  - **Fix #7 runtime verified ✅**: resume 시 anchor init 단계까지 도달
+    (`local_network.go:163`). 그 전 단계인 `readDeploymentContracts()` →
+    `readBedrockDeployConfigTemplate` 가 모두 성공했음을 간접 증명.
+  - **Fix #5 runtime verified ✅**: backend 로그의
+    `op-geth volume already initialized with matching genesis, skipping init`
+    (19:05:52.695Z) 마커가 Fix C 의 새 volume-inspect + marker-read
+    로직이 정상 발동함을 직접 증명. 준비된 stale-but-matching volume
+    시나리오에서 skip-init branch 선택.
+  - **Fix #6b 미도달 ⚠️**: `orchestrateDRBOperators` 진입 전 Bug #8 이
+    차단. Fix #6b 는 코드 경로가 advisor-reviewed + Fix #1/#7 와 structurally
+    유사하므로 높은 신뢰도. E2E 필수성 낮음.
+  - **Bug #8 신규 섹션**: `AnchorStateRegistryProxy address not found in
+    deployed contracts` (`local_network.go:163-164`). 근본 원인은 new
+    tokamak-deployer 의 `deploy-output.json` 및 Foundry layer 의
+    `11155111-deploy.json` 모두 AnchorStateRegistryProxy 필드가 없다는
+    것. `deploy-methods-comparison` 에 이미 기록된 "반쪽 포팅" 상태의 결과.
+    분류상 Bug #1/#7 과 동급 (new deployer 산출 incomplete) 이나 **fix
+    위치가 producer-side (tokamak-deployer upstream)** 이라 consumer
+    재매핑으로 해결 불가.
+  - 상태 테이블에 Bug #8 행 추가, Fix #5/#7 runtime ✅ 로 갱신.
+
+Tangential discovery (이 버그들과 무관하지만 기록): trh-backend 이미지
+자체에 docker CLI 가 베이크되어 있지 않아 `resources/docker-compose.yml`
+entrypoint `["./main"]` 만으로 backend 실행 시 orchestration step 에서
+`exec: "docker": executable file not found in $PATH` 로 실패. Electron 앱
+의 동작 경로에서는 외부에서 CLI 를 주입하는 듯함. 본 검증 세션에서는
+`docker exec` 로 런타임 설치해 우회. 별도 이슈로 분리할 필요 있음.
+
 ## [2026-04-18] update | drb-local-compose-path-template-bugs — Bug #7 코드 수정 (readBedrockDeployConfigTemplate)
 
 Updated page: [[drb-local-compose-path-template-bugs]] (troubleshooting/)

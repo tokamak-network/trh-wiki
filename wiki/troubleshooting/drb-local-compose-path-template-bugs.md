@@ -14,13 +14,13 @@ related:
 tags: [troubleshooting, drb, local-compose, gaming-preset]
 ---
 
-# DRB Gaming Preset 로컬 배포 — 7개 경로·템플릿 버그
+# DRB Gaming Preset 로컬 배포 — 7 + 1 경로·템플릿 버그
 
 2026-04-17 preset resume-deploy (gaming + USDT + fault-proof ON) 시 순차적으로
-드러난 7개 독립 버그. 1-4 는 commit `50d0b39` + `3912799` 에서 수정. 5/6a/6b 는
-commit `0f453c3` 에서 코드 수정. 7 은 commit `4c3e33b` 에서 수정 (단위 테스트
-통과). Fix #5/#6b/#7 의 E2E runtime 확인은 trh-backend 가 신규 SDK 로
-bump 된 후 resume-deploy 로 재현해야 하며 다음 세션 작업으로 이월.
+드러난 7개 독립 버그 + 2026-04-18 runtime 검증 세션에서 드러난 Bug #8. 1-4 는
+commit `50d0b39` + `3912799` 에서 수정. 5/6a/6b 는 commit `0f453c3` 에서
+수정. 7 은 commit `4c3e33b` 에서 수정. **Bug #8 은 미해결** — tokamak-deployer
+output 에 `AnchorStateRegistryProxy` 가 포함되지 않음.
 
 ## 현재 상태 요약
 
@@ -30,10 +30,11 @@ bump 된 후 resume-deploy 로 재현해야 하며 다음 세션 작업으로 �
 | #2 | `add` 템플릿 함수 미등록 | `50d0b39` | ✅ |
 | #3 | range 내부 root-scope 접근 실패 | `50d0b39` | ✅ |
 | #4 | Regular 노드 env 키 이름 | `3912799` | ✅ |
-| #5 | op-geth volume stale (host 경로 probe 오류) | `0f453c3` Fix C | ⚠️ 미확인 (Bug #7 로 차단) |
+| #5 | op-geth volume stale (host 경로 probe 오류) | `0f453c3` Fix C | ✅ **2026-04-18 verified** (`skipping init` branch) |
 | #6a | Hostname `leadernode` 하드코딩 | `0f453c3` Fix A (alias) | ✅ DNS 해결 확인 |
-| #6b | Leader PeerID mismatch (image-default key) | `0f453c3` Fix B (restart) | ⚠️ 미확인 (Bug #7 로 차단) |
-| #7 | `readBedrockDeployConfigTemplate` 레거시 경로 | `4c3e33b` (new-path-first + legacy fallback) | ⚠️ 단위 테스트 ✅ / E2E 런타임 미확인 |
+| #6b | Leader PeerID mismatch (image-default key) | `0f453c3` Fix B (restart) | ⚠️ 미확인 (Bug #8 로 차단) |
+| #7 | `readBedrockDeployConfigTemplate` 레거시 경로 | `4c3e33b` (new-path-first + legacy fallback) | ✅ **2026-04-18 verified** (간접: anchor init 도달) |
+| #8 | `AnchorStateRegistryProxy` 주소 미출력 | **미해결** (producer-side fix 필요) | ❌ 차단 중 |
 
 ## Bug #1 — Genesis/Rollup 경로 불일치
 
@@ -282,12 +283,58 @@ shutdown 워크플로우도 그대로 작동.
 과거 로그에서 "compose 는 문제없이 생성됐는데 왜 contract address 가
 비어있지?" 같은 관찰이 있었다면 이 원인이었을 가능성.
 
-**E2E runtime 확인 (미완)**: Bug #7 fix 이후 orchestrateDRBOperators 가
-진입 가능해져야 함. 이를 통해 Fix B (leader PeerID 일치) 와 Fix C
-(op-geth volume stale-check 발동) 의 runtime 경로도 검증 가능. 다음 세션
-작업 대상. trh-backend 는 `.github/workflows/notify-trh-backend.yml` +
-`update-trh-sdk.yml` 체인으로 trh-sdk main push 시 자동 bump 커밋이
-들어오므로 별도 `go get` 불필요. docker 이미지 재빌드만 필요.
+**E2E runtime 확인 (2026-04-18 세션)**:
+- **Fix #7 verified ✅** — resume 시 `readDeploymentContracts` 가
+  AnchorStateRegistryProxy 필드 부재 에러로 실패하는 지점에 도달했다는 것은
+  그 앞 단계의 `readBedrockDeployConfigTemplate` 가 `deploy-config.json`
+  을 정상적으로 읽었음을 의미 (Fix #7 가 없다면 "deploy config file not
+  found" 에러로 먼저 실패). 다른 직접 마커는 없지만 간접 증명 완료.
+- **Fix #5 verified ✅** — backend 로그에 `op-geth volume already
+  initialized with matching genesis, skipping init` 기록. 준비된 stale
+  volume (`.genesis-hash` marker 존재, hash 일치) 시나리오에서 skip-init
+  branch 가 정상 발동.
+- **Fix #6b 미확인 ⚠️** — `orchestrateDRBOperators` 진입 전 Bug #8 이 차단.
+
+## Bug #8 — `AnchorStateRegistryProxy` 주소 미출력 (미해결)
+
+**증상** (2026-04-18 resume 시):
+```
+deployment failed: AnchorStateRegistryProxy address not found in
+deployed contracts — cannot initialize genesis anchor state
+```
+
+**위치**: `local_network.go:163-164` — fault-proof path 의 anchor init
+pre-check. `readDeploymentContracts()` 가 non-nil 리턴했지만 반환된
+`types.Contracts.AnchorStateRegistryProxy` 가 빈 문자열.
+
+**근본 원인**: tokamak-deployer 의 `deploy-output.json` (그리고 Foundry
+layer 의 `11155111-deploy.json`) 모두 10개 core L1 주소만 기록하고
+`AnchorStateRegistryProxy` 필드가 전혀 없음. 이는 `deploy-methods-comparison`
+에 이미 기록된 "반쪽 포팅" 상태의 결과:
+
+> tokamak-deployer v0.0.5 fault-proof 지원은 "반쪽 포팅":
+> DisputeGameFactoryProxy + AnchorStateRegistryProxy 의 deploy + plain
+> upgrade 까지만. initialize/setImplementation/Safe wallet 실행 은 여전히
+> forge 경로.
+
+즉 deployer 는 AnchorStateRegistryProxy 를 **배포는 하지만** 주소를
+`deploy-output.json` 에 emit 하지 않음. 별도 forge 스크립트가 돌아서
+initialize 하는데 그 결과 주소도 어디에도 persist 되지 않음.
+
+**분류**: Bug #1/#7 과 동급 class (new deployer 산출 incomplete) 이지만
+fix 위치는 **producer-side (tokamak-deployer)** — 경로 재매핑만으로는
+해결 불가. 주소를 찾아 output 파일에 쓰는 upstream 변경이 필요.
+
+**해결 후보**:
+1. tokamak-deployer 에 `AnchorStateRegistryProxy`·`DisputeGameFactoryProxy`
+   등 fault-proof 관련 address 들을 `deploy-output.json` 에 추가 출력
+2. 또는 trh-sdk 에서 배포 직후 L1 RPC 로 `DisputeGameFactoryProxy.anchorStateRegistry()`
+   를 직접 조회해 AnchorStateRegistryProxy 를 얻고 별도 파일에 저장
+3. 또는 SystemConfig 의 공개 메서드로 체인에서 직접 읽기 (가능 여부 확인 필요)
+
+**다음 세션 작업**: Bug #8 을 해결해야 Fix #6b 의 runtime 검증이 가능.
+단, Fix #6b 의 코드 경로는 advisor-reviewed + structurally-simple 이므로
+Fix #1/#7 패턴 매치로 high confidence. E2E 필수성은 낮음.
 
 ## 증거 — 성공 지표 (Bug #4·#5·#6 해결되면 기대되는 마커)
 
@@ -311,6 +358,11 @@ predeploy 가 live L2 에서 호출 가능함을 의미.
   after bootstrap). Fix B/C runtime 확인은 Bug #7 로 이월
 - trh-sdk `4c3e33b` — bug #7 fix (`readBedrockDeployConfigTemplate` new path
   precedence + legacy fallback) + 4 unit tests
+- Bug #8 — 미해결, tokamak-deployer producer-side 수정 필요. 관련 레퍼런스:
+  [[deploy-methods-comparison]] 의 "반쪽 포팅" 섹션
+- runtime 검증 세션 2026-04-18 19:04-19:09 UTC — Fix #5 log marker
+  확인: `trh-backend` 컨테이너 로그의 `op-geth volume already initialized
+  with matching genesis, skipping init` at 19:05:52.695Z
 - trh-backend `f732a48` — deploy-infra step 레이블 AWS/local 분리
   (`DeployAWSInfraStep` + `DeployLocalInfraStep` + `GetDeployInfraStepName`)
 - `pkg/stacks/thanos/local_network.go:250-280, 431, 590-640, 1074-1107+`
