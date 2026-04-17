@@ -441,3 +441,18 @@ Verification pending:
   - GitHub Release v0.0.1 creation (Run #24523146838 in progress)
   - Binary artifacts: tokamak-deployer-{linux,darwin}-{amd64,arm64}.tar.gz
   - Pre-release flag status
+
+## [2026-04-17] ingest | DRB Gaming Enablement v1.1 milestone
+
+Pages updated:
+  [[commit-reveal2]] — Genesis Predeploy 방식 (trh-sdk 전용) 섹션 추가
+  [[drb-node]] — 환경 변수 표 확장 (LEADER_EOA/LEADER_PORT/LEADER_PEER_ID/LEADER_MULTIADDR/STATUS)
+  [[drb-project]] — Known Quirks 갱신 (SDK peer ID 결정적 파생, Leader+3Regular 고정 구성)
+  [[l2-deployment]] — Gaming/Full Preset 추가 단계 섹션 신설 (DRB 통합 전체 흐름)
+
+Key facts captured:
+  - Gaming/Full preset에서 CommitReveal2L2 genesis predeploy (0x4200…0060, ERC1967 proxy)
+  - Regular 3대 BIP44 index 5/6/7 결정적 파생 + libp2p Ed25519 peer ID 결정적 파생
+  - Genesis alloc funding (runtime 송금 회피, max(threshold×10, 1e18)) + 순차 depositAndActivate() 자동 호출
+  - trh-sdk Makefile `update-drb-contracts VERSION=<semver>` 타겟 + `DRB_CONTRACTS_VERSION` env override
+  - 구현: trh-sdk/pkg/stacks/thanos/drb_{genesis,orchestrator,activate,peer_id}.go

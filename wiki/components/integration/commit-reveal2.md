@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-15
+updated: 2026-04-17
 sources: []
 related:
   - "[[drb-project]]"
@@ -101,6 +101,25 @@ make deploy                              # Anvil (local)
 make deploy ARGS="--network sepolia"    # Ethereum Sepolia
 make deploy ARGS="--network thanossepolia"  # Thanos Sepolia
 ```
+
+---
+
+## Genesis Predeploy 방식 (trh-sdk 전용)
+
+Gaming/Full preset으로 배포된 Thanos L2에서는 CommitReveal2L2가 **genesis에 predeploy**된다. Foundry `make deploy`와 달리:
+
+| 항목 | `make deploy` (전통적) | trh-sdk genesis predeploy |
+|------|---------------------|--------------------------|
+| 배포 시점 | 체인 운영 중 트랜잭션 | L2 genesis.json alloc 주입 |
+| 가스 소모 | 있음 | 0 (genesis 상태) |
+| 주소 | 배포자 nonce 기반 | `0x4200000000000000000000000000000000000060` (고정) |
+| 검증 | etherscan | `cast code <addr>` |
+| 프로세스 | Forge script | Go 시뮬레이션(`runtime.Create`) + alloc patch |
+
+**구현 경로**: `trh-sdk/pkg/stacks/thanos/drb_genesis.go`의 `injectDRBIntoGenesis()`.
+`@tokamak-network/commit-reveal2-contracts@1.0.0` npm 아티팩트에서 bytecode를 다운받아 Cancun EVM에서 생성자를 시뮬레이션한 뒤, 런타임 bytecode를 `0xc0D3…0060`(implementation) 슬롯에 배치하고 proxy(`0x4200…0060`)의 ERC1967 implementation slot을 설정한다.
+
+**조건부**: Gaming 또는 Full preset에서만 주입됨 (General/DeFi는 skip).
 
 ---
 

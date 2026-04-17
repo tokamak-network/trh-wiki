@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-15
+updated: 2026-04-17
 sources: []
 related:
   - "[[drb-project]]"
@@ -95,7 +95,11 @@ Leader: reveal 순서 결정 → Sequential Secret 요청
 |------|------|
 | `NODE_TYPE` | `leader` 또는 `regular` |
 | `LEADER_PRIVATE_KEY` | Leader 서명 키 |
-| `LEADER_PEER_ID` | Leader LibP2P Peer ID |
+| `LEADER_EOA` | Leader externally-owned account 주소 |
+| `LEADER_PORT` | Leader LibP2P listen port, 기본 9600 |
+| `LEADER_PEER_ID` | Leader LibP2P peer ID |
+| `LEADER_MULTIADDR` | Leader multiaddr `/dns4/drb-leader/tcp/9601/p2p/<peer-id>` |
+| `STATUS` | `dev` 또는 `prod` — 로깅 레벨 등 제어 |
 | `ETH_RPC_URLS` | Ethereum RPC 엔드포인트 (콤마 구분, 페일오버 지원) |
 | `CONTRACT_ADDRESS` | 배포된 CommitReveal2 컨트랙트 주소 |
 | `CHAIN_ID` | 네트워크 체인 ID (예: 111551119090 = ThanosSepolia) |

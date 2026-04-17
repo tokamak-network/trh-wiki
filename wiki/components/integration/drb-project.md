@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-15
+updated: 2026-04-17
 sources: []
 related:
   - "[[drb-node]]"
@@ -268,4 +268,7 @@ forge test --match-path "test/gas/ForManuscriptGas.t.sol" -vv
 
 - **Go 버전 불일치**: `go.mod`에는 `go 1.23.0`이지만 README에는 `Go 1.24+`를 요구사항으로 명시. `toolchain go1.23.9`가 실제 사용 버전.
 - **HALTED 복구**: HALTED 상태에서 벗어나는 on-chain 메커니즘이 없음. 컨트랙트 재배포 필요.
-- **Peer ID 생성**: Leader/Regular 각각 별도 생성 도구(`cmd/generator/`, `cmd/regulargenerator/`) 사용. 생성된 `static-key/leadernode.bin`을 안전하게 보관해야 함.
+- **Peer ID 생성**:
+  - **일반 경로**: Leader/Regular 각각 `cmd/generator/`, `cmd/regulargenerator/` 도구 사용. `static-key/leadernode.bin` 안전 보관 필수.
+  - **trh-sdk Gaming/Full preset 경로**: SDK가 libp2p Go 라이브러리로 seed phrase에서 결정적 파생(`sha256(mnemonic + "|drb-peer-id-v1|" + role)`). 재배포 시 동일 peer ID 재현. 도구 실행 불필요.
+- **로컬 Gaming/Full preset 배포 구성**: **Leader + Regular 3대 고정**. `CommitReveal2L2.activationThreshold`만큼 genesis alloc 자동 funding (max(threshold×10, 1e18) native 토큰). SDK가 `depositAndActivate()` 순차 호출로 모든 operator 활성화 완료 상태로 배포 마감.
