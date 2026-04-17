@@ -269,3 +269,4 @@ logStep := func(format string, args ...interface{}) {
 - [[tokamak-deployer-logging]] — 신규 경로 로깅 상세
 - [[tokamak-deployer-gas-price]] — v0.0.5 고정 가스 전략 근거 + Sepolia 측정 결과
 - [[l2-deployment]] — L2 배포 파이프라인 전체 개요
+- [[drb-local-compose-path-template-bugs]] — 이 전환 과정에서 드러난 5 개 경로·템플릿 버그 (2026-04-17)

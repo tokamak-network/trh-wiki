@@ -6,6 +6,22 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-18] ingest | drb-local-compose-path-template-bugs — DRB preset 배포 5개 경로·템플릿 버그
+
+New page: [[drb-local-compose-path-template-bugs]] (troubleshooting/)
+Source: 2026-04-17 preset resume-deploy 세션 관찰 + trh-sdk commit 50d0b39
+
+Index updated: Troubleshooting 표에 항목 추가
+Decisions updated: [[deploy-methods-comparison]] 관련 문서에 링크 추가
+
+Key facts captured:
+  - **Bug #1**: `local_network.go:259,260,599` — `tokamak-thanos/build/{genesis,rollup}.json` 경로는 2026-04-16 `generate-genesis` 리팩토링 후 레거시. 소비자 측 consumer 수정
+  - **Bug #2**: `local_network.go:431` — `{{ add ... }}` 사용인데 FuncMap 미등록으로 Go text/template 파싱 실패
+  - **Bug #3**: `templates/local-compose.yml.tmpl:457,474` — range 내부 `.DRBNodeImage`/`.L2ChainID` 는 DRBRegular 구조체를 가리켜 평가 실패. `$.X` 로 root 접근 필요
+  - **Bug #4 (미확정)**: Regular 노드 crash `PORT not set in environment variables`. template `PORT=9601` 으로 rename 했어도 재현. DRB-node source 에서 실제 env 키 확인 필요
+  - **Bug #5 (미해결)**: resume 시 op-geth chaindata 재사용으로 L2 genesis hash mismatch. `initLocalOpGeth` 의 hash 재초기화 로직이 이 경로에서 발동하지 않음
+  - Leader 노드 로그가 `Fetched current round from contract: 0` + `s_isInProcess value: 2` 를 남기면 `0x4200...0060` predeploy 는 이미 live L2 에서 호출 가능한 상태
+
 ## [2026-04-18] ingest | deploy-methods-comparison — Deploy.s.sol vs tokamak-deployer
 
 New page: [[deploy-methods-comparison]] (decisions/) — 271 lines, 5-page tight spec
