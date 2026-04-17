@@ -6,6 +6,45 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-18] update | drb-local-compose-path-template-bugs — Bug #5/#6 코드 수정 + Bug #7 신규
+
+Updated page: [[drb-local-compose-path-template-bugs]] (troubleshooting/)
+Source: 2026-04-18 E2E 재현 세션, trh-sdk commit `0f453c3` + trh-backend commit `f732a48`
+
+Changes:
+  - **Bug #5 근본 원인 정정**: 기존 "hash 재초기화 로직이 resume 에서 발동
+    안 함" 기술은 증상. 실제 원인은 `os.Stat(<deployPath>/op-geth-data/chaindata)`
+    host 파일시스템 probe — op-geth-data 는 **Docker named volume** 이므로
+    host 경로는 존재하지 않음. 수정: `docker volume inspect` + alpine
+    helper container 로 volume 내부 `.genesis-hash` marker 를 읽고 씀.
+  - **Bug #6a workaround 적용**: 이미지 교체 대신 docker-compose 에
+    `drb-leader` 서비스 network alias `leadernode` 추가. regular 의 dial
+    대상이 DNS 로 정상 resolve 되는 것까지 확인 (E2E 검증 ✅).
+  - **Bug #6b 근본 원인 정교화**: volume persist 뿐 아니라, 빈 named
+    volume 최초 마운트 시 이미지 레이어의 default `leadernode.bin` 이
+    volume 으로 자동 복사된다는 Docker 동작이 추가 트리거. 해결은
+    `BootstrapDRBPeerIDFiles()` 호출 직후 `docker compose restart
+    drb-leader drb-regular-*` 로 새 key 를 강제 reload.
+  - **Bug #7 신규 섹션** (미해결, Bug #1 동일 class):
+    `readBedrockDeployConfigTemplate` (`shutdown.go:311-312`) 가
+    `<deploy>/tokamak-thanos/packages/tokamak/contracts-bedrock/scripts/deploy-config.json`
+    레거시 경로를 강제로 읽음. 새 tokamak-deployer 는 이 경로에 쓰지 않음 →
+    orchestrateDRBOperators 진입 시 파일 없음으로 차단. Fix B/C runtime
+    재현이 이 버그로 막혀 다음 세션으로 이월.
+  - **상태 테이블 추가**: 7개 버그 각각의 코드 수정 / runtime 확인 상태를
+    문서 상단 "현재 상태 요약" 에 표로 정리.
+  - **관련 커밋 섹션 업데이트**: trh-sdk `0f453c3` + trh-backend `f732a48`
+    + plan file 링크 추가.
+
+실제 배포 드라이브 결과 (2026-04-18): Bug #5/#6a/#6b 코드 수정은
+적용되었으나 Bug #7 이 orchestrator 진입 이전에 차단 → Fix B (restart) 와
+Fix C (volume reinit) 의 runtime 경로는 한 번도 실행되지 않음. 다음
+세션에서 Bug #7 consumer-side 수정 후 Fix B/C 효과 검증 필요.
+
+Tangential: trh-backend 의 local Docker 배포는 이제 `deploy-infra` step 을
+`deploy-local-infra` 라벨로 기록 (기존 모든 배포가 AWS 라벨로 기록되던
+혼선 제거, commit `f732a48`).
+
 ## [2026-04-18] update | drb-local-compose-path-template-bugs — Bug #4 확정 + Bug #6 신규 (2 sub-bug)
 
 Updated page: [[drb-local-compose-path-template-bugs]] (troubleshooting/)
