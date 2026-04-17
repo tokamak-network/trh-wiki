@@ -139,6 +139,27 @@ Key learning: Workflow files must exist on default branch before tag push to tri
   Problem: Tag pushed before workflow changes merged → workflow never ran
   Solution: Merge workflow changes to main first, then push tag to trigger workflow
 
+## [2026-04-17] update | tokamak-deployer release pipeline — slash-separated tag format migration
+Motivation: Standardize monorepo tag naming to use path-like format (e.g., `component/version`) instead of dash separators
+Prior state: Used `tokamak-deployer-v0.0.1` format; now migrating to `tokamak-deployer/v0.0.1`
+
+Changes made (on top of prior dash-format work):
+  1. Workflow trigger pattern: `'tokamak-deployer-v*'` → `'tokamak-deployer/v*'`
+  2. Version extraction: `VERSION=${TAG#tokamak-deployer-}` → `VERSION=${TAG#tokamak-deployer/}`
+  3. Release name template: `.goreleaser.yml` added `release.name_template: "tokamak-deployer/{{ .Version }}"`
+
+Outcome: ✓ tokamak-deployer/v0.0.1 release successfully created
+  - Tag format: tokamak-deployer/v0.0.1 (slash-separated path format)
+  - Release name: tokamak-deployer/v0.0.1 (matches tag format exactly)
+  - All 4 platform binaries uploaded with correct naming
+  - Checksums.txt included
+  - Incorrect v1.0.2 release removed from prior session
+
+Key design decision: Monorepo components should use slash-separated tags (e.g., `tokamak-deployer/v0.0.1`, `thanos-bridge/v1.0.0`)
+  Rationale: Path-like format (`component/version`) is more maintainable than dash-separated format across multiple repos
+  Pattern applies to: All future releases in tokamak-thanos and related monorepos
+  Risk: Requires workflow file existence on default branch before tag push (precondition met in this session)
+
 ## [2026-04-09] refactor | raw/ 드롭존 구조 개편
 HTML 다이어그램 에셋 분리 및 inbox/ 드롭존 추가
 
