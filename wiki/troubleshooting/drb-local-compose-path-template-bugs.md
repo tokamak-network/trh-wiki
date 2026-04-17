@@ -4,6 +4,7 @@ sources:
   - commit 50d0b39 (trh-sdk main)
   - commit 3912799 (trh-sdk main)
   - commit 0f453c3 (trh-sdk main)
+  - commit 4c3e33b (trh-sdk main)
   - commit f732a48 (trh-backend main)
 related:
   - "[[deploy-methods-comparison]]"
@@ -17,8 +18,9 @@ tags: [troubleshooting, drb, local-compose, gaming-preset]
 
 2026-04-17 preset resume-deploy (gaming + USDT + fault-proof ON) 시 순차적으로
 드러난 7개 독립 버그. 1-4 는 commit `50d0b39` + `3912799` 에서 수정. 5/6a/6b 는
-commit `0f453c3` 에서 코드 수정 (단, Fix B/C 의 runtime 재현은 Bug #7 upstream
-blocker 로 인해 다음 세션으로 이월). 7 은 **미해결** (근본 수정 필요).
+commit `0f453c3` 에서 코드 수정. 7 은 commit `4c3e33b` 에서 수정 (단위 테스트
+통과). Fix #5/#6b/#7 의 E2E runtime 확인은 trh-backend 가 신규 SDK 로
+bump 된 후 resume-deploy 로 재현해야 하며 다음 세션 작업으로 이월.
 
 ## 현재 상태 요약
 
@@ -31,7 +33,7 @@ blocker 로 인해 다음 세션으로 이월). 7 은 **미해결** (근본 수�
 | #5 | op-geth volume stale (host 경로 probe 오류) | `0f453c3` Fix C | ⚠️ 미확인 (Bug #7 로 차단) |
 | #6a | Hostname `leadernode` 하드코딩 | `0f453c3` Fix A (alias) | ✅ DNS 해결 확인 |
 | #6b | Leader PeerID mismatch (image-default key) | `0f453c3` Fix B (restart) | ⚠️ 미확인 (Bug #7 로 차단) |
-| #7 | `readBedrockDeployConfigTemplate` 레거시 경로 | **미해결** | ❌ 차단 중 |
+| #7 | `readBedrockDeployConfigTemplate` 레거시 경로 | `4c3e33b` (new-path-first + legacy fallback) | ⚠️ 단위 테스트 ✅ / E2E 런타임 미확인 |
 
 ## Bug #1 — Genesis/Rollup 경로 불일치
 
@@ -218,7 +220,7 @@ for _, regular := range accounts.Regulars {
 미해결 시 6b 는 시각적으로 드러나지 않음. 이번 세션 해결 순서: **6a (alias)
 → 6b (restart)** 순으로 수정 적용.
 
-## Bug #7 — `readBedrockDeployConfigTemplate` 레거시 경로 강제 (미해결)
+## Bug #7 — `readBedrockDeployConfigTemplate` 레거시 경로 강제 (코드 수정, E2E 미확인)
 
 **증상**: Bug #5/#6 수정 직후 orchestrateDRBOperators 진입 시점에
 `failed to read deployment contracts: open
@@ -243,15 +245,38 @@ Foundry→tokamak-deployer v0.0.5 리팩토링이 부분 이행되면서 발생�
 실패 → 이번 세션에서 Fix B (restart) 와 Fix C (volume reinit) 의 runtime
 경로가 한 번도 발동하지 못함.
 
-**해결 후보**:
-1. `readBedrockDeployConfigTemplate` 가 새 경로 (`<deploy>/deploy-config.json`)
-   를 먼저 시도하고 fallback 으로 레거시 경로 유지 (Bug #1 과 같은 패턴)
-2. 또는 orchestrateDRBOperators 가 필요한 config 필드만 직접 읽어 의존성 제거
-3. 또는 deployer 쪽에서 레거시 경로에도 파일을 복제 (비권장)
+**수정** (commit `4c3e33b`, `shutdown.go:304-341`): 해결 후보 1번 (Bug #1
+동일 패턴) 채택.
 
-**다음 세션 작업**: Fix B/C 의 runtime 확인을 위해 Bug #7 을 반드시 먼저
-풀어야 함. `readBedrockDeployConfigTemplate` 호출 스택을 역추적해
-Bug #1 과 동일한 패턴의 consumer-side fix 로 교정하는 것이 최소 변경.
+```go
+candidates := []string{
+    filepath.Join(s.deploymentPath, "deploy-config.json"), // new tokamak-deployer
+}
+if bedrockPath, err := s.getBedrockPath(); err == nil {
+    candidates = append(candidates,
+        filepath.Join(bedrockPath, "scripts", "deploy-config.json")) // legacy Foundry
+}
+for _, filePath := range candidates {
+    if !utils.CheckFileExists(filePath) { continue }
+    // read + json.Unmarshal → return config
+}
+```
+
+두 write-site (`deploy_contracts.go:143` 의 new + legacy Foundry) 가
+같은 `types.DeployConfigTemplate` 구조체를 직렬화하므로 스키마 변환
+불필요. new path 우선 채택 + legacy path 폴백으로 이전 Foundry 시대 체인의
+shutdown 워크플로우도 그대로 작동.
+
+**단위 테스트** (`shutdown_test.go`, 4개):
+- `NewPath`: legacy 부재 + new 존재 → new 로드 성공
+- `LegacyFallback`: new 부재 + legacy 존재 → legacy 로드 성공
+- `NewPathPrecedence`: 둘 다 존재 → new 우선 (stale legacy 사용 방지)
+- `NoneFound`: 둘 다 부재 → 명확한 에러 메시지
+
+**E2E runtime 확인 (미완)**: Bug #7 fix 이후 orchestrateDRBOperators 가
+진입 가능해져야 함. 이를 통해 Fix B (leader PeerID 일치) 와 Fix C
+(op-geth volume stale-check 발동) 의 runtime 경로도 검증 가능. 다음 세션
+작업 대상.
 
 ## 증거 — 성공 지표 (Bug #4·#5·#6 해결되면 기대되는 마커)
 
@@ -273,6 +298,8 @@ predeploy 가 live L2 에서 호출 가능함을 의미.
 - trh-sdk `3912799` — bug #4 fix (EOA_PRIVATE_KEY + LEADER_IP env 키 교정)
 - trh-sdk `0f453c3` — bug #5 / #6a / #6b fix (volume reinit + alias + restart
   after bootstrap). Fix B/C runtime 확인은 Bug #7 로 이월
+- trh-sdk `4c3e33b` — bug #7 fix (`readBedrockDeployConfigTemplate` new path
+  precedence + legacy fallback) + 4 unit tests
 - trh-backend `f732a48` — deploy-infra step 레이블 AWS/local 분리
   (`DeployAWSInfraStep` + `DeployLocalInfraStep` + `GetDeployInfraStepName`)
 - `pkg/stacks/thanos/local_network.go:250-280, 431, 590-640, 1074-1107+`

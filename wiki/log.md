@@ -6,6 +6,30 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-18] update | drb-local-compose-path-template-bugs — Bug #7 코드 수정 (readBedrockDeployConfigTemplate)
+
+Updated page: [[drb-local-compose-path-template-bugs]] (troubleshooting/)
+Source: trh-sdk commit `4c3e33b`
+
+Changes:
+  - **Bug #7 상태 "미해결" → "코드 수정, E2E 미확인"**:
+    `readBedrockDeployConfigTemplate` (`shutdown.go:304-341`) 가 Bug #1
+    동일 패턴 (new path 우선 + legacy fallback) 으로 수정됨. 2026-01-27
+    커밋 `191e730` 에서 추가된 "Force use of scripts/deploy-config.json
+    as requested" 하드코딩은 Foundry 시대의 의도였고 2026-04-16
+    tokamak-deployer 전환 후 이유 소멸 — git blame 으로 확인.
+  - **단위 테스트 4개 추가** (`shutdown_test.go`): NewPath /
+    LegacyFallback / NewPathPrecedence (new 우선) / NoneFound. 모두 통과.
+  - **해결 후보 섹션을 수정 섹션으로 대체**: 채택된 해결책 (후보 1) 의
+    실제 코드와 근거 기록.
+  - **상태 테이블 업데이트**: Bug #7 칸 코드 수정 완료 + E2E 미확인.
+
+E2E runtime 확인은 아직 미완. trh-backend 가 이 SDK (`4c3e33b`) 로
+bump 된 후 DRB gaming + USDT + fault-proof ON resume-deploy 를 재실행해야
+함. Fix #5 (op-geth volume stale-check) + Fix #6b (leader PeerID
+restart) 의 runtime 경로도 Bug #7 해결 이후 비로소 검증 가능하므로 같은
+런으로 확인.
+
 ## [2026-04-18] update | drb-local-compose-path-template-bugs — Bug #5/#6 코드 수정 + Bug #7 신규
 
 Updated page: [[drb-local-compose-path-template-bugs]] (troubleshooting/)
