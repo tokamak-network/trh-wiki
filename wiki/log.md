@@ -6,6 +6,30 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-18] update | drb-local-compose-path-template-bugs — Bug #4 확정 + Bug #6 신규 (2 sub-bug)
+
+Updated page: [[drb-local-compose-path-template-bugs]] (troubleshooting/)
+Source: 2026-04-17 후속 세션, trh-sdk commit 3912799
+
+Changes:
+  - **Bug #4 상태 "미확정" → "확정"**: DRB-node upstream `config/env.go`
+    확인 결과 regular 바이너리 env 키는 `EOA_PRIVATE_KEY` / `LEADER_IP` /
+    `PORT` (PORT 는 이름 OK, 나머지는 template 이 잘못된 이름 사용 중이
+    었음). trh-sdk `3912799` 에서 수정.
+  - **Bug #6 신규 섹션** (미해결, 2 sub-bug):
+    - **6a**: `tokamaknetwork/drb-node:sha-8c37f63` 바이너리에
+      `/dns/leadernode/tcp/%s/p2p/%s` format string 하드코딩. LEADER_IP
+      env 지원 이전 버전 → upstream 최신 tag 로 업그레이드 필요.
+    - **6b**: `drb-leader-keys` volume 에 이전 배포의 `leadernode.bin`
+      (68B) 잔존 → leader 컨테이너가 구 key 로드해 구 PeerID 노출.
+      template 은 새 PeerID 박아 불일치 dial 실패. `BootstrapDRBPeerIDFiles()`
+      overwrite 보장 또는 volume clean 필요.
+
+실제 배포 드라이브 결과: regular 컨테이너가 Bug #1-4 모두 통과하고
+libp2p dial 단계까지 진행. Leader 컨테이너의 predeploy 호출 성공
+(`Fetched current round from contract: 0`, `s_isInProcess value: 2`)으로
+`0x4200...0060` CommitReveal2L2 가 live L2 에서 작동함이 확인됨.
+
 ## [2026-04-18] ingest | drb-local-compose-path-template-bugs — DRB preset 배포 5개 경로·템플릿 버그
 
 New page: [[drb-local-compose-path-template-bugs]] (troubleshooting/)
