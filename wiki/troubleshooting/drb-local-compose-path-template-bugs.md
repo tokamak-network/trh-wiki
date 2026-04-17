@@ -273,10 +273,21 @@ shutdown 워크플로우도 그대로 작동.
 - `NewPathPrecedence`: 둘 다 존재 → new 우선 (stale legacy 사용 방지)
 - `NoneFound`: 둘 다 부재 → 명확한 에러 메시지
 
+**부차 영향 — 잠복 버그 노출**: `generateLocalComposeFile`
+(`local_network.go:252-256`) 은 `readDeploymentContracts()` 실패 시 warning
+만 남기고 빈 `types.Contracts{}` 로 진행해 왔음. 이는 Bug #7 이 살아 있는
+동안 **compose 파일이 빈 컨트랙트 주소로 템플릿 치환되고도 조용히 통과**
+하는 상태였음을 의미. 이번 fix 이후 실제 주소가 주입되므로 이전과
+구성이 달라진 것처럼 보일 수 있음 (실제로는 항상 이 주소여야 했음).
+과거 로그에서 "compose 는 문제없이 생성됐는데 왜 contract address 가
+비어있지?" 같은 관찰이 있었다면 이 원인이었을 가능성.
+
 **E2E runtime 확인 (미완)**: Bug #7 fix 이후 orchestrateDRBOperators 가
 진입 가능해져야 함. 이를 통해 Fix B (leader PeerID 일치) 와 Fix C
 (op-geth volume stale-check 발동) 의 runtime 경로도 검증 가능. 다음 세션
-작업 대상.
+작업 대상. trh-backend 는 `.github/workflows/notify-trh-backend.yml` +
+`update-trh-sdk.yml` 체인으로 trh-sdk main push 시 자동 bump 커밋이
+들어오므로 별도 `go get` 불필요. docker 이미지 재빌드만 필요.
 
 ## 증거 — 성공 지표 (Bug #4·#5·#6 해결되면 기대되는 마커)
 
