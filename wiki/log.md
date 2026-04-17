@@ -370,6 +370,50 @@ Not covered: AWS infrastructure, Solidity implementation details, local Docker d
 Verification checklist included (8 grep commands for validation).
 Cross-references: blob fee fixes (tokamak-thanos commits), ec2-deploy, preset-system, design-decisions.
 
+## [2026-04-17] perf | tokamak-deployer v0.0.5 — fixed gas price reuse (L1 deploy 5m47s on Sepolia)
+Repos: tokamak-thanos (76b522c02e, tag tokamak-deployer/v0.0.5), trh-sdk (230cdb8)
+
+Problem: v0.0.4 called `SuggestGasPrice` per TX (26-32 round-trips per deploy) and
+started at the raw suggested price, so the 90s/5-attempt bump-retry safety net
+fired often when Sepolia block-time drifted. Reported L1 deploy wall-clock:
+~10-15 min.
+
+Change: resolveGasPrice runs once at Deploy() startup. Default = SuggestGasPrice
+× 200%, clamped to [1 Gwei, 100 Gwei]. Reused for every TX. sendMaxAttempts
+5→3, sendAttemptTimeout 90s→180s (retry safety net still present but rarely
+triggers).
+
+New pages:
+  [[tokamak-deployer-gas-price]] — Design decision, parameters, measured results,
+                                   escape hatches, floor-applied-when-quiet note
+
+Pages updated:
+  [[tokamak-deployer-logging]] — v0.0.5 row added to version table; log format
+                                  examples updated to new `Fixed gas price …
+                                  user-specified` startup line + `attempt 1/3`
+                                  broadcast line
+  [[index]] — Troubleshooting section adds [[tokamak-deployer-gas-price]]
+
+Measured (Sepolia, 2026-04-17, 0x7220c734653a…99c, nonces 1839-1864):
+  - Total: 5m47s (347s) for 26 steps
+  - 0 bump/retry events
+  - Per-step avg 13.3s (median 12s, max 26s — within block variance)
+  - Fixed gas price held at 1 Gwei (suggested 0.031 Gwei × 2 = 0.063 Gwei →
+    floor of 1 Gwei kicked in; visible in logs as "user-specified" because
+    trh-sdk passed it via --gas-price)
+  - Deploy cost 0.0196 ETH
+
+Key design decisions captured:
+  - Multiplier 200 (trh-sdk also passes × 2 so balance precheck at × 3 keeps a
+    wider affordability envelope than the 2× actually charged)
+  - Floor 1 Gwei (guards v0.0.1 gasPrice=0 bug)
+  - Ceil 100 Gwei (fails mainnet fast rather than bleeding budget)
+  - `--gas-price` + `TOKAMAK_DEPLOY_GAS_PRICE` env mirror OLD forge
+    `--with-gas-price` pattern (ops-bedrock/scripts/sepolia-oneclick.sh:253)
+
+Next steps: track whether the retry path ever fires in production logs; if 0
+after 1 month, consider tightening `sendMaxAttempts` further to 2.
+
 ## [2026-04-17] fix | tokamak-deployer gasPrice zero bug (v0.0.1 pre-release)
 Repos: tokamak-thanos (451224b6aa), trh-sdk (567e617), trh-backend (30929b0)
 Workflow: release-deployer.yml updated + CI/CD v0.0.1 tag trigger (Run #24523146838 in progress)

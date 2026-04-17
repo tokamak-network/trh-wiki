@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-16
+updated: 2026-04-17
 ---
 
 # TRH Wiki Index
@@ -86,6 +86,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[l2-deposit-verification]] | Verifying L2 deposit transaction execution — polling strategy |
 | [[l1-deposit-tx-pitfalls]] | L1 Deposit Tx CrossTrade 배포 시 13개 주요 함정과 방지법 |
 | [[tokamak-deployer-logging]] | Debugging contract deployment hangs via comprehensive logging (v1.0.1+) |
+| [[tokamak-deployer-gas-price]] | Fixed gas price reuse strategy (v0.0.5+) — 5m47s measured on Sepolia, 0 retries |
 
 ---
 
