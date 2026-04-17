@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-17
+updated: 2026-04-18
 ---
 
 # TRH Wiki Index
@@ -75,6 +75,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[sequential-l2-deploy]] | Why L2 deployments must run sequentially (port conflict analysis) |
 | [[tech-debt-and-risks]] | Known bugs, tech debt, security concerns, dependency risks |
 | [[requirements-v1]] | CrossTrade 통합 v1 요구사항 30개 — 전체 완료, Phase traceability 포함 |
+| [[deploy-methods-comparison]] | Deploy.s.sol (Foundry) vs tokamak-deployer (Go) — L1 배포 방식 비교, 하이브리드 전환 상태 |
 
 ## Troubleshooting
 

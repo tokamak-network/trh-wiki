@@ -6,6 +6,21 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-18] ingest | deploy-methods-comparison — Deploy.s.sol vs tokamak-deployer
+
+New page: [[deploy-methods-comparison]] (decisions/) — 271 lines, 5-page tight spec
+Source: 코드베이스 라인 단위 분석 (Deploy.s.sol 2031L + L2Genesis.s.sol 571L + start-deploy.sh 517L + contracts.go 588L + gasprice.go 92L + generator.go 126L + deployer_binary.go 231L + deploy_contracts.go 522L + genesis_prep.go 178L)
+
+Index updated: Decisions 섹션에 deploy-methods-comparison 항목 추가
+
+Key facts captured:
+  - 전환 커밋: df52538 (2026-04-16, L1 경로 교체), 230cdb8 (2026-04-17, v0.0.5 고정 가스)
+  - 성능 개선: Sepolia 배포 25-30분 → 6-8분 (fault-proof OFF 기준)
+  - **중요 — 하이브리드 전환 상태**: trh-backend/preset_deploy.go:127 `EnableFaultProof: true` 하드코딩으로 Preset 배포 100% 가 fault-proof ON → 여전히 tokamak-thanos clone + forge 빌드 + cannon prestate + AnchorStateRegistry 소스 패치 경로 사용
+  - tokamak-deployer v0.0.5 fault-proof 지원은 "반쪽 포팅": DisputeGameFactoryProxy + AnchorStateRegistryProxy 의 deploy + plain upgrade 까지만. initialize/setImplementation/Safe wallet 실행 은 여전히 forge 경로
+  - L1 `initialize()` 호출 갭: contracts.go:202 "Try upgrade() first (simpler, no initialization)" — Foundry 경로의 `_upgradeAndCallViaSafe` 대체 메커니즘이 문서화되지 않음
+  - 향후 포팅의 실질 장애물: GnosisSafe `execTransaction` Go 포팅 / cannon prestate 의 Rust+MIPS 빌드 의존성 / AnchorStateRegistry.sol 소스 패치
+
 ## [2026-04-09] init | Wiki initialized
 Pages created: [[index]]
 Schema defined: CLAUDE.md
