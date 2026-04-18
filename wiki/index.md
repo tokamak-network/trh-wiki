@@ -89,6 +89,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[tokamak-deployer-logging]] | Debugging contract deployment hangs via comprehensive logging (v1.0.1+) |
 | [[tokamak-deployer-gas-price]] | Fixed gas price reuse strategy (v0.0.5+) — 5m47s measured on Sepolia, 0 retries |
 | [[drb-local-compose-path-template-bugs]] | DRB gaming preset 로컬 배포 시 드러난 5개 경로·템플릿 버그 (path, FuncMap, range-scope, PORT, op-geth volume) |
+| [[forge-l2genesis-silent-slow]] | forge L2Genesis 단계 로그 무음·과도 지연 — Infow 오용, CombinedOutput, 불필요 --rpc-url |
 
 ---
 

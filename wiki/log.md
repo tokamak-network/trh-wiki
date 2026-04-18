@@ -6,6 +6,35 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-18] add | forge-l2genesis-silent-slow — forge L2Genesis 단계 로그 무음·과도 지연 원인과 픽스
+
+New page: [[forge-l2genesis-silent-slow]] (troubleshooting/)
+Source: 로컬 L2 배포 중 `✅ All contracts deployed successfully!` 이후 진행 피드백 무음 + 수분간 대기
+
+변경 요약:
+  - 증상 3개를 한 곳에 정리: (a) 로그가 `state-dumpdir/...addresses/...config/...`처럼
+    경로가 구분자 없이 이어붙어 보임, (b) forge 실행 동안 수분간 무음, (c) 체감상 필요 이상으로 오래 걸림.
+  - 근본 원인 3개 식별:
+    1. `zap.SugaredLogger.Info(msg, k, v, ...)` 오용 — `fmt.Sprint` 방식이라 전부 이어붙음. 구조화 kv는 `Infow`를 써야 함.
+    2. `cmd.CombinedOutput()` — 프로세스 종료까지 차단·침묵, 실패 시에만 덤프.
+    3. 불필요한 `--rpc-url` — L2Genesis.s.sol은 `vm.etch`/`vm.chainId`/`vm.dumpState`만 씀(RPC 미참조).
+       upstream `contracts-bedrock/package.json`의 `genesis` 스크립트도 RPC 없이 호출(`run()` = `runWithStateDump()` 별칭).
+  - 픽스: `Info` → `Infow` 전환, `CombinedOutput` → `StdoutPipe`/`StderrPipe` 라인 스캐너(`[forge]` 프리픽스),
+    `--rpc-url` 제거 + 호출부 `l1RPCURL` 인자 제거.
+  - 트레이드오프 명시: 현재 스트리밍은 PTY가 아니라 pipe라 forge가 `isatty` 검사 후 block-buffered로
+    내려갈 수 있음(RPC 제거 속도 이득과는 별개). 필요 시 `ExecuteCommandStreamInDir`에 env 지원을 얹어
+    PTY 경로로 이행하는 것이 다음 스텝.
+
+관련 파일:
+  - `trh-sdk/pkg/stacks/thanos/genesis_prep.go` (runForgeL2GenesisScript, ensureOpNodeBinary)
+  - `trh-sdk/pkg/stacks/thanos/deploy_contracts.go` (runForgeL2GenesisScript 호출부)
+
+검증:
+  - `go build ./pkg/stacks/thanos/...` pass
+  - `go vet ./pkg/stacks/thanos/...` clean
+  - `pkg/stacks/thanos` unit tests pass
+  - 실제 로컬 L2 배포로 런타임 검증은 다음 세션 예정
+
 ## [2026-04-18] update | cross-trade — USDC TokenPair 주소 확정, Thanos UI guidance, USDC E2E 테스트 추가
 
 Updated page: [[cross-trade]] (components/integration/)
