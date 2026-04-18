@@ -34,7 +34,7 @@ commit `50d0b39` + `3912799` 에서 수정. 5/6a/6b 는 commit `0f453c3` 에서
 | #6a | Hostname `leadernode` 하드코딩 | `0f453c3` Fix A (alias) | ✅ DNS 해결 확인 |
 | #6b | Leader PeerID mismatch (image-default key) | `0f453c3` Fix B (restart) | ⚠️ 미확인 (Bug #8 로 차단) |
 | #7 | `readBedrockDeployConfigTemplate` 레거시 경로 | `4c3e33b` (new-path-first + legacy fallback) | ✅ **2026-04-18 verified** (간접: anchor init 도달) |
-| #8 | Fault-proof 컨트랙트 미배포 (--fault-proof 플래그 미연결) | tokamak-thanos `7af425cdf4`/`8b0473bf12` + trh-sdk `f009dbc`/`6c8da80` | ✅ code-complete + anvil verified (Sepolia 재배포 필요) |
+| #8 | Fault-proof 컨트랙트 미배포 + deploy-output → deployments/ 파일 격차 | tokamak-thanos `7af425cdf4`/`8b0473bf12` + trh-sdk `f009dbc`/`6c8da80`/`2a688a8` | ✅ code-complete + anvil/fixture verified (Sepolia 재배포 필요) |
 
 ## Bug #1 — Genesis/Rollup 경로 불일치
 
@@ -321,19 +321,39 @@ incomplete 문제로 추정.
 즉 컨트랙트가 "배포되었는데 주소만 누락"이 아니라 **애초에 배포 자체가
 실행되지 않았던 것**. `deploy-output.json` 에 주소가 없는 건 그래서 당연.
 
-**Fix** (두 레이어):
+**Fix** (세 레이어):
 
 | 레이어 | 변경 | 커밋 |
 |--------|-------|-------|
-| tokamak-thanos | `cmd/tokamak-deployer/cmd/deploy_contracts.go` 에 `--fault-proof` bool 플래그 등록 + `cfg.EnableFaultProof` 에 wire | `7af425cdf4` |
-| trh-sdk | `deployContractsOpts.EnableFaultProof` 추가; `runDeployContracts` 에서 flag pass; `TokamakDeployerVersion v0.0.5 → v0.0.6` | (commit) |
+| tokamak-thanos (producer CLI) | `cmd/tokamak-deployer/cmd/deploy_contracts.go` 에 `--fault-proof` bool 플래그 등록 + `cfg.EnableFaultProof` 에 wire | `7af425cdf4` + anvil E2E 검증 `8b0473bf12` |
+| trh-sdk (wiring) | `deployContractsOpts.EnableFaultProof` 추가; `runDeployContracts` 에서 flag pass; `TokamakDeployerVersion v0.0.5 → v0.0.6` | `f009dbc` + unit test `6c8da80` |
+| trh-sdk (consumer 경로) | `readDeploymentContracts` searchPaths 에 `<deploymentPath>/deploy-output.json` 을 **최우선**으로 추가. 기존 `<contracts-bedrock>/deployments/<L1ChainID>-deploy.json` 은 `cloneSourcecode` 가 tokamak-thanos 레포에서 체크아웃하는 stale 파일이므로 읽힐 경우 새 주소를 shadow 함 | `2a688a8` |
+
+**Producer-consumer 링크 격차 (세 번째 레이어의 존재 이유)**: Producer-side
+fix 만으로는 부족함이 advisor 리뷰에서 확인됐다. 새 파이프라인은
+`<deploymentPath>/deploy-output.json` 을 쓰지만, consumer 인
+`readDeploymentContracts` 는 Foundry 시절 artifact 인
+`<contracts-bedrock>/deployments/<L1ChainID>-deploy.json` 을 읽었다. 이 파일은
+tokamak-thanos 레포에 체크인되어 있어 `cloneSourcecode` 직후 fresh 배포에도
+이미 존재하고 (10 core addresses, no fault-proof), 새 파이프라인의 그 어떤 단계도
+이 파일을 재작성하지 않는다. Bug #7 의 new-path-first 패턴과 동일하게
+우선순위만 바꾸면 해결.
 
 **검증 후 필요 작업**: DRB/fault-proof 스택은 **새 Sepolia 배포** 가 필요.
 기존 실패 배포 디렉토리의 L1 컨트랙트들은 fault-proof 없이 배포되었으므로
 DisputeGameFactory/AnchorStateRegistry 가 존재하지 않음 — re-deploy 외에 복구 경로 없음.
 
-**분류**: Producer-side bug. trh-sdk 단독 fix 로는 해결 불가. Bug #1/#7 과 달리
-경로 재매핑이 아니라 upstream CLI 기능 자체가 빠져 있었음.
+**분류**: Producer-side bug + consumer-side path mismatch. trh-sdk 단독 fix 로는
+producer 문제 해결 불가 (upstream CLI 기능 자체가 빠짐). 단, producer fix 만으로
+끝나지도 않음 — 새 산출물이 소비자에 닿는 경로까지 같이 고쳐야 함.
+
+**Caller 범위 주의**: `readDeploymentContracts` 는 `local_network.go:163`
+(anchor init 검증), `deploy_chain.go:523` (anchor 초기화 실행),
+`aa_bridge.go:73` 등 다수 caller 가 공유. `setupSafeWallet`
+(`register_candidate.go:465`) 은 직접 `<L1ChainID>-deploy.json` 를 읽고
+`SystemOwnerSafe` 를 찾음 — 이 필드는 tokamak-deployer 의 `DeployOutput`
+구조체에 아직 없어서 register-candidate 플로우에서는 여전히 legacy 경로에
+의존. 해당 플로우를 새 경로로 전환하려면 추가 작업 필요.
 
 ## 증거 — 성공 지표 (Bug #4·#5·#6 해결되면 기대되는 마커)
 
@@ -357,8 +377,11 @@ predeploy 가 live L2 에서 호출 가능함을 의미.
   after bootstrap). Fix B/C runtime 확인은 Bug #7 로 이월
 - trh-sdk `4c3e33b` — bug #7 fix (`readBedrockDeployConfigTemplate` new path
   precedence + legacy fallback) + 4 unit tests
-- tokamak-thanos `7af425cdf4` — bug #8 fix (deploy-contracts `--fault-proof` flag
-  wiring) + tag `tokamak-deployer/v0.0.6` (release with new binary)
+- tokamak-thanos `7af425cdf4` — bug #8 producer fix (deploy-contracts
+  `--fault-proof` flag wiring) + tag `tokamak-deployer/v0.0.6` (release with new
+  binary) + anvil integration test `8b0473bf12`
+- trh-sdk `f009dbc` / `6c8da80` / `2a688a8` — bug #8 wiring + consumer path fix
+  (readDeploymentContracts prefers deploy-output.json)
 - runtime 검증 세션 2026-04-18 19:04-19:09 UTC — Fix #5 log marker
   확인: `trh-backend` 컨테이너 로그의 `op-geth volume already initialized
   with matching genesis, skipping init` at 19:05:52.695Z

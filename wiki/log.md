@@ -6,6 +6,33 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-18] update | drb-local-compose-path-template-bugs — Bug #8 consumer gap fixed (readDeploymentContracts path)
+
+Updated page: [[drb-local-compose-path-template-bugs]] (troubleshooting/)
+Source: advisor 리뷰로 드러난 producer-consumer 링크 격차
+
+변경 요약:
+  - Producer fix 만으로는 불충분함을 발견: tokamak-deployer 는
+    `<deploymentPath>/deploy-output.json` 에 쓰지만 consumer
+    (`readDeploymentContracts`) 는 `<contracts-bedrock>/deployments/<L1ChainID>-deploy.json` 을 읽음.
+  - 후자는 `cloneSourcecode` 가 tokamak-thanos 레포에서 체크아웃하는 forge 시대
+    artifact 로, fresh 배포에도 stale 상태로 존재 (10 core addresses, no fault-proof).
+    새 파이프라인의 어떤 단계도 재작성하지 않음.
+  - trh-sdk `2a688a8`: `readDeploymentContracts` searchPaths 에
+    `deploy-output.json` 을 최우선으로 prepend. Bug #7 의 new-path-first 패턴 동일.
+  - Bug #8 wiki 섹션 rewrite: 3-layer fix 표 + producer-consumer 격차 설명 +
+    caller 범위 주의 추가 (`setupSafeWallet` 은 `SystemOwnerSafe` 필요 → 여전히
+    legacy 경로 의존).
+
+검증:
+  - trh-sdk unit tests: `TestReadDeploymentContracts_DeployOutputJSON`,
+    `TestReadDeploymentContracts_DeployOutputPrecedence`,
+    `TestReadDeploymentContracts_FaultProofAddresses` 모두 pass
+  - 전체 `pkg/stacks/thanos` 테스트 pass
+  - Sepolia 실제 재배포 검증은 별도 세션에서 필요
+
+---
+
 ## [2026-04-18] update | drb-local-compose-path-template-bugs — Bug #8 resolved (--fault-proof flag wiring)
 
 Updated page: [[drb-local-compose-path-template-bugs]] (troubleshooting/)
