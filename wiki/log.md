@@ -6,6 +6,30 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-19] update | cross-trade — CRT E2E 런 루트 원인 3건 수정 문서화
+
+Updated page: [[cross-trade]] (components/integration/)
+Source: CRT-01~10 + CT-E2E-01~05 전체 실행 (2026-04-18~19)
+
+변경 요약:
+  - E2E 결과 테이블 업데이트: CRT-08~10 ✅ PASS, CT-E2E-01~05 ✅ 완료
+  - 새 섹션 "루트 원인 수정 (2026-04-19 CRT E2E 런)" 추가 — 3건:
+    1. **Fix 1: L1CrossDomainMessengerProxy.initialize() 미호출 (CDM portal=0x0)**
+       tokamak-deployer가 upgrade()만 호출하고 initialize()를 생략 → portal 슬롯 = 0x0 → CRT-02 실패.
+       trh-sdk deploy_chain.go에 initL1CrossDomainMessenger() 추가 (멱등성 가드 + pre-flight eth_call + 100바이트 ABI 수동 인코딩).
+    2. **Fix 2: L2CDM predeploy 오주입**
+       cross_trade_local.go가 initialize() 파라미터에 L1CDM 주소를 L2CDM으로 전달. 0x4200...0007 상수로 교체.
+    3. **Fix 3: L1UsdcBridgeAdapter — selector 불일치**
+       Circle L1UsdcBridge는 bridgeERC20To가 아닌 depositERC20To를 노출 → CRT-09 revert.
+       L1UsdcBridgeAdapter.sol 신규 작성 + trh-backend RegisterCrossTradeL2()에서 프로그래매틱 배포.
+
+관련 파일:
+  - `trh-sdk/pkg/stacks/thanos/deploy_chain.go` (initL1CrossDomainMessenger 신규)
+  - `trh-sdk/pkg/stacks/thanos/local_network.go` (CDM init 호출 추가)
+  - `trh-sdk/pkg/stacks/thanos/cross_trade_local.go` (L2CDM predeploy 상수 교체)
+  - `crossTrade/contracts/L1/L1UsdcBridgeAdapter.sol` (신규 어댑터)
+  - `trh-backend/pkg/services/thanos/integrations/cross_trade_local.go` (deployL1UsdcBridgeAdapter + 조건부 배포)
+
 ## [2026-04-18] add | forge-l2genesis-silent-slow — forge L2Genesis 단계 로그 무음·과도 지연 원인과 픽스
 
 New page: [[forge-l2genesis-silent-slow]] (troubleshooting/)

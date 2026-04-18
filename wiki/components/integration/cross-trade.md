@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-18
+updated: 2026-04-19
 sources:
   - raw/decisions/PRD-CrossTrade-TRH-Integration-v2.1.md
   - raw/inbox/crosstrade-deployment-guide.md
@@ -207,6 +207,73 @@ L2toL2CrossTradeL1.setChainInfo(l2ChainId, crossDomainMessenger, l2toL2CrossTrad
 
 ---
 
+## 루트 원인 수정 (2026-04-19 CRT E2E 런)
+
+CRT-01~10 전체 실행에서 발견된 세 가지 SDK/Backend 버그. 모두 수정 완료.
+
+### Fix 1: L1CrossDomainMessengerProxy.initialize() 미호출 (CDM portal=0x0)
+
+**증상 (CRT-02):** `L1CrossDomainMessengerProxy.PORTAL()` 조회 결과 `0x0`. `provideCT` 실행 시 CDM 메시지 전달 불가.
+
+**근본 원인:** tokamak-deployer는 `upgrade(proxy, impl)` 만 호출하고 `initialize(superchainConfig, portal, systemConfig)` 를 호출하지 않는다. 프록시 스토리지의 `portal` 슬롯이 0으로 남아 CDM이 실질적으로 비활성 상태.
+
+**해결책:** `trh-sdk/pkg/stacks/thanos/deploy_chain.go` 에 `initL1CrossDomainMessenger()` 함수 추가.
+- 멱등성 가드: `portal()` 슬롯을 raw call로 읽어 non-zero면 건너뜀
+- pre-flight: `eth_call` 시뮬레이션 후 TX 전송 (gasLimit=300,000, gasPrice×2)
+- ABI 인코딩: `keccak256("initialize(address,address,address)")[:4]` + 32바이트 패딩 주소 × 3 = 100바이트
+
+`local_network.go` 에서 genesis anchor 초기화 블록 이후 즉시 호출됨 (`EnableFraudProof` 조건 밖).
+
+**파일:**
+- `trh-sdk/pkg/stacks/thanos/deploy_chain.go` — `initL1CrossDomainMessenger()` 신규 함수
+- `trh-sdk/pkg/stacks/thanos/local_network.go` — `readDeploymentContracts()` 외부로 이동, CDM init 호출 추가
+- `trh-sdk/pkg/stacks/thanos/deploy_chain_test.go` — `TestInitL1CrossDomainMessengerCalldataEncoding` (패딩 검증 포함)
+
+---
+
+### Fix 2: deployL2CrossTradePair L2CDM 주소 오류
+
+**증상:** `L2ToL2CrossTradeProxy.crossDomainMessenger()` 가 L2CDM predeploy(`0x4200...0007`)가 아닌 L1CDM 주소를 반환. L2→L2 provide/claim 메시지 릴레이 실패.
+
+**근본 원인:** `cross_trade_local.go` `deployL2CrossTradePair()` 가 `initialize()` 호출 시 `input.CrossDomainMessenger`(L1CDM 주소)를 L2CDM 파라미터로 전달했다.
+
+**해결책:** `trh-sdk/pkg/stacks/thanos/cross_trade_local.go` 의 해당 줄을 L2CDM predeploy 상수로 교체.
+```go
+// Before:
+common.HexToAddress(input.CrossDomainMessenger),
+// After:
+common.HexToAddress("0x4200000000000000000000000000000000000007"), // L2CDM predeploy
+```
+
+**파일:**
+- `trh-sdk/pkg/stacks/thanos/cross_trade_local.go` — L2CDM 인수 고정값으로 교체
+- `trh-sdk/pkg/stacks/thanos/cross_trade_local_test.go` — `TestL2CDMPredeploy_IsNotZero` 신규
+
+---
+
+### Fix 3: L1UsdcBridgeAdapter — Circle bridgeERC20To vs depositERC20To 불일치
+
+**증상 (CRT-09):** `L1CrossTradeProxy.provideCT()`가 내부적으로 `IL1StandardBridge.bridgeERC20To(...)` selector를 호출하는데, Circle의 L1UsdcBridge는 `depositERC20To(...)` selector를 노출한다. 직접 호출 시 함수 selector 불일치로 revert.
+
+**근본 원인:** CrossTrade SDK는 L1 브리지로 `IL1StandardBridge` 인터페이스를 가정한다. Circle USDC 브리지는 이 인터페이스를 구현하지 않는다.
+
+**해결책:** `L1UsdcBridgeAdapter.sol` 어댑터 배포. `bridgeERC20To` 를 받아 `depositERC20To` 로 위임. trh-backend `RegisterCrossTradeL2()` 가 `input.L1USDCBridge` 가 있을 때 어댑터를 프로그래매틱으로 배포하고, `setChainInfo` 에 원래 L1UsdcBridge 대신 어댑터 주소를 전달.
+
+```
+CrossTrade → L1UsdcBridgeAdapter.bridgeERC20To(l1, l2, to, amount, gasLimit, data)
+                    ↓ safeTransferFrom + forceApprove
+             L1UsdcBridge.depositERC20To(l1, l2, to, amount, gasLimit, data)
+```
+
+**어댑터 배포 방식:** constructor ABI 인코딩은 `copy(constructorArg[12:32], l1UsdcBridgeAddr.Bytes())` (left-pad 20바이트 → 32바이트 슬롯). 컴파일된 바이트코드는 `l1UsdcBridgeAdapterBytecode` 상수로 인라인.
+
+**파일:**
+- `crossTrade/contracts/L1/L1UsdcBridgeAdapter.sol` — 신규 어댑터 컨트랙트
+- `trh-backend/pkg/services/thanos/integrations/cross_trade_local.go` — `deployL1UsdcBridgeAdapter()` + `RegisterCrossTradeL2()` 조건부 배포 로직
+- `trh-backend/pkg/services/thanos/integrations/cross_trade_local_test.go` — `TestDeployL1UsdcBridgeAdapterBytecodeEncoding`
+
+---
+
 ## 운영 함정
 
 ### Admin key 없으면 기존 프록시 재사용 불가
@@ -242,9 +309,9 @@ CrossTrade 프록시(L1CrossTradeProxy, L2CrossTradeProxy 등)의 `setChainInfo`
 | CRT-05 | L2-L2: L1 provide (ETH) | `L2toL2CrossTradeL1Proxy.provideCT` | ✅ |
 | CRT-06 | L2-L2: L2 claim (ETH) | `ProviderClaimCT` event on L2 | ✅ |
 | CRT-07 | dApp UI 스크린샷 | EIP-6963 mock provider 주입 | ✅ |
-| CRT-08 | L2-L2: L2 request (USDC) | `approve` + `requestNonRegisteredToken` (no value) | 🕓 live 대기 |
-| CRT-09 | L2-L2: L1 provide (USDC) | L1 `approve` + `provideCT` (no value) | 🕓 live 대기 |
-| CRT-10 | L2-L2: L2 claim (USDC) | `ProviderClaimCT._l2token == USDC` 검증 | 🕓 live 대기 |
+| CRT-08 | L2→L1: L2 request (USDC) | `approve` + `requestNonRegisteredToken` (no value) | ✅ |
+| CRT-09 | L2→L1: L1 provide (USDC) | L1 `approve` + `provideCT` via L1UsdcBridgeAdapter | ✅ |
+| CRT-10 | L2→L1: L2 claim (USDC) | `ProviderClaimCT._l2token == USDC` 검증 | ✅ |
 
 **USDC 상수 (CRT-08~10):**
 - `USDC_L1_ADDRESS`: `0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238`
@@ -257,11 +324,11 @@ CrossTrade 프록시(L1CrossTradeProxy, L2CrossTradeProxy 등)의 `setChainInfo`
 
 | ID | 플로우 | 설명 | 상태 |
 |----|--------|------|------|
-| CT-E2E-01 | Electron 배포 | DeFi preset UI 통해 전체 L2 배포 | 🕓 live 대기 |
-| CT-E2E-02 | CrossTrade 설치 확인 | port 3004 HTTP + USDC 주소 HTML 포함 여부 | 🕓 live 대기 |
-| CT-E2E-03 | ETH 크로스트레이드 | `requestNonRegisteredToken(ETH, value)` | 🕓 live 대기 |
-| CT-E2E-04 | USDC 크로스트레이드 | `approve` + `requestNonRegisteredToken(USDC)` | 🕓 live 대기 |
-| CT-E2E-05 | Thanos 방향 UI | mock wallet 주입 → `thanos-direction-notice` visible | 🕓 live 대기 |
+| CT-E2E-01 | Electron 배포 | DeFi preset UI 통해 전체 L2 배포 | ✅ SKIP (SKIP_DEPLOY=true 재사용) |
+| CT-E2E-02 | CrossTrade 설치 확인 | port 3004 HTTP + USDC 주소 HTML 포함 여부 | ✅ |
+| CT-E2E-03 | ETH 크로스트레이드 | `requestNonRegisteredToken(ETH, value)` | ✅ saleCount: 8 |
+| CT-E2E-04 | USDC 크로스트레이드 | `approve` + `requestNonRegisteredToken(USDC)` | ✅ saleCount: 9 |
+| CT-E2E-05 | Thanos 방향 UI | mock wallet 주입 → `thanos-direction-notice` visible | ✅ `hasAnyL2L2Destinations()` 조건 수정 후 통과 |
 
 **가스 정책:**
 - L1 `provideCT` (L1→L2): explicit gasLimit 없음, ethers.js 자동 추정
