@@ -22,11 +22,15 @@ Source: Bug #8 root-cause 재분석 + 양쪽 레이어 수정
     (isResume + fresh) 에서 와이어, `TokamakDeployerVersion v0.0.6` bump
   - Bug #8 section root cause/Fix/검증 섹션 전면 재작성
 
-검증:
-  - tokamak-thanos: `TestDeployContractsCmd_FaultProofFlag` green
-  - trh-sdk: `TestBuildDeployContractsArgs_FaultProofOn/Off/GasPricePreserved`
-    green; 전체 `pkg/stacks/thanos` 테스트 pass
-  - Runtime 검증 (fresh Sepolia 배포) 은 별도 세션에서 수행 예정
+검증 (code-complete, E2E runtime on Sepolia 은 보류):
+  - tokamak-thanos: flag 등록 unit test + anvil integration test
+    (`TestDeployContracts_FaultProof_Anvil`, 33s) — steps 27-32 가 실제로
+    실행되고 `AnchorStateRegistryProxy`/`DisputeGameFactoryProxy` 가
+    `deploy-output.json` 에 non-zero 로 기록됨 을 확인
+  - trh-sdk: args passing unit test + `readDeploymentContracts` fixture
+    test — JSON tag 가 producer output 과 매치
+  - 아직 확인 안 된 영역: Sepolia 에서 실제 fault-proof 컨트랙트의 bytecode
+    정상성 + on-chain initialization. 별도 fresh 배포 세션 필요.
 
 ---
 

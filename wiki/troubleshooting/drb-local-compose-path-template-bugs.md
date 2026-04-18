@@ -34,7 +34,7 @@ commit `50d0b39` + `3912799` 에서 수정. 5/6a/6b 는 commit `0f453c3` 에서
 | #6a | Hostname `leadernode` 하드코딩 | `0f453c3` Fix A (alias) | ✅ DNS 해결 확인 |
 | #6b | Leader PeerID mismatch (image-default key) | `0f453c3` Fix B (restart) | ⚠️ 미확인 (Bug #8 로 차단) |
 | #7 | `readBedrockDeployConfigTemplate` 레거시 경로 | `4c3e33b` (new-path-first + legacy fallback) | ✅ **2026-04-18 verified** (간접: anchor init 도달) |
-| #8 | Fault-proof 컨트랙트 미배포 (--fault-proof 플래그 미연결) | tokamak-thanos `7af425cdf4` + trh-sdk (v0.0.6 bump) | ✅ fixed (재배포 필요) |
+| #8 | Fault-proof 컨트랙트 미배포 (--fault-proof 플래그 미연결) | tokamak-thanos `7af425cdf4`/`8b0473bf12` + trh-sdk `f009dbc`/`6c8da80` | ✅ code-complete + anvil verified (Sepolia 재배포 필요) |
 
 ## Bug #1 — Genesis/Rollup 경로 불일치
 
