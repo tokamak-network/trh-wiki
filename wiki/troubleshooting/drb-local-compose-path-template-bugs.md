@@ -19,8 +19,8 @@ tags: [troubleshooting, drb, local-compose, gaming-preset]
 2026-04-17 preset resume-deploy (gaming + USDT + fault-proof ON) 시 순차적으로
 드러난 7개 독립 버그 + 2026-04-18 runtime 검증 세션에서 드러난 Bug #8. 1-4 는
 commit `50d0b39` + `3912799` 에서 수정. 5/6a/6b 는 commit `0f453c3` 에서
-수정. 7 은 commit `4c3e33b` 에서 수정. **Bug #8 은 미해결** — tokamak-deployer
-output 에 `AnchorStateRegistryProxy` 가 포함되지 않음.
+수정. 7 은 commit `4c3e33b` 에서 수정. 8 은 tokamak-thanos
+`7af425cdf4` (v0.0.6 release) + trh-sdk (다음 커밋) 에서 수정.
 
 ## 현재 상태 요약
 
@@ -34,7 +34,7 @@ output 에 `AnchorStateRegistryProxy` 가 포함되지 않음.
 | #6a | Hostname `leadernode` 하드코딩 | `0f453c3` Fix A (alias) | ✅ DNS 해결 확인 |
 | #6b | Leader PeerID mismatch (image-default key) | `0f453c3` Fix B (restart) | ⚠️ 미확인 (Bug #8 로 차단) |
 | #7 | `readBedrockDeployConfigTemplate` 레거시 경로 | `4c3e33b` (new-path-first + legacy fallback) | ✅ **2026-04-18 verified** (간접: anchor init 도달) |
-| #8 | `AnchorStateRegistryProxy` 주소 미출력 | **미해결** (producer-side fix 필요) | ❌ 차단 중 |
+| #8 | Fault-proof 컨트랙트 미배포 (--fault-proof 플래그 미연결) | tokamak-thanos `7af425cdf4` + trh-sdk (v0.0.6 bump) | ✅ fixed (재배포 필요) |
 
 ## Bug #1 — Genesis/Rollup 경로 불일치
 
@@ -295,7 +295,7 @@ shutdown 워크플로우도 그대로 작동.
   branch 가 정상 발동.
 - **Fix #6b 미확인 ⚠️** — `orchestrateDRBOperators` 진입 전 Bug #8 이 차단.
 
-## Bug #8 — `AnchorStateRegistryProxy` 주소 미출력 (미해결)
+## Bug #8 — Fault-proof 컨트랙트 미배포 (--fault-proof 플래그 미연결)
 
 **증상** (2026-04-18 resume 시):
 ```
@@ -307,34 +307,33 @@ deployed contracts — cannot initialize genesis anchor state
 pre-check. `readDeploymentContracts()` 가 non-nil 리턴했지만 반환된
 `types.Contracts.AnchorStateRegistryProxy` 가 빈 문자열.
 
-**근본 원인**: tokamak-deployer 의 `deploy-output.json` (그리고 Foundry
-layer 의 `11155111-deploy.json`) 모두 10개 core L1 주소만 기록하고
-`AnchorStateRegistryProxy` 필드가 전혀 없음. 이는 `deploy-methods-comparison`
-에 이미 기록된 "반쪽 포팅" 상태의 결과:
+**초기 가설 (wrong)**: tokamak-deployer 가 AnchorStateRegistryProxy 를
+배포는 하지만 `deploy-output.json` 에 emit 하지 않음 — "반쪽 포팅" 산출물
+incomplete 문제로 추정.
 
-> tokamak-deployer v0.0.5 fault-proof 지원은 "반쪽 포팅":
-> DisputeGameFactoryProxy + AnchorStateRegistryProxy 의 deploy + plain
-> upgrade 까지만. initialize/setImplementation/Safe wallet 실행 은 여전히
-> forge 경로.
+**실제 근본 원인**: tokamak-deployer 의 deploy-contracts CLI 에는
+`--fault-proof` 플래그 자체가 등록되어 있지 않았다 (v0.0.5 까지).
+따라서 `deployer.DeployConfig.EnableFaultProof` 는 항상 `false` 였고,
+`contracts.go:526` 의 `if cfg.EnableFaultProof` gate 는 절대 true 가
+될 수 없었음. Steps 27-32 (DisputeGameFactory + AnchorStateRegistry
+배포) 가 **조용히 전체 skip** 되어 온 것.
 
-즉 deployer 는 AnchorStateRegistryProxy 를 **배포는 하지만** 주소를
-`deploy-output.json` 에 emit 하지 않음. 별도 forge 스크립트가 돌아서
-initialize 하는데 그 결과 주소도 어디에도 persist 되지 않음.
+즉 컨트랙트가 "배포되었는데 주소만 누락"이 아니라 **애초에 배포 자체가
+실행되지 않았던 것**. `deploy-output.json` 에 주소가 없는 건 그래서 당연.
 
-**분류**: Bug #1/#7 과 동급 class (new deployer 산출 incomplete) 이지만
-fix 위치는 **producer-side (tokamak-deployer)** — 경로 재매핑만으로는
-해결 불가. 주소를 찾아 output 파일에 쓰는 upstream 변경이 필요.
+**Fix** (두 레이어):
 
-**해결 후보**:
-1. tokamak-deployer 에 `AnchorStateRegistryProxy`·`DisputeGameFactoryProxy`
-   등 fault-proof 관련 address 들을 `deploy-output.json` 에 추가 출력
-2. 또는 trh-sdk 에서 배포 직후 L1 RPC 로 `DisputeGameFactoryProxy.anchorStateRegistry()`
-   를 직접 조회해 AnchorStateRegistryProxy 를 얻고 별도 파일에 저장
-3. 또는 SystemConfig 의 공개 메서드로 체인에서 직접 읽기 (가능 여부 확인 필요)
+| 레이어 | 변경 | 커밋 |
+|--------|-------|-------|
+| tokamak-thanos | `cmd/tokamak-deployer/cmd/deploy_contracts.go` 에 `--fault-proof` bool 플래그 등록 + `cfg.EnableFaultProof` 에 wire | `7af425cdf4` |
+| trh-sdk | `deployContractsOpts.EnableFaultProof` 추가; `runDeployContracts` 에서 flag pass; `TokamakDeployerVersion v0.0.5 → v0.0.6` | (commit) |
 
-**다음 세션 작업**: Bug #8 을 해결해야 Fix #6b 의 runtime 검증이 가능.
-단, Fix #6b 의 코드 경로는 advisor-reviewed + structurally-simple 이므로
-Fix #1/#7 패턴 매치로 high confidence. E2E 필수성은 낮음.
+**검증 후 필요 작업**: DRB/fault-proof 스택은 **새 Sepolia 배포** 가 필요.
+기존 실패 배포 디렉토리의 L1 컨트랙트들은 fault-proof 없이 배포되었으므로
+DisputeGameFactory/AnchorStateRegistry 가 존재하지 않음 — re-deploy 외에 복구 경로 없음.
+
+**분류**: Producer-side bug. trh-sdk 단독 fix 로는 해결 불가. Bug #1/#7 과 달리
+경로 재매핑이 아니라 upstream CLI 기능 자체가 빠져 있었음.
 
 ## 증거 — 성공 지표 (Bug #4·#5·#6 해결되면 기대되는 마커)
 
@@ -358,8 +357,8 @@ predeploy 가 live L2 에서 호출 가능함을 의미.
   after bootstrap). Fix B/C runtime 확인은 Bug #7 로 이월
 - trh-sdk `4c3e33b` — bug #7 fix (`readBedrockDeployConfigTemplate` new path
   precedence + legacy fallback) + 4 unit tests
-- Bug #8 — 미해결, tokamak-deployer producer-side 수정 필요. 관련 레퍼런스:
-  [[deploy-methods-comparison]] 의 "반쪽 포팅" 섹션
+- tokamak-thanos `7af425cdf4` — bug #8 fix (deploy-contracts `--fault-proof` flag
+  wiring) + tag `tokamak-deployer/v0.0.6` (release with new binary)
 - runtime 검증 세션 2026-04-18 19:04-19:09 UTC — Fix #5 log marker
   확인: `trh-backend` 컨테이너 로그의 `op-geth volume already initialized
   with matching genesis, skipping init` at 19:05:52.695Z

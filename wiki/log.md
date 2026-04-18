@@ -6,6 +6,30 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-18] update | drb-local-compose-path-template-bugs — Bug #8 resolved (--fault-proof flag wiring)
+
+Updated page: [[drb-local-compose-path-template-bugs]] (troubleshooting/)
+Source: Bug #8 root-cause 재분석 + 양쪽 레이어 수정
+
+변경 요약:
+  - 기존 가설 "deploy-output.json emit 누락" 은 틀렸음. 실제 원인은
+    tokamak-deployer `deploy-contracts` CLI 에 `--fault-proof` 플래그
+    자체가 미등록 → `cfg.EnableFaultProof` 항상 false → steps 27-32 전체 skip.
+  - tokamak-thanos `7af425cdf4` 에서 플래그 와이어링 + 단위 테스트
+    (deploy_contracts_internal_test.go)
+  - tokamak-deployer `v0.0.6` 태그 릴리스 (GH Actions 빌드)
+  - trh-sdk `deployContractsOpts.EnableFaultProof` 추가, 두 콜사이트
+    (isResume + fresh) 에서 와이어, `TokamakDeployerVersion v0.0.6` bump
+  - Bug #8 section root cause/Fix/검증 섹션 전면 재작성
+
+검증:
+  - tokamak-thanos: `TestDeployContractsCmd_FaultProofFlag` green
+  - trh-sdk: `TestBuildDeployContractsArgs_FaultProofOn/Off/GasPricePreserved`
+    green; 전체 `pkg/stacks/thanos` 테스트 pass
+  - Runtime 검증 (fresh Sepolia 배포) 은 별도 세션에서 수행 예정
+
+---
+
 ## [2026-04-18] update | drb-local-compose-path-template-bugs — Fix #5/#7 runtime verified + Bug #8 신규 (미해결)
 
 Updated page: [[drb-local-compose-path-template-bugs]] (troubleshooting/)
