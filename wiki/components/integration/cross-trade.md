@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-15
+updated: 2026-04-18
 sources:
   - raw/decisions/PRD-CrossTrade-TRH-Integration-v2.1.md
   - raw/inbox/crosstrade-deployment-guide.md
@@ -75,11 +75,15 @@ L2 운영자가 7일 출금 대기 없이 빠른 크로스체인 토큰 교환�
 
 ## 지원 토큰 (DeFi/Full Preset 기본값)
 
-| 토큰 | L1 주소 (Sepolia) | 브릿지 경로 |
-|------|-------------------|------------|
-| ETH | address(0) | StandardBridge / OptimismPortal |
-| USDC | TBD | L1UsdcBridge → MasterMinter.mint |
-| USDT | TBD | StandardBridge (double approval) |
+| 토큰 | L1 주소 (Sepolia) | L2 주소 | 브릿지 경로 |
+|------|-------------------|---------|------------|
+| ETH | `address(0)` | `address(0)` | StandardBridge / OptimismPortal |
+| USDC | `0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238` | `0x4200000000000000000000000000000000000778` | Thanos genesis predeploy (L2) |
+| USDT | TBD | TBD | TBD — `TODO(usdt)` 주석으로 표시됨 |
+
+**USDC L2 주소 출처:** Thanos genesis predeploy `0x4200...0778`. `deployment.go` `autoInstallCrossTradeLocal()` 에서 `TokenPair` 슬라이스에 고정값으로 등록됨 (2026-04-18 확정).
+
+**USDC ERC20 approve 필요:** ETH와 달리 USDC는 `requestNonRegisteredToken` 호출 전에 `approve(crossTradeProxy, amount)` 선행 필요. `{ value: amount }` 없이 호출.
 
 ---
 
@@ -173,9 +177,13 @@ L2toL2CrossTradeL1.setChainInfo(l2ChainId, crossDomainMessenger, l2toL2CrossTrad
 
 **근본 원인:** 지갑(OKX 포함)은 서명 팝업 전에 `eth_estimateGas`로 트랜잭션을 사전 시뮬레이션한다. Thanos Sepolia의 `L2toL2CrossTradeProxy(0x7BbEC445F9BDF6c579e81EAda5df86654184BcE3)`는 Tokamak 팀이 관리하는 프록시로, 우리가 배포한 신규 L2 체인 ID가 등록되어 있지 않다. 따라서 시뮬레이션 단계에서 컨트랙트가 revert → 지갑이 팝업 자체를 차단한다.
 
-**해결책 (2026-04-15):** trh-backend `BuildDAppEnvConfig()`에서 Thanos Sepolia 토큰의 `destination_chains`를 `[]` (빈 배열)로 설정. dApp destination picker는 `destination_chains`가 빈 체인을 후보에서 제외하므로, 사용자가 애초에 Thanos→신규L2 경로에 도달하지 못하게 된다.
+**해결책 1 — destination 숨김 (2026-04-15):** trh-backend `BuildDAppEnvConfig()`에서 Thanos Sepolia 토큰의 `destination_chains`를 `[]` (빈 배열)로 설정. dApp destination picker는 `destination_chains`가 빈 체인을 후보에서 제외하므로, 사용자가 Thanos→신규L2 경로에 도달하지 못하게 된다.
 
-**코드:** `trh-backend/pkg/services/thanos/integrations/cross_trade_local.go` — `thanosL2L2Tokens` 세 항목(ETH, TON, USDC) 모두 `DestinationChains: []uint64{}`
+**해결책 2 — UI 안내 메시지 (2026-04-18):** destination picker 아래에 안내 문구 추가. `getAllowedDestinationChains().length === 0` 조건 (= Thanos Sepolia가 source일 때) 이면 `<p data-testid="thanos-direction-notice">Thanos Sepolia → [your L2] direction is not yet available. Only [your L2] → Thanos Sepolia bridging is supported.</p>` 렌더링.
+
+**코드:**
+- `trh-backend/pkg/services/thanos/integrations/cross_trade_local.go` — `thanosL2L2Tokens` 세 항목(ETH, TON, USDC) 모두 `DestinationChains: []uint64{}`
+- `crossTrade/frontend/cross-trade-dapp/src/components/CreateRequest.tsx` — destination picker 아래 `thanos-direction-notice` 조건부 렌더링
 
 **반대 방향(신규L2 → Thanos Sepolia)은 정상 동작.** 신규 L2의 `L2toL2CrossTradeProxy`에는 우리가 admin이므로 Thanos Sepolia 체인 ID를 등록할 수 있다. `destination_chains: [111551119090]`으로 설정되어 있다.
 
@@ -221,17 +229,39 @@ CrossTrade 프록시(L1CrossTradeProxy, L2CrossTradeProxy 등)의 `setChainInfo`
 
 ## E2E 테스트
 
-**파일:** `tests/e2e/crosstrade-tx.live.spec.ts` (2026-04-11 기준 CRT-01~07 전체 통과)
+### crosstrade-tx.live.spec.ts (CRT-01~10)
 
-| ID | 플로우 | 컨트랙트 |
-|----|--------|---------|
-| CRT-01 | L1-L2: L2 request | `L2CrossTradeProxy.requestNonRegisteredToken` |
-| CRT-02 | L1-L2: L1 provide | `L1CrossTradeProxy.provideCT` |
-| CRT-03 | L1-L2: L2 claim | `ProviderClaimCT` event on L2 |
-| CRT-04 | L2-L2: L2 request | `L2ToL2CrossTradeProxy.requestNonRegisteredToken` |
-| CRT-05 | L2-L2: L1 provide | `L2toL2CrossTradeL1Proxy.provideCT` |
-| CRT-06 | L2-L2: L2 claim | `ProviderClaimCT` event on L2 |
-| CRT-07 | dApp UI 스크린샷 | EIP-6963 mock provider 주입 |
+**파일:** `tests/e2e/crosstrade-tx.live.spec.ts`
+
+| ID | 플로우 | 컨트랙트 | 상태 |
+|----|--------|---------|------|
+| CRT-01 | L1-L2: L2 request (ETH) | `L2CrossTradeProxy.requestNonRegisteredToken` | ✅ |
+| CRT-02 | L1-L2: L1 provide (ETH) | `L1CrossTradeProxy.provideCT` | ✅ |
+| CRT-03 | L1-L2: L2 claim (ETH) | `ProviderClaimCT` event on L2 | ✅ |
+| CRT-04 | L2-L2: L2 request (ETH) | `L2ToL2CrossTradeProxy.requestNonRegisteredToken` | ✅ |
+| CRT-05 | L2-L2: L1 provide (ETH) | `L2toL2CrossTradeL1Proxy.provideCT` | ✅ |
+| CRT-06 | L2-L2: L2 claim (ETH) | `ProviderClaimCT` event on L2 | ✅ |
+| CRT-07 | dApp UI 스크린샷 | EIP-6963 mock provider 주입 | ✅ |
+| CRT-08 | L2-L2: L2 request (USDC) | `approve` + `requestNonRegisteredToken` (no value) | 🕓 live 대기 |
+| CRT-09 | L2-L2: L1 provide (USDC) | L1 `approve` + `provideCT` (no value) | 🕓 live 대기 |
+| CRT-10 | L2-L2: L2 claim (USDC) | `ProviderClaimCT._l2token == USDC` 검증 | 🕓 live 대기 |
+
+**USDC 상수 (CRT-08~10):**
+- `USDC_L1_ADDRESS`: `0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238`
+- `USDC_L2_ADDRESS`: `0x4200000000000000000000000000000000000778`
+- `USDC_TRADE_AMOUNT` / `USDC_CT_AMOUNT`: `1_000_000` (1 USDC, 6 decimals)
+
+### 08-defi-crosstrade-electron.spec.ts (CT-E2E-01~05)
+
+**파일:** `tests/e2e/08-defi-crosstrade-electron.spec.ts` (2026-04-18 신규)
+
+| ID | 플로우 | 설명 | 상태 |
+|----|--------|------|------|
+| CT-E2E-01 | Electron 배포 | DeFi preset UI 통해 전체 L2 배포 | 🕓 live 대기 |
+| CT-E2E-02 | CrossTrade 설치 확인 | port 3004 HTTP + USDC 주소 HTML 포함 여부 | 🕓 live 대기 |
+| CT-E2E-03 | ETH 크로스트레이드 | `requestNonRegisteredToken(ETH, value)` | 🕓 live 대기 |
+| CT-E2E-04 | USDC 크로스트레이드 | `approve` + `requestNonRegisteredToken(USDC)` | 🕓 live 대기 |
+| CT-E2E-05 | Thanos 방향 UI | mock wallet 주입 → `thanos-direction-notice` visible | 🕓 live 대기 |
 
 **가스 정책:**
 - L1 `provideCT` (L1→L2): explicit gasLimit 없음, ethers.js 자동 추정

@@ -6,6 +6,29 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-18] update | cross-trade — USDC TokenPair 주소 확정, Thanos UI guidance, USDC E2E 테스트 추가
+
+Updated page: [[cross-trade]] (components/integration/)
+
+변경 요약:
+  - 지원 토큰 테이블: USDC L1/L2 주소 TBD → 확정값으로 업데이트
+    - L1 Sepolia USDC: `0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238`
+    - L2 predeploy USDC: `0x4200000000000000000000000000000000000778`
+    - USDC ERC20 approve 선행 필요 (ETH와 달리 `{ value }` 없음) 명시
+  - `deployment.go` `autoInstallCrossTradeLocal()`에서 USDC TokenPair 슬라이스 등록 (2026-04-18 구현)
+  - `cross_trade_local.go` `l2l2Tokens` USDC address 픽스: `""` → `0x4200...0778`
+  - Thanos 방향 UI 안내 메시지 (해결책 2) 추가: `thanos-direction-notice` data-testid,
+    `getAllowedDestinationChains().length === 0` 조건 렌더링
+  - E2E 테스트 섹션 재구성: CRT-01~07(완료) + CRT-08~10(USDC, live 대기)
+  - 신규 spec 파일 `08-defi-crosstrade-electron.spec.ts` CT-E2E-01~05 표 추가
+
+관련 파일:
+  - `trh-backend/pkg/services/thanos/deployment.go` (L755 — TokenPair USDC 등록)
+  - `trh-backend/pkg/services/thanos/integrations/cross_trade_local.go` (l2l2Tokens USDC address)
+  - `crossTrade/frontend/cross-trade-dapp/src/components/CreateRequest.tsx` (thanos-direction-notice)
+  - `tests/e2e/crosstrade-tx.live.spec.ts` (CRT-08~10 추가)
+  - `tests/e2e/08-defi-crosstrade-electron.spec.ts` (신규)
+
 ## [2026-04-18] update | drb-local-compose-path-template-bugs — Bug #8 consumer gap fixed (readDeploymentContracts path)
 
 Updated page: [[drb-local-compose-path-template-bugs]] (troubleshooting/)
