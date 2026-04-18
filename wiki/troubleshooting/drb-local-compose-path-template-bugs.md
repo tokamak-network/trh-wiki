@@ -355,6 +355,12 @@ producer 문제 해결 불가 (upstream CLI 기능 자체가 빠짐). 단, produ
 구조체에 아직 없어서 register-candidate 플로우에서는 여전히 legacy 경로에
 의존. 해당 플로우를 새 경로로 전환하려면 추가 작업 필요.
 
+**현재 Sepolia 검증에는 영향 없음**: trh-backend 의 4개 preset
+(base/defi/gaming/full) 모두 `ChainDefaults.registerCandidate = false`
+(`presets/service.go:78,117,157,197`). 따라서 이번 fresh 배포 검증에서
+`setupSafeWallet` 은 fire 하지 않음. register-candidate 를 enable 한
+별도 플로우에서만 잠재 이슈가 발생 — 별도 추적 필요.
+
 ## 증거 — 성공 지표 (Bug #4·#5·#6 해결되면 기대되는 마커)
 
 Leader 노드의 1차 기동 시 아래 로그가 나오면 predeploy 연동은 이미 OK:
