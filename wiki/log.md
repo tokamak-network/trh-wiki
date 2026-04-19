@@ -6,6 +6,22 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-19] new | trh-sdk — Gaming/Full preset genesis hash mismatch (RC1) 수정 문서화
+
+New page: [[gaming-full-preset-genesis-hash-mismatch]] (troubleshooting/)
+
+변경 요약:
+  - RC1 근본 원인: maybeInjectDRB/maybeFundDRBRegulars가 runGenerateGenesis 이후 genesis.json 수정
+    → rollup.json의 genesis.l2.hash가 stale → op-node genesis hash mismatch crash
+  - 수정: drb preset에서 두 번째 generate-genesis 호출 (--base-genesis로 post-DRB genesis 재해싱)
+  - USDC/MTP/L1Block post-processing 모두 idempotent 확인
+  - trh-sdk commit: 323489c
+
+관련 파일:
+  - `trh-sdk/pkg/stacks/thanos/deploy_contracts.go` (RC1 fix)
+
+---
+
 ## [2026-04-19] update | cross-trade — CRT E2E 런 루트 원인 3건 수정 문서화
 
 Updated page: [[cross-trade]] (components/integration/)
