@@ -6,6 +6,23 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-20] new | trh-sdk — AnchorStateRegistry setInitialAnchorState 누락 (RC3) StorageSetter fallback
+
+New page: [[anchor-state-registry-missing-set-initial-anchor-state]] (troubleshooting/)
+
+변경 요약:
+  - RC3 근본 원인: tokamak-deployer embedded 바이트코드에 setInitialAnchorState 없음
+    → patchAnchorStateRegistry()는 .sol만 패치; deployed impl에 효과 없음
+  - 수정: Guard B 실패 시 bootstrapAnchorStateViaStorageSetter() 자동 호출
+  - StorageSetter 배포 → upgradeAndCall → storage 검증 → impl 복원 (loud-fail)
+  - trh-sdk commit: 339c882
+
+관련 파일:
+  - pkg/stacks/thanos/deploy_chain.go (bootstrapAnchorStateViaStorageSetter 추가)
+  - pkg/stacks/thanos/local_network.go (콜사이트 업데이트)
+
+---
+
 ## [2026-04-19] new | trh-sdk — Gaming/Full preset genesis hash mismatch (RC1) 수정 문서화
 
 New page: [[gaming-full-preset-genesis-hash-mismatch]] (troubleshooting/)
