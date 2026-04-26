@@ -6,6 +6,20 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-27] new | op-node genesis l1=0 pitfall — SystemConfig.startBlock() uninitialized by Go deployer
+
+Pages added:
+  [[troubleshooting/op-node-genesis-l1-block-zero]] — root cause, fix (cmd.go patch), redeploy procedure
+
+Key facts captured:
+  - Go deployer uses upgradeProxyViaAdmin (no initialize()), so SystemConfig.startBlock() = 0
+  - Fix: read L1StartingBlockTag from deploy-config.json instead
+  - Commit 1e5426d6b8 on tokamak-thanos main removes systemconfig.go, patches cmd.go
+  - Redeploy requires: wipe geth chaindata → geth init → restart all services
+  - op-geth image requires --entrypoint geth for geth init (CMD form fails)
+
+---
+
 ## [2026-04-20] new | trh-sdk — AnchorStateRegistry setInitialAnchorState 누락 (RC3) StorageSetter fallback
 
 New page: [[anchor-state-registry-missing-set-initial-anchor-state]] (troubleshooting/)
