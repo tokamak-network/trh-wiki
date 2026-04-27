@@ -6,6 +6,21 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-27] new | DisputeGameFactory no implementations (Bug #8 pre-v0.0.6) + StorageSetter bytecode fix
+
+Pages added:
+  [[troubleshooting/dispute-game-factory-no-implementations-pre-v006]] — root cause, affected stacks, fix options
+
+Key facts captured:
+  - tokamak-deployer < v0.0.6 silently skipped fault proof steps 27-32 without --fault-proof flag
+  - Affected stacks have DisputeGameFactory with zero game implementations → op-proposer execution reverted
+  - Confirmed in stack 7640669c: deploy-output.json missing FaultDisputeGame/MIPS/PreimageOracle
+  - storageSetterBytecode was 14 bytes short (955→969): two dispatcher stubs missing at offset 0x191, causing InvalidJump
+  - originalImpl EIP-1967 fallback added: reads impl from proxy storage slot when deploy-output.json omits it
+  - trh-sdk commit e396bb1 fixes both bytecode and EIP-1967 fallback
+
+---
+
 ## [2026-04-27] new | op-node genesis l1=0 pitfall — SystemConfig.startBlock() uninitialized by Go deployer
 
 Pages added:
