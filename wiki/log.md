@@ -6,6 +6,23 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-27] fix | op-node Pectra blobBaseFee 계산 오류 — drb-regular insufficient funds 근본 원인
+
+Pages added:
+  [[troubleshooting/op-node-pectra-blob-base-fee]] — CalcBlobFeeCancun 고정 사용 버그 + Prague-aware 수정 + setGasConfigEcotone 워크어라운드
+
+Key facts captured:
+  - l1_block_info.go:501이 항상 CalcBlobFeeCancun(excessBlobGas) 호출 → Cancun UpdateFraction=3338477 고정
+  - Sepolia post-Pectra excessBlobGas≈193M → ~10^25 wei blobBaseFee (정상은 수 gwei)
+  - PectraBlobScheduleTime 설정은 startup 에러만 억제; override 경로도 동일 공식 → 완전한 no-op
+  - 수정: block.BlobBaseFee() → CalcBlobFeeDefault → header.RequestsHash != nil이면 Prague UpdateFraction=5007716
+  - 업스트림 ethereum-optimism/optimism develop에서 동일 패턴 block.BlobBaseFee(l1ChainConfig) 확인 → 올바른 backport
+  - tokamak-thanos commit 07c68f913a, trh-sdk commit 66333d9
+  - 임시 L1 workaround: setGasConfigEcotone(1368, 0) — blobBaseFeeScalar=0으로 영향 차단 (Sepolia TX 0x937b838d)
+  - 기존 로컬 체인은 이 수정 적용 후 wipe + 재배포 필요
+
+---
+
 ## [2026-04-27] fix | L2OutputOracle 미초기화 — op-proposer "only the proposer address can propose" 해결
 
 Pages added:
