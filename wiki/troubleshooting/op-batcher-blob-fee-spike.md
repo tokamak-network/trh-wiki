@@ -1,6 +1,6 @@
 ---
-updated: 2026-04-27
-component: tokamak-thanos / op-batcher
+updated: 2026-04-27 (rev2)
+component: tokamak-thanos / op-batcher / trh-sdk
 ---
 
 # op-batcher Blob Fee Spike Fix
@@ -85,15 +85,38 @@ op-batcher가 무기한 paused 상태가 됨 → `safe_l2 = 0` (L1에 배치 미
 
 Sepolia 테스트넷은 blob fee가 실제 비용이 아니므로 uncapped 제출이 50 gwei threshold로 safe head가 멈추는 것보다 낫다.
 
-## Behavior After Fix
+### 4차 수정 — trh-sdk commit `df0ccb4` (Apr 27)
 
-- `MaxBlobBaseFeeGwei = "0"`: blob fee 임계값 없음 → 항상 4× cap으로 제출
-- `MaxBlobBaseFeeGwei > 0`: blob base fee가 임계값 초과 시 `ErrBlobBaseFeeTooHigh` → retry 없이 즉시 반환 → 프레임 재큐 → 다음 ticker 틱에서 재시도
+`MaxBlobBaseFeeGwei=0` (3차 수정)은 threshold를 비활성화했지만 근본 문제를 해결하지 못했다.
 
-## Rollback
+**에러 변화**: `ErrBlobBaseFeeTooHigh` → `"insufficient funds for gas * price + value"`
 
-blob DA를 완전히 우회하려면:
-```bash
-OP_BATCHER_DATA_AVAILABILITY_TYPE=calldata
+원인:
+- threshold 비활성화 → batcher가 blob tx 제출 시도
+- `BlobFeeCap = BlobFeeCapMultiplier(4) × blob_base_fee(~4.4e25 wei) = ~1.75e26 wei`
+- batcher 잔액: ~0.5 ETH = 5e17 wei << 1.75e26 wei
+- `eth_estimateGas` → "insufficient funds" → 여전히 safe_l2 = 0
+
+**최종 수정**: `DataAvailabilityType = "calldata"`, `UseBlobs = false`
+
+```go
+// trh-sdk local_network.go — buildBatcherDAConfig()
+// calldata를 쓰면 blob fee 계산 자체가 없음 → Sepolia blob fee 이상치 완전 우회
+func buildBatcherDAConfig() (useBlobs bool, daType string) {
+    return false, "calldata"
+}
 ```
-(calldata는 blob fee를 사용하지 않으므로 스파이크 영향 없음)
+
+## Configuration (현재)
+
+```bash
+OP_BATCHER_DATA_AVAILABILITY_TYPE=calldata         # blob fee 우회 (Sepolia 이상치 대응)
+OP_BATCHER_TXMGR_BLOB_FEE_CAP_MULTIPLIER=4        # calldata 모드에서 무시됨
+OP_BATCHER_TXMGR_MAX_L1_BLOB_BASE_FEE=0           # calldata 모드에서 무시됨
+```
+
+## Behavior
+
+- `DataAvailabilityType=calldata`: blob fee 계산 없음 → 정상 L1 calldata tx 제출 → safe_l2 진행
+- `DataAvailabilityType=blobs` + `MaxBlobBaseFeeGwei=0`: blob fee 무제한 → "insufficient funds" 위험
+- `DataAvailabilityType=blobs` + `MaxBlobBaseFeeGwei=50`: 50 gwei 임계값 → Sepolia 스파이크 시 safe_l2=0

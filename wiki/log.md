@@ -6,6 +6,19 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-27] fix | op-batcher DA calldata 전환 — blob fee "insufficient funds" 근본 해결
+
+Pages updated:
+  [[troubleshooting/op-batcher-blob-fee-spike]] — 4차 수정: calldata로 전환, "insufficient funds" 원인 추가
+
+Key facts captured:
+  - MaxBlobBaseFeeGwei=0 (3차 수정)은 불완전 — threshold 비활성화 후 BlobFeeCap=4×blob_fee≈1.75e26 wei 시도
+  - batcher 잔액 0.5 ETH << 1.75e26 wei → "insufficient funds for gas * price + value" 에러
+  - 근본 해결: DataAvailabilityType="calldata" → blob fee 계산 자체 없음
+  - trh-sdk commit df0ccb4: buildBatcherDAConfig() 추출 + generateLocalComposeFile에 연결
+
+---
+
 ## [2026-04-27] fix | op-batcher safe_l2 stuck at 0 — blob fee threshold disabled + rollup.json wrong path
 
 Pages updated:
