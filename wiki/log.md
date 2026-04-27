@@ -6,6 +6,21 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-27] new | DRB depositAndActivate revert — s_activationThreshold mismatch (3 wei vs 0.1 ETH)
+
+Pages added:
+  [[troubleshooting/drb-deposit-and-activate-threshold-mismatch]] — root cause (hardcoded 3 wei vs deployer 0.1 ETH), fix
+
+Key facts captured:
+  - `tokamak-deployer` sets `s_activationThreshold = 0.1 ETH` in genesis.json storage slot 7
+  - `patchGenesisWithDRB` patches bytecode only; deployer storage is preserved
+  - `local_network.go` used `DefaultDRBGenesisConfig().ActivationThreshold = 3 wei` → `depositAndActivate` revert
+  - Fix: `ActivateRegularOperators` now reads threshold from live contract (`readActivationThreshold`)
+  - trh-sdk commit 7979644 removes `threshold *big.Int` param; reads from `SActivationThreshold()` binding
+  - Latent: `patchGenesisWithDRBRegularFunding` has same class bug but `max(30 wei, 1 ETH)` clamp saves it
+
+---
+
 ## [2026-04-27] new | DRB depositAndActivate revert — 5s sleep too short, L2 at genesis block 0
 
 Pages added:
