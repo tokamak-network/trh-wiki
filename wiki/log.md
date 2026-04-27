@@ -6,6 +6,23 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-27] fix | op-batcher safe_l2 stuck at 0 — blob fee threshold disabled + rollup.json wrong path
+
+Pages updated:
+  [[troubleshooting/op-batcher-blob-fee-spike]] — 3차 수정: MaxBlobBaseFeeGwei "50" → "0" (disabled)
+Pages added:
+  [[troubleshooting/build-local-chain-information-wrong-rollup-path]] — L1ChainID=0 root cause + fix
+
+Key facts captured:
+  - Sepolia blob fee spiked to 4.4e25 wei; 50 gwei threshold caused permanent batcher pause → safe_l2=0
+  - `MaxBlobBaseFeeGwei=0` disables threshold (txmgr/cli.go:379: `if > 0`; MaxBlobBaseFee stays nil)
+  - trh-sdk commit 5e0301a: "50" → "0" in local_network.go generateLocalComposeFile
+  - `BuildLocalChainInformation` read rollup.json from non-existent `/tokamak-thanos/build/` subpath
+  - Silent os.ReadFile failure → L1ChainID=0, L2ChainID=0 → CrossTrade auto-install blocked
+  - trh-backend commit 6786459: fix path to `deploymentPath + "/rollup.json"`
+
+---
+
 ## [2026-04-27] new | DRB depositAndActivate revert — s_activationThreshold mismatch (3 wei vs 0.1 ETH)
 
 Pages added:

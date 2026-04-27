@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-16
+updated: 2026-04-27
 component: tokamak-thanos / op-batcher
 ---
 
@@ -66,20 +66,33 @@ blobFee = eth.CalcBlobFeeCancun(*head.ExcessBlobGas)
 ```bash
 OP_BATCHER_DATA_AVAILABILITY_TYPE=blobs           # calldata 우회 해제
 OP_BATCHER_TXMGR_BLOB_FEE_CAP_MULTIPLIER=4        # 기본 4× (구 하드코딩 2×)
-OP_BATCHER_TXMGR_MAX_L1_BLOB_BASE_FEE=50          # 50 gwei 초과 시 제출 일시 중단
+OP_BATCHER_TXMGR_MAX_L1_BLOB_BASE_FEE=0           # 0 = threshold 비활성화 (항상 제출)
 ```
 
 trh-sdk `local-compose.yml.tmpl`에 자동 주입됨 (commit `13e1465`).
 
+### 3차 수정 — trh-sdk commit `5e0301a` (Apr 27)
+
+`MaxBlobBaseFeeGwei`를 `"50"` → `"0"` (비활성화)으로 변경:
+
+Sepolia blob fee가 `4.4e25 wei` 수준의 극단적 스파이크 시 50 gwei 임계값이 초과되어
+op-batcher가 무기한 paused 상태가 됨 → `safe_l2 = 0` (L1에 배치 미확인).
+
+`OP_BATCHER_TXMGR_MAX_L1_BLOB_BASE_FEE=0`의 의미:
+- `txmgr/cli.go:379`: `if cfg.MaxBlobBaseFeeGwei > 0 { maxBlobBaseFee = ... }` → 0이면 건너뜀
+- `txmgr.go:265`: `m.cfg.MaxBlobBaseFee != nil` 체크 → nil이면 임계값 체크 자체 없음
+- 결과: blob fee 크기와 무관하게 항상 제출
+
+Sepolia 테스트넷은 blob fee가 실제 비용이 아니므로 uncapped 제출이 50 gwei threshold로 safe head가 멈추는 것보다 낫다.
+
 ## Behavior After Fix
 
-- blob base fee < 50 gwei: 4× cap으로 정상 제출
-- blob base fee ≥ 50 gwei: `ErrBlobBaseFeeTooHigh` → retry 없이 즉시 반환 → 프레임 재큐 → 다음 ticker 틱에서 재시도
-- 스파이크 해소 후 자동 재개
+- `MaxBlobBaseFeeGwei = "0"`: blob fee 임계값 없음 → 항상 4× cap으로 제출
+- `MaxBlobBaseFeeGwei > 0`: blob base fee가 임계값 초과 시 `ErrBlobBaseFeeTooHigh` → retry 없이 즉시 반환 → 프레임 재큐 → 다음 ticker 틱에서 재시도
 
 ## Rollback
 
-스파이크가 장기 지속될 경우 임시 우회:
+blob DA를 완전히 우회하려면:
 ```bash
 OP_BATCHER_DATA_AVAILABILITY_TYPE=calldata
 ```
