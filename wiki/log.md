@@ -6,6 +6,20 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-27] fix | L2OutputOracle 미초기화 — op-proposer "only the proposer address can propose" 해결
+
+Pages added:
+  [[troubleshooting/l2-output-oracle-uninitialized]] — tokamak-deployer initialize() 미호출 버그 + trh-sdk 자동 초기화 fix
+
+Key facts captured:
+  - tokamak-deployer steps 24-26: proxy→impl→upgrade 배포하지만 initialize() 미호출 → proposer=address(0)
+  - op-proposer가 proposeL2Output() 호출 시 revert → L2 safe head 정지
+  - 수동 fix: cast send로 initialize(300,2,0,startingTimestamp,proposer,challenger,12) 호출
+  - trh-sdk commit ce4ce65: initL2OutputOracle() 추가, StartLocalNetwork()에서 CDM init 직후 자동 호출
+  - idempotent: proposer() non-zero이면 skip
+
+---
+
 ## [2026-04-27] fix | op-batcher DA calldata 전환 — blob fee "insufficient funds" 근본 해결
 
 Pages updated:
