@@ -6,6 +6,20 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-27] new | DRB depositAndActivate revert — 5s sleep too short, L2 at genesis block 0
+
+Pages added:
+  [[troubleshooting/drb-deposit-and-activate-l2-not-ready]] — root cause, fix (L2 block polling)
+
+Key facts captured:
+  - `orchestrateDRBOperators` had a hardcoded `time.After(5s)` before calling `ActivateRegularOperators`
+  - DRB containers restarted while L2 still at genesis (block 0) → `depositAndActivate` eth_estimateGas reverts
+  - Log signature: "regular 1 depositAndActivate submission failed: execution reverted" exactly 5s after "Waiting for DRB containers"
+  - Fix: `waitForL2Ready()` polls `eth_blockNumber` (2s interval, 2min timeout) until block > 0
+  - trh-sdk commit 034364c replaces the sleep with block polling
+
+---
+
 ## [2026-04-27] new | DisputeGameFactory no implementations (Bug #8 pre-v0.0.6) + StorageSetter bytecode fix
 
 Pages added:
