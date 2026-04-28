@@ -6,6 +6,19 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-28] bugfix | DelayedWETH 배포 누락 — tokamak-deployer v0.0.7
+
+Pages updated:
+  [[delayed-weth-proxy-empty]] (신규) — 증상, 근본 원인, fix 상세
+
+Key facts captured:
+  - tokamak-deployer v0.0.6 fault-proof 블록이 DelayedWETH를 배포하지 않아 initDisputeGameFactory 실패
+  - v0.0.7에서 steps 33-35(proxy/impl/upgrade) 추가, faultProofSteps 6→9
+  - deploy-artifacts/DelayedWETH.json 추가 (forge-artifacts에서 추출)
+  - DeployConfig.DelayedWETHDelay, DeployOutput.DelayedWETHProxy 필드 추가
+  - trh-sdk TokamakDeployerVersion v0.0.6→v0.0.7 범프
+  - DelayedWETH initialize() 호출 불필요 (로컬 테스트넷; hold()는 normal lifecycle 미사용)
+
 ## [2026-04-28] feat | CrossTrade AWS 자동 설치 — DeFi/Full preset AWS 배포 시 자동화
 
 Pages updated:

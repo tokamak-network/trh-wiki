@@ -92,6 +92,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[forge-l2genesis-silent-slow]] | forge L2Genesis 단계 로그 무음·과도 지연 — Infow 오용, CombinedOutput, 불필요 --rpc-url |
 | [[l2-output-oracle-uninitialized]] | tokamak-deployer가 L2OutputOracle initialize() 미호출 → proposer=address(0) → op-proposer 제출 실패 |
 | [[op-node-pectra-blob-base-fee]] | op-node l1_block_info.go가 CalcBlobFeeCancun 고정 사용 → post-Pectra Sepolia에서 ~10^25 wei blobBaseFee → drb-regular insufficient funds |
+| [[delayed-weth-proxy-empty]] | tokamak-deployer v0.0.6이 DelayedWETH를 배포하지 않아 initDisputeGameFactory 실패 → v0.0.7에서 steps 33-35 추가로 수정 |
 
 ---
 
