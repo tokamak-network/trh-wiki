@@ -112,6 +112,7 @@ cast send <SYSTEM_CONFIG_PROXY> \
 |------|---------|-------------------|-----|---------------|
 | 2026-04-27 | DRB gaming preset (uuid `fd621bd4`) | `0x0b8429525C3C39b5060b9c7b616f7406B099Ad55` | `0x937b838d...` | 10743056 |
 | 2026-04-28 | DRB gaming preset (uuid `fd621bd4`, 재배포 후) | `0x0b8429525C3C39b5060b9c7b616f7406B099Ad55` | `0x305fd43d879eb4037e945e3328115eeecccc7f0b2921a6f58af362caa037216d` | 10746610 |
+| 2026-04-28 | Full preset (uuid `7510de41`) | `0x3c434c816c8b555825f54e6ff98d8d5ffcfe2533` | `0xc13c3502fd284ba5aa716b8bf4f40671db56f1caa374b06d2d7553f81b86b3a9` | 10747603 |
 
 ## Impact
 

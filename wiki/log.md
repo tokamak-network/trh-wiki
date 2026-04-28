@@ -6,6 +6,19 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-28] fix | Full preset (7510de41) DRB 클러스터 정상화 — PeerID 주입 + mipsAddr fallback + Pectra workaround 3차 적용
+
+Pages updated:
+  [[troubleshooting/op-node-pectra-blob-base-fee]] — 적용 기록 테이블에 full preset (7510de41) 항목 추가
+
+Key facts captured:
+  - Full preset 신규 배포 (7510de41): DRB PeerID 주입 수동 수행 (BootstrapDRBPeerIDFiles 이미지 미포함)
+  - mipsAddr is empty 버그: tokamak-deployer가 MIPS 미배포 → deploy-output.json에 Mips 필드 없음 → trh-sdk fix (constants fallback)
+  - Pectra blobBaseFee 워크어라운드: SystemConfig(0x3c434...2533).setGasConfigEcotone(1368,0) → TX 0xc13c3502...
+  - 결과: 모든 DRB 노드 (leader + regular-1,2,3) "Node is activated" 상태
+
+---
+
 ## [2026-04-28] verify | Bug #6b Runtime 확인 + Pectra workaround 2차 적용 — DRB gaming preset 전체 정상화
 
 Pages updated:
