@@ -6,6 +6,21 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-28] verify | Bug #6b Runtime 확인 + Pectra workaround 2차 적용 — DRB gaming preset 전체 정상화
+
+Pages updated:
+  [[troubleshooting/drb-local-compose-path-template-bugs]] — Bug #6b ⚠️ → ✅ Runtime 확인; 수동 bootstrap 절차 + regular 랜덤 peer ID 동작 추가
+  [[troubleshooting/op-node-pectra-blob-base-fee]] — workaround 적용 기록 테이블 추가 (2차 Sepolia TX 0x305fd43d)
+
+Key facts captured:
+  - trh-backend:latest 이미지가 0f453c3 미포함 → BootstrapDRBPeerIDFiles 미호출 → leadernode.bin Jan 6 타임스탬프 → leader 가 image-default key 사용
+  - 수동 bootstrap (trh-sdk 소스 빌드) → leadernode.bin 교체 → docker restart → leader PeerID 정상화 확인
+  - drb-regular 는 regularnode.bin 무시하고 랜덤 peer ID 생성 — 문제 없음 (EOA 서명 기반 registration)
+  - Pectra blobBaseFee 버그로 drb-regular tx cost ~3.7×10^24 wei → setGasConfigEcotone(1368,0) 적용 → 정상화
+  - 모든 DRB 노드 (leader + 3 regular) activation 성공 + leader registration 완료 → idle 대기 상태
+
+---
+
 ## [2026-04-27] fix | op-node Pectra blobBaseFee 계산 오류 — drb-regular insufficient funds 근본 원인
 
 Pages added:

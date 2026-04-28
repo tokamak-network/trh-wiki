@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-18
+updated: 2026-04-28
 sources:
   - commit 50d0b39 (trh-sdk main)
   - commit 3912799 (trh-sdk main)
@@ -32,7 +32,7 @@ commit `50d0b39` + `3912799` 에서 수정. 5/6a/6b 는 commit `0f453c3` 에서
 | #4 | Regular 노드 env 키 이름 | `3912799` | ✅ |
 | #5 | op-geth volume stale (host 경로 probe 오류) | `0f453c3` Fix C | ✅ **2026-04-18 verified** (`skipping init` branch) |
 | #6a | Hostname `leadernode` 하드코딩 | `0f453c3` Fix A (alias) | ✅ DNS 해결 확인 |
-| #6b | Leader PeerID mismatch (image-default key) | `0f453c3` Fix B (restart) | ⚠️ 미확인 (Bug #8 로 차단) |
+| #6b | Leader PeerID mismatch (image-default key) | `0f453c3` Fix B (restart) | ✅ **2026-04-28 verified** (수동 bootstrap → leadernode.bin 교체 → 재시작; 단 trh-backend:latest 이미지 미포함 — 수동 workaround 필요, 아래 참고) |
 | #7 | `readBedrockDeployConfigTemplate` 레거시 경로 | `4c3e33b` (new-path-first + legacy fallback) | ✅ **2026-04-18 verified** (간접: anchor init 도달) |
 | #8 | Fault-proof 컨트랙트 미배포 + deploy-output → deployments/ 파일 격차 | tokamak-thanos `7af425cdf4`/`8b0473bf12` + trh-sdk `f009dbc`/`6c8da80`/`2a688a8` | ✅ code-complete + anvil/fixture verified (Sepolia 재배포 필요) |
 
@@ -210,10 +210,47 @@ for _, regular := range accounts.Regulars {
 }
 ```
 
-**상태**: 코드 수정 완료. Runtime 재현 확인은 Bug #7 이 orchestrator 를
-앞단에서 차단하고 있어 다음 세션으로 이월. 다음 세션에서는 leader 로그의
-`leader host created with PeerID: 12D3Koo...` 값이 template 에 바인딩된
-값과 일치함을 확인해야 함.
+**Runtime 확인** (2026-04-28): ✅
+
+`trh-backend:latest` 이미지가 `0f453c3` 이전 버전이어서 `BootstrapDRBPeerIDFiles` 가 호출되지 않음 — volume 내 `leadernode.bin` 타임스탬프 `Jan 6` 유지로 확인. 수동 bootstrap 으로 해결:
+
+```bash
+# 1. trh-sdk 소스에서 bootstrap 바이너리 빌드
+cd /tmp/drb_bootstrap
+cat > main.go << 'EOF'
+package main
+import (
+    "context"; "fmt"; "os"
+    thanos "github.com/tokamak-network/trh-sdk/pkg/stacks/thanos"
+)
+func main() {
+    mnemonic := os.Args[1]; projectName := os.Args[2]
+    accounts, err := thanos.DeriveDRBAccounts(mnemonic)
+    if err != nil { fmt.Fprintln(os.Stderr, err); os.Exit(1) }
+    fmt.Printf("Leader PeerID: %s\n", accounts.LeaderPeerID)
+    if err := thanos.BootstrapDRBPeerIDFiles(context.Background(), projectName, accounts); err != nil {
+        fmt.Fprintln(os.Stderr, err); os.Exit(1)
+    }
+    fmt.Println("Bootstrap complete")
+}
+EOF
+go mod init drb_bootstrap
+go mod edit -replace github.com/tokamak-network/trh-sdk=/path/to/trh-sdk
+go mod tidy
+go build -o drb_bootstrap .
+
+# 2. 실행 (mnemonic + deploymentId)
+./drb_bootstrap "mnemonic words here" "<deployment-uuid>"
+
+# 3. leader 재시작
+docker restart <deployId>-drb-leader-1
+```
+
+**검증**: `docker logs <deployId>-drb-leader-1 | grep "PeerID"` → template 에 바인딩된 PeerID 와 일치.
+
+**주의**: regular 노드는 `regularnode.bin` 을 사용하지 않고 매 재시작마다 랜덤 키를 생성. 하지만 DRB 프로토콜은 EOA 서명 기반 registration 이므로 peer ID 변경이 프로토콜에 영향 없음 — leader 가 재등록 수락.
+
+**근본 해결**: `tokamaknetwork/trh-backend` 이미지 재빌드 (trh-sdk `0f453c3` 포함) 로 자동 bootstrap + restart 보장.
 
 ### 의존 관계
 

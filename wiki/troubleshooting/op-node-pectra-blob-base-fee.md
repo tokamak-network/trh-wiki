@@ -102,9 +102,16 @@ cast send <SYSTEM_CONFIG_PROXY> \
   --private-key $DEPLOYER_PRIVATE_KEY
 ```
 
-- Sepolia TX: `0x937b838d2158e0475cb6b38c8cbb5c016dfda1f0307dfb7e08eee245b747aa0a` (block 10743056)
 - `blobBaseFeeScalar=0` → L2 트랜잭션 gas 계산에서 blob fee 항 = 0 → 비정상 blobBaseFee 영향 없음
 - 이 설정은 L1 스토리지에 저장되어 Docker 재시작 후에도 유지
+- op-node가 다음 Sepolia L1 블록을 처리할 때 (SystemConfig 이벤트 포함 블록 이후) 효과 발동
+
+### 적용 기록
+
+| 날짜 | 대상 체인 | SystemConfig Proxy | TX | Sepolia Block |
+|------|---------|-------------------|-----|---------------|
+| 2026-04-27 | DRB gaming preset (uuid `fd621bd4`) | `0x0b8429525C3C39b5060b9c7b616f7406B099Ad55` | `0x937b838d...` | 10743056 |
+| 2026-04-28 | DRB gaming preset (uuid `fd621bd4`, 재배포 후) | `0x0b8429525C3C39b5060b9c7b616f7406B099Ad55` | `0x305fd43d879eb4037e945e3328115eeecccc7f0b2921a6f58af362caa037216d` | 10746610 |
 
 ## Impact
 
