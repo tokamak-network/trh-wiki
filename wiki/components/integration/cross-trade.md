@@ -158,14 +158,31 @@ L2toL2CrossTradeL1.setChainInfo(l2ChainId, crossDomainMessenger, l2toL2CrossTrad
 
 ---
 
-## AWS vs Local 공존 원칙
+## AWS vs Local 배포 방식
 
-기존 AWS 코드(`DeployCrossTrade()`, Foundry 스크립트, Helm)는 **수정 금지**. 새 로컬 코드는 완전히 별도 파일로 병존한다.
-
-| 환경 | 배포 방식 | dApp 배포 |
+| 환경 | L2 컨트랙트 배포 | dApp 배포 |
 |------|---------|---------|
-| AWS (K8s) | Foundry 스크립트 | Helm chart |
-| Local (Docker) | L1 Deposit Tx (신규) | Docker Compose (신규) |
+| AWS (K8s) | L1 Deposit Tx (`DeployCrossTradeLocal`) | Helm chart (inline, `installCrossTradeHelmAWS`) |
+| Local (Docker) | L1 Deposit Tx (`DeployCrossTradeLocal`) | Docker Compose |
+
+### AWS 자동 설치 (`cross_trade_aws.go`)
+
+DeFi/Full preset AWS 배포 시 `installPresetModules`가 `autoInstallCrossTradeAWS`를 자동 호출한다:
+
+1. `readDeploymentContracts()` — `deploy-output.json`에서 `OptimismPortalProxy`, `L1CrossDomainMessengerProxy` 읽기
+2. `DeployCrossTradeLocal` — L1 Deposit Tx로 L2 CrossTrade 컨트랙트 배포 (20-40분)
+3. `installCrossTradeHelmAWS` — CrossTrade dApp을 Helm으로 배포, ALB ingress 대기
+
+**주의:** `DeployCrossTradeApplication` 함수는 `input.L2ChainConfig[l2ChainID]`에서 uint64 체인 ID를 슬라이스 인덱스로 사용하는 버그가 있다 (e.g. 111551215120 → 즉시 panic). AWS 경로는 이 함수를 우회하여 Helm 로직을 inline으로 구현한다.
+
+### L1 CrossTrade 컨트랙트 주소 (Sepolia)
+
+Tokamak 팀이 배포한 공유 인프라 — 모든 L2 체인이 동일한 L1 컨트랙트 사용:
+
+| 컨트랙트 | 주소 |
+|---------|------|
+| L1CrossTradeProxy | `0xf3473E20F1d9EB4468C72454a27aA1C65B67AB35` |
+| L2toL2CrossTradeL1 | `0xDa2CbF69352cB46d9816dF934402b421d93b6BC2` |
 
 ---
 

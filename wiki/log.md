@@ -6,6 +6,20 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-28] feat | CrossTrade AWS 자동 설치 — DeFi/Full preset AWS 배포 시 자동화
+
+Pages updated:
+  [[cross-trade]] — "AWS vs Local 배포 방식" 섹션 전면 개정, AWS 자동 설치 흐름 추가, L1 컨트랙트 주소 표 추가
+
+Key facts captured:
+  - `cross_trade_aws.go` 신규 파일: `autoInstallCrossTradeAWS` + `installCrossTradeHelmAWS`
+  - `installPresetModules`에서 K8s 환경이면 AWS 자동 설치, 아니면 기존 수동 힌트 유지
+  - `DeployCrossTradeApplication` slice-indexing 버그 우회 — Helm 로직 inline 구현
+  - L2toL2CrossTradeL1 주소 정정: `0xF09Af...` (구) → `0xDa2CbF...` (라이브 테스트 검증값)
+  - L1CrossTradeProxy: `0xf3473E20F1d9EB4468C72454a27aA1C65B67AB35` (Sepolia 공유 인프라)
+
+---
+
 ## [2026-04-28] fix | Pectra BlobBaseFee 근본 수정 — headerInfo.BlobBaseFee() in sources/types.go
 
 Pages updated:
