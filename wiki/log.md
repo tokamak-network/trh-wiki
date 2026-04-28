@@ -6,6 +6,19 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-04-28] fix | Pectra BlobBaseFee 근본 수정 — headerInfo.BlobBaseFee() in sources/types.go
+
+Pages updated:
+  [[troubleshooting/op-node-pectra-blob-base-fee]] — 실제 root cause (headerInfo, sources/types.go) + fix commit 2f1b7245ee 반영; 이전 수정(07c68f913a)이 왜 부족했는지 설명 추가
+
+Key facts captured:
+  - 진짜 버그 위치: op-service/sources/types.go headerInfo.BlobBaseFee() — CalcBlobFeeCancun 직접 호출
+  - l1_block_info.go의 block.BlobBaseFee() 호출은 interface dispatch → concrete type headerInfo → 이전 call site 수정(07c68f913a)이 실질적 효과 없었던 이유
+  - Fix: CalcBlobFeeDefault(h.Header) 사용 → RequestsHash != nil 이면 Prague UpdateFraction=5007716 선택
+  - commit 2f1b7245ee push → Docker nightly CI 트리거 → 신규 배포에서 workaround 불필요
+
+---
+
 ## [2026-04-28] fix | Full preset (7510de41) DRB 클러스터 정상화 — PeerID 주입 + mipsAddr fallback + Pectra workaround 3차 적용
 
 Pages updated:
