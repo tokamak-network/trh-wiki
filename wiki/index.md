@@ -38,6 +38,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[drb-project]] | DRB 프로젝트 umbrella — 프로토콜 흐름, 상태 머신, operator lifecycle, dispute/slashing, L2 gas |
 | [[commit-reveal2]] | 분산 랜덤 비컨(DRB) 스마트 컨트랙트 — 2단계 Commit-Reveal, last revealer attack 방지 (part of [[drb-project]]) |
 | [[drb-node]] | DRB Go 노드 구현체 — Leader/Regular 아키텍처, LibP2P, PostgreSQL (part of [[drb-project]]) |
+| [[drb-deploy]] | trh-sdk DRB 노드 AWS 배포 — EKS leader, EC2 regular, 보안 결정, 브랜치 고정 이유 |
 
 ## Concepts
 

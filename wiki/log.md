@@ -6,6 +6,19 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-01] feat | DRB Node Deployment — trh-sdk PR #185 merged to main
+
+Pages updated:
+  [[drb-deploy]] (신규) — DRB leader/regular 노드 AWS 배포 설계 결정
+
+Key facts captured:
+  - PluginDRB 상수값 = "drb-vrf" (main 브랜치 기준; "drb"는 구버전)
+  - tokamak-thanos-stack: feat/add-drb-node 고정 (main에 terraform/drb 없음)
+  - DRB-node: dispute-mechanism 고정 (main과 동일 구성)
+  - SSH SG: checkip.amazonaws.com으로 배포자 공인 IP /32 자동 적용 (폴백: 0.0.0.0/0)
+  - user-data 파일 권한 0600 (base64 EOA_PRIVATE_KEY 포함)
+  - drb_leader.go (EKS+Terraform) + drb_regular.go (EC2 직접)
+
 ## [2026-04-28] bugfix | DelayedWETH 배포 누락 — tokamak-deployer v0.0.7
 
 Pages updated:
