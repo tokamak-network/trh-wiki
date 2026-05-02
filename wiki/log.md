@@ -6,6 +6,18 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-03] bugfix | CrossTrade AWS Auto-Install Hang — InProgress timeout 근본 원인 및 수정
+
+Pages updated:
+  [[crosstrade-aws-install-hang]] (신규) — 증상, 근본 원인, 트리거 조건, 수정 상세
+
+Key facts captured:
+  - context.Background() goroutine + forge hang on down L2 RPC → EFP-02 정확히 30분 timeout
+  - 수정: goroutine에 50분 context timeout + waitForL2RPC (L2 RPC readiness check) 추가
+  - 테스트 timeout 50분으로 증가 (backend goroutine timeout과 동기화)
+  - Race condition: b3a5049 push 전에 deploy 시작 시 nightly-nightly 이미지 사용됨
+  - trh-backend d8cc907, trh-platform a4120cf 커밋에 반영
+
 ## [2026-05-01] feat | DRB Node Deployment — trh-sdk PR #185 merged to main
 
 Pages updated:
