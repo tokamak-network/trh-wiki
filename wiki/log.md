@@ -6,6 +6,17 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-04] bugfix | SetKubeconfigFile 다중 배포 환경변수 재사용 버그
+
+Pages added:
+  [[set-env-path-reuse-bug]] (신규) — 증상, 근본 원인, 트리거 조건, 수정
+
+Key facts captured:
+  - `SetKubeconfigFile` / `SetAWSConfigFile` / `SetAWSCredentialsFile` 세 함수가 `os.Getenv != ""` 로만 체크 → 동일 프로세스 내 2번째 배포 시 1번째 배포 경로 재사용
+  - 결과: 2번째 배포의 EKS kubeconfig가 1번째 배포 파일에 append → two-document YAML → `YamlError while loading kubeconfig`
+  - 수정: `existing == expectedPath` 비교로 변경. basePath가 다르면 항상 새 경로로 `os.Setenv`
+  - trh-sdk `feat/integrate-drb 3f50d14`, trh-backend `main 62b56ea`
+
 ## [2026-05-03] bugfix | CrossTrade AWS Auto-Install Hang — InProgress timeout 근본 원인 및 수정
 
 Pages updated:
