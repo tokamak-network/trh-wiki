@@ -6,6 +6,19 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-04] refactor | DRB Helm 멀티노드 아키텍처 전환 + Terraform/EC2 경로 삭제
+
+Pages updated:
+  [[drb-deploy]] (전면 재작성) — Terraform/EC2 경로 제거, Helm leader+3 regular 아키텍처로 전환
+
+Key facts captured:
+  - `drb_leader.go` (~1,500 lines), `drb_regular.go` (~710 lines) 삭제
+  - `InstallDRB()`가 유일한 배포 경로. `helm upgrade --set image.tag=...`로 4개 노드 동시 업데이트
+  - BIP44 결정론적 키 파생: leader=index 0, regular1=5, regular2=6, regular3=7
+  - Helm `--set-string` 리스트: values.yaml 기본값 미상속 → Go 코드에서 모든 필드 명시적 주입
+  - `PluginsThatWorkWithoutChain`에서 `PluginDRB` 제거 (K8s + L2RpcUrl 필요)
+  - trh-backend `installDRBOperators()` + `fundDRBRegularAccounts()` 삭제, `RetriggerDRBInstall()` 단순화
+
 ## [2026-05-04] bugfix | SetKubeconfigFile 다중 배포 환경변수 재사용 버그
 
 Pages added:
