@@ -95,6 +95,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[op-node-pectra-blob-base-fee]] | op-node l1_block_info.go가 CalcBlobFeeCancun 고정 사용 → post-Pectra Sepolia에서 ~10^25 wei blobBaseFee → drb-regular insufficient funds |
 | [[delayed-weth-proxy-empty]] | tokamak-deployer v0.0.6이 DelayedWETH를 배포하지 않아 initDisputeGameFactory 실패 → v0.0.7에서 steps 33-35 추가로 수정 |
 | [[asr-dgf-proxy-address-bug]] | tokamak-deployer step 31이 ASR constructor에 DGF 구현체 주소 전달 → resolve() 항상 UnregisteredGame() revert → 프록시 주소로 수정 |
+| [[optimism-portal-proxy-uninitialized]] | tokamak-deployer가 OptimismPortalProxy initialize() 미호출 → systemConfig=0 → depositTransaction() _metered() revert → CrossTrade L2 배포 실패 |
 
 ---
 

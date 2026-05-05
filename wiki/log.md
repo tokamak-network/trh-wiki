@@ -6,6 +6,19 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-06] bugfix | OptimismPortalProxy 미초기화 → CrossTrade deposit tx revert
+
+Pages added:
+  [[optimism-portal-proxy-uninitialized]] (신규) — 증상, 근본 원인, metered() revert 체인, 수정
+
+Key facts captured:
+  - tokamak-deployer는 모든 proxy를 upgrade(proxy, impl)만 하고 initialize() 미호출
+  - OptimismPortalProxy.systemConfig = address(0) → _metered() post-hook에서 address(0).resourceConfig() → empty bytes → ABI decode revert
+  - 실제 deposit 저장은 성공하나 modifier post-execution에서 revert → tx 전체 취소
+  - 수정: `trh-sdk/pkg/stacks/thanos/deploy_chain.go` Step 8.2.6 추가 — initSystemConfig, initL1CrossDomainMessenger, initOptimismPortal/initOptimismPortal2 (조건부)
+  - L2OO/fault proof 양쪽 경로 모두 처리; local_network.go의 동일 init 시퀀스를 미러링
+  - 모든 init 함수에는 idempotency guard 있음
+
 ## [2026-05-05] bugfix | ASR/DGF 프록시 주소 버그 — AnchorStateRegistry가 구현체 주소로 초기화됨
 
 Pages added:
