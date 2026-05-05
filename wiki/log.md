@@ -1017,6 +1017,17 @@ Verification pending:
   - Binary artifacts: tokamak-deployer-{linux,darwin}-{amd64,arm64}.tar.gz
   - Pre-release flag status
 
+## [2026-05-06] ingest | AA EIP-7702 / IsthmusTime / L2RpcUrl threading bug 수정
+
+Pages added:
+  [[troubleshooting/aa-eip7702-isthmus-genesis-l2rpcurl]] — RC1 (AA goroutine L2RpcUrl 누락) + RC2 (NewL2Genesis IsthmusTime 누락) 동시 수정
+
+Key facts captured:
+  - RC1: AAOperatorConfig에 L2RpcUrl 누락 → AA 백그라운드 고루틴 전체 localL2RPCURL() 폴백 (trh-sdk 51e3a22)
+  - RC2: NewL2Genesis에 IsthmusTime 미설정 → EIP-7702 SetCode tx "pool not yet in Prague" 오류 (tokamak-thanos 8420273d24)
+  - tokamak-thanos-geth: IsthmusTime 추가 커밋(cb69272ba, Apr 2026)은 TerminalTotalDifficultyPassed 제거 이후라 두 필드 동시 존재 불가
+  - go.mod replace 지시자: 로컬 경로 → 원격 pseudo-version v0.0.0-20260502144003-25d0c60d53c4
+
 ## [2026-04-17] ingest | DRB Gaming Enablement v1.1 milestone
 
 Pages updated:
