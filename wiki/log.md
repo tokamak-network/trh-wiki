@@ -6,6 +6,19 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-05] bugfix | ASR/DGF 프록시 주소 버그 — AnchorStateRegistry가 구현체 주소로 초기화됨
+
+Pages added:
+  [[asr-dgf-proxy-address-bug]] (신규) — 증상, 근본 원인, 에러 체인, 수정
+
+Key facts captured:
+  - `contracts.go` step 31이 ASR 구현체 constructor에 `disputeGameFactoryImplAddr` 전달 → 프록시 주소여야 함
+  - 결과: ASR.DISPUTE_GAME_FACTORY가 DGF 구현체를 가리킴 → games() 호출 시 storage 없음 → address(0) 반환 → `UnregisteredGame()` revert
+  - `FaultDisputeGame.resolve()` 내 `tryUpdateAnchorState()` 호출이 "should not revert" 주석에도 불구하고 항상 revert
+  - 수정: `disputeGameFactoryImplAddr` → `disputeGameFactoryProxyAddr` (line 572)
+  - tokamak-thanos `main 11435dd788` 에 반영
+  - 이 버그 이전 배포된 스택은 영구적으로 resolve() 불가 — 새 스택 필요
+
 ## [2026-05-04] refactor | DRB Helm 멀티노드 아키텍처 전환 + Terraform/EC2 경로 삭제
 
 Pages updated:

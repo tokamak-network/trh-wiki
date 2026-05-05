@@ -94,6 +94,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[l2-output-oracle-uninitialized]] | tokamak-deployer가 L2OutputOracle initialize() 미호출 → proposer=address(0) → op-proposer 제출 실패 |
 | [[op-node-pectra-blob-base-fee]] | op-node l1_block_info.go가 CalcBlobFeeCancun 고정 사용 → post-Pectra Sepolia에서 ~10^25 wei blobBaseFee → drb-regular insufficient funds |
 | [[delayed-weth-proxy-empty]] | tokamak-deployer v0.0.6이 DelayedWETH를 배포하지 않아 initDisputeGameFactory 실패 → v0.0.7에서 steps 33-35 추가로 수정 |
+| [[asr-dgf-proxy-address-bug]] | tokamak-deployer step 31이 ASR constructor에 DGF 구현체 주소 전달 → resolve() 항상 UnregisteredGame() revert → 프록시 주소로 수정 |
 
 ---
 
