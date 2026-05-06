@@ -6,6 +6,21 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-06] bugfix | Block Explorer .envrc 재작성으로 `TF_VAR_thanos_stack_name` 누락 → terraform plan stdin hang
+
+Pages added:
+  [[block-explorer-envrc-thanos-stack-name-stripped]] (신규) — 4h+ deployment hang 의 근본 원인, 두 갈래 수정, 즉시 복구 절차
+
+Key facts captured:
+  - 증상: AWS 배포가 step `deploy-aws-infra` 에서 4시간 이상 InProgress 멈춤. 마지막 DB 로그가 정확히 terraform 의 unset-required-variable 인터랙티브 프롬프트 형식 (`var.thanos_stack_name` + ANSI bold + "Thanos stack name\r")
+  - 컨테이너 안 `terraform plan` (PID 21344) State: S — stdin sleeping
+  - 데이터 버그: `makeBlockExplorerEnvs` 가 .envrc 에서 `export TF_VAR_thanos_stack_name=` 를 unconditional strip 후 `if config.StackName != ""` 일 때만 재추가. 두 호출자 (`block_explorer.go:67,340`) 모두 StackName 미설정 → 변수 사라짐
+  - 같은 .envrc 의 `vpc_name="${TF_VAR_thanos_stack_name}/VPC"` 가 source 시 `/VPC` 로 평가되어 추가 단서 제공
+  - block-explorer/variables.tf 의 `thanos_stack_name` 은 default 없는 required → terraform plan 이 `-input=false` 없이 호출되어 stdin 폴백 → 컨테이너 TTY 부재 → 영구 hang. backend orchestrator 도 자식 sleep 을 timeout 으로 인식 못 함
+  - 수정 (trh-sdk f6f2f92): caller 양쪽에 `StackName: namespace` 명시 + 함수가 빈 StackName 시 기존 .envrc 값 파싱·복원 (defense-in-depth)
+  - 단위 테스트 `block_explorer_envrc_test.go` 두 케이스 — caller 명시 / 빈 caller 모두 변수 보존 검증, 수정 전엔 후자 fail
+  - 권장 추가: 모든 `terraform plan` 호출에 `-input=false` 적용해 동일 부류 hang 을 fast-fail 화 (별도 PR 권장)
+
 ## [2026-05-06] ingest | Block Explorer Update pattern — PUT route + helm upgrade
 
 Pages added:
