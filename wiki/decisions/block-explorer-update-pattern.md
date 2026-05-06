@@ -21,13 +21,19 @@ release(`block-explorer-be-{ts}`, `block-explorer-fe-{ts}`) 로 timestamp suffix
 
 ### API 라우트
 
-| Method | Path                                       | Action                |
-|--------|--------------------------------------------|-----------------------|
-| POST   | `/:id/integrations/block-explorer`         | `InstallBlockExplorer` |
-| **PUT**  | `/:id/integrations/block-explorer`         | `UpdateBlockExplorer`  |
-| DELETE | `/:id/integrations/block-explorer`         | `UninstallBlockExplorer` |
+| Method | Path                                              | Action                |
+|--------|---------------------------------------------------|-----------------------|
+| POST   | `/:id/integrations/block-explorer`                | `InstallBlockExplorer` |
+| **PUT**  | `/:id/integrations/block-explorer`              | `UpdateBlockExplorer`  |
+| **GET**  | `/:id/integrations/block-explorer/config`       | `GetBlockExplorerConfig` (sanitized) |
+| DELETE | `/:id/integrations/block-explorer`                | `UninstallBlockExplorer` |
 
 PUT 패턴은 monitoring 의 `UpdateEmailAlert` / `UpdateTelegramAlert` 와 동일.
+
+GET 엔드포인트는 Update UI 프리필 용도로만 쓰이며 응답에서 DB 자격증명을 의도적으로
+제외 (`SanitizeBlockExplorerConfig` → `BlockExplorerConfigResponse`). 기존
+`GET /:id/integrations` 가 `Config` 전체(DB password 포함)를 노출하는 것을 우회하기
+위함.
 
 ### SDK 흐름 (`trh-sdk/pkg/stacks/thanos/block_explorer.go`)
 
