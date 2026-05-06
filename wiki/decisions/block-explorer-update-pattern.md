@@ -103,8 +103,25 @@ DB 필드 의도적 제외 — Update UI 에서 사용자가 DB 비밀번호를 
 - `trh-backend/pkg/api/dtos/thanos.go` — `UpdateBlockExplorerRequest`,
   `InstallBlockExplorerRequest.CoinmarketcapTokenID`
 
+## 알려진 제약 — 기존 설치 prefill
+
+`InstallBlockExplorerRequest.CoinmarketcapTokenID` 가 추가된 커밋
+(trh-backend `76c6819`) 이전에 설치된 block-explorer 통합 record 는 저장된
+Config 에 `coinmarketcapTokenId` 필드가 없다. 이 경우 GET config endpoint
+응답의 `coinmarketcapTokenId` 는 빈 문자열이 되어 Update UI 가 빈 칸으로
+프리필한다. 사용자가 실제 token id 를 알고 있다면 직접 다시 입력해야 한다
+(혹은 빈 칸 그대로 제출하면 exchange rates 가 비활성화됨).
+
+신규 설치는 영향 없음.
+
 ## 검증 상태
 
-- 단위 테스트: K8s nil / inputs nil / 잘못된 input 의 early-return 만 커버
-- 실제 helm upgrade / terraform output / YAML 토글 / DB credential 보존은 라이브
-  AWS 환경에서 first-run 으로 검증 예정 (테스트 환경 부재)
+- 단위 테스트:
+  - SDK: K8s nil / inputs nil / 잘못된 input 의 early-return 만 커버
+  - DTO sanitize: DB 자격증명 leak 없음을 검증
+- **미검증**:
+  - 실제 helm upgrade / terraform output / YAML 토글 / DB credential 보존은 라이브
+    AWS 환경에서 first-run 으로 검증 예정 (테스트 환경 부재)
+  - trh-platform-ui Update Settings UI 의 브라우저 동작 (dialog open/prefill/submit) —
+    Electron + backend + AWS-deployed stack 조합 필요. 코드 type-check + Next.js
+    build 만 통과한 상태.
