@@ -131,11 +131,11 @@ docker exec trh-backend bash -c 'pkill -f "terraform plan"; pkill -f "block-expl
 # 3. UI 에서 재배포 (수정된 SDK 빌드 필요)
 ```
 
-## 권장 추가 개선 (별도 작업)
+## 후속 디펜스 적용 (trh-sdk 5071a36, 2026-05-06)
 
-블록 익스플로러 install/update 가 사용하는 bash 명령에 `-input=false`
-를 추가하면 동일 부류의 변수 누락 버그가 hang 대신 즉시 실패하도록 강제할
-수 있음:
+같은 부류의 stdin hang 을 미래에 차단하기 위해 `block_explorer.go`
+와 `deploy_chain.go` 의 모든 `terraform init/plan/apply` 호출에
+`-input=false` 를 일괄 추가:
 
 ```diff
 - terraform init &&
@@ -146,8 +146,27 @@ docker exec trh-backend bash -c 'pkill -f "terraform plan"; pkill -f "block-expl
 + terraform apply -input=false -auto-approve
 ```
 
-`deploy_chain.go` 의 backend / thanos-stack 모듈도 같은 패턴이라 일괄 적용
-가치가 있음. 이번 fix 의 scope 외라 별도 PR 권장.
+적용 위치:
+
+| 파일 | 함수 | 모듈 |
+|------|------|------|
+| `block_explorer.go:101-103` | `InstallBlockExplorer` | block-explorer |
+| `block_explorer.go:373` | `UpdateBlockExplorer` | block-explorer (init만, output 전) |
+| `deploy_chain.go:328-330` | `deployNetworkToAWS` | backend (state 백엔드 부트스트랩) |
+| `deploy_chain.go:345-347` | `deployNetworkToAWS` | thanos-stack (메인 인프라) |
+
+`terraform output -json` 호출은 read-only 라 제외. `terraform.go` 의
+destroy 명령은 본 fix scope 외 — 별도 검토 필요.
+
+회귀 가드: `terraform_input_false_test.go` 가 두 파일의 백틱
+raw-string 안에서 모든 `terraform <init|plan|apply>` 라인을 grep 으로
+검사, `-input=false` 누락 시 fail. 미래에 새 호출 추가 시 동일 규칙을
+강제.
+
+이 디펜스로 차단되는 것: 어떤 사유로든 required 변수가 누락되거나
+backend reconfigure / state migration 같은 인터랙티브 프롬프트가
+발생할 때, hang 대신 즉시 에러 메시지와 함께 종료. backend
+orchestrator 가 deployment 를 Failed 로 정상 전이 가능.
 
 ## 진단 체크리스트
 

@@ -6,6 +6,18 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-06] hardening | terraform init/plan/apply 에 `-input=false` 일괄 적용
+
+Pages updated:
+  [[block-explorer-envrc-thanos-stack-name-stripped]] — "후속 디펜스 적용" 섹션으로 갱신 (이전 "권장 추가" 항목 대체)
+
+Key facts captured:
+  - 적용 위치: block_explorer.go:101-103,373 + deploy_chain.go:328-330,345-347 — block-explorer install/update + chain backend/thanos-stack apply 의 모든 init/plan/apply
+  - 동기: thanos_stack_name strip 같은 데이터 버그가 다시 발생해도 stdin 폴백으로 hang 하지 않고 즉시 fail. backend orchestrator 가 deployment 를 Failed 로 정상 전이
+  - 제외: `terraform output -json` (read-only, prompt 없음), `terraform.go` 의 destroy (별도 검토)
+  - 회귀 가드: `terraform_input_false_test.go` 가 두 파일의 백틱 raw-string 안에서 `terraform <init|plan|apply>` grep, `-input=false` 누락 시 fail
+  - 적용 (trh-sdk 5071a36)
+
 ## [2026-05-06] bugfix | Block Explorer .envrc 재작성으로 `TF_VAR_thanos_stack_name` 누락 → terraform plan stdin hang
 
 Pages added:
