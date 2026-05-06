@@ -6,6 +6,20 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-06] ingest | Block Explorer Update pattern — PUT route + helm upgrade
+
+Pages added:
+  [[block-explorer-update-pattern]] — Install 멱등 유지 + 별도 Update 경로(`helm upgrade`)로 CMC/WC 변경 처리
+
+Key facts captured:
+  - 라우트: `POST /:id/integrations/block-explorer` (Install) / `PUT` (Update) / `DELETE` (Uninstall) — monitoring `UpdateEmailAlert` 패턴 차용
+  - SDK `UpdateBlockExplorer`: `FilterHelmReleases` 로 `block-explorer-be-{ts}` / `block-explorer-fe-{ts}` 발견 → `helm upgrade` (terraform output 으로 RDS URL 만 재취득, apply 없음)
+  - DB credential 은 입력으로 받지만 실질적으로 RDS 변경 안 함 — `terraform output -json rds_connection_url` 이 install-time 자격증명 포함
+  - trh-backend `BlockExplorerIntegration.Update`: 저장된 `InstallBlockExplorerRequest` 에서 DB 자격증명 복원 후 SDK 호출
+  - helm upgrade 성공 후 bookkeeping 은 best-effort (실제 chain 갱신 완료 후 DB write 실패해도 Failed 로 되돌리지 않음)
+  - DTO: `InstallBlockExplorerRequest` 에 `CoinmarketcapTokenID` 추가 (round-trip 저장용); `UpdateBlockExplorerRequest` 신규 (DB 필드 의도적 제외)
+  - 검증: SDK 단위 테스트는 early-return 가드만 커버 — 실제 helm upgrade / YAML 토글은 라이브 AWS 환경 first-run 검증 예정
+
 ## [2026-05-06] bugfix | AWS destroy namespace timeout — 5min `kubectl delete namespace` hang
 
 Pages added:
