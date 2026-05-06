@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-18
+updated: 2026-05-06
 ---
 
 # TRH Wiki Index
@@ -96,6 +96,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[delayed-weth-proxy-empty]] | tokamak-deployer v0.0.6이 DelayedWETH를 배포하지 않아 initDisputeGameFactory 실패 → v0.0.7에서 steps 33-35 추가로 수정 |
 | [[asr-dgf-proxy-address-bug]] | tokamak-deployer step 31이 ASR constructor에 DGF 구현체 주소 전달 → resolve() 항상 UnregisteredGame() revert → 프록시 주소로 수정 |
 | [[optimism-portal-proxy-uninitialized]] | tokamak-deployer가 OptimismPortalProxy initialize() 미호출 → systemConfig=0 → depositTransaction() _metered() revert → CrossTrade L2 배포 실패 |
+| [[destroy-namespace-timeout]] | AWS destroy 시 `kubectl delete namespace` 가 5분 timeout — finalizer 자가복구 부재 + EFS MT 정리 순서 결함 + Conditions 타입 버그, trh-sdk 4099570에서 자가복구 5단계로 수정 |
 
 ---
 

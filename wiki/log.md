@@ -6,6 +6,19 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-06] bugfix | AWS destroy namespace timeout — 5min `kubectl delete namespace` hang
+
+Pages added:
+  [[destroy-namespace-timeout]] (신규) — 증상, 4가지 결함 결합 분석, 자가복구 패턴 수정, 수동 정리 절차
+
+Key facts captured:
+  - `destroyInfraOnAWS()` namespace 삭제가 단일 fatal 실패점이었음 — finalizer 보유 자원 (LB Service, EFS PV) 으로 5분 timeout 후 fatal return → terraform destroy까지 못 감
+  - EFS mount target 정리가 namespace 삭제 *후*에 위치 → EFS PV finalizer가 namespace 종료 차단 (정리 순서 결함)
+  - `K8sNamespaceStatus.Status.Conditions` 가 string 타입이었으나 실제 Terminating namespace는 array → force-finalize 코드가 도달해도 json.Unmarshal 실패 → 자가복구 사실상 무동작
+  - 수정 (trh-sdk `4099570`): EFS MT 선행 정리, namespace 실패→best-effort, `tryToDeleteK8sNamespace` 자가복구 5단계 (non-blocking delete → Terminating polling → Service/PVC/PV finalizer 클리어 → /finalize 강제 → 최종 polling), generic map 기반 JSON 빌드, `os.CreateTemp` race fix, ctx deadline 없을 때 5분 safety-net
+  - 실측 사례: stack 24fed531 / namespace full-a7fyi / cluster ap-northeast-2 / context deadline exceeded 정확히 5분
+  - Advisor 검토에서 latent bug 1건 (status.conditions 타입) + uptime_service 무한 대기 가능성 사전 발견·수정
+
 ## [2026-05-06] bugfix | OptimismPortalProxy 미초기화 → CrossTrade deposit tx revert
 
 Pages added:
