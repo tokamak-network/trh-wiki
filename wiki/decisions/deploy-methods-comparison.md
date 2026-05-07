@@ -348,7 +348,7 @@ CLI override: `--reuse-impls <path>` 가 embedded 보다 우선.
 ### 7.8 후속 후보
 
 - **`IMPL_SALT` / CREATE2** — 본 변경에서 미포함. fallback 신규 배포에 deterministic 주소 도입하면 IMPL_SALT 환경변수로 멀티-체인 주소 일관성 확보 가능 (§6 의 별도 항목)
-- **trh-sdk 에 `--reuse-impls <path>` CLI 플래그 추가** — 현재 wiring 은 `RegistryPath` 필드만 있고 노출 X. 사용자 직접 override 가 필요해질 때 추가
+- ~~**trh-sdk 에 `--reuse-impls <path>` CLI 플래그 추가**~~ ✅ **완료 (trh-sdk `21d6a3e`, 2026-05-07)** — `flags.ReuseImplsFlag` (StringFlag, env `TRH_SDK_REUSE_IMPLS`) → `DeployContractsInput.RegistryPath` → `deployContractsOpts.RegistryPath`. 사용자가 `trh-sdk deploy-contracts --reuse-deployment --reuse-impls /path/to/x.json` 으로 embedded registry override 가능
 - **Mainnet registry 등록** — Sepolia 절차 그대로. 첫 mainnet 배포 후 `deploy-output.json:implementations` 를 `registry/1.json` 으로 PR
 - **AnchorStateRegistry / DelayedWETH 의 constructor-aware reuse** — chain-specific 인자가 같은 경우에만 reuse 허용. Foundry 의 `delayedWETH.delay()` view check 패턴 참고
 

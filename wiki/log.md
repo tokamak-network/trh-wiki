@@ -6,6 +6,21 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-07] feature | trh-sdk `--reuse-impls` CLI 플래그 노출
+
+Pages updated:
+  [[deploy-methods-comparison]] — §7.8 후속 후보 중 "--reuse-impls 노출" 항목 ✅ 완료 표시
+
+Key facts captured:
+  - 신규 `flags.ReuseImplsFlag` (StringFlag, env `TRH_SDK_REUSE_IMPLS`) — DeployContractsFlag 슬라이스에 등록
+  - `commands/contracts.go` 가 cmd.String 으로 읽어 `deployContractsConfig.RegistryPath` 채움
+  - `DeployContractsInput.RegistryPath string` 추가 (기존 `ReuseDeployment bool` 옆)
+  - `runDeployContracts(...)` 호출 site 에 `RegistryPath: deployContractsConfig.RegistryPath` 전달 — `deployer_binary.go:buildDeployContractsArgs` 의 `if opts.RegistryPath != ""` 분기와 결합
+  - 사용 예: `trh-sdk deploy-contracts --reuse-deployment --reuse-impls /path/to/custom-registry.json` 또는 `TRH_SDK_REUSE_IMPLS=/path/to/x.json trh-sdk deploy-contracts --reuse-deployment`
+  - `--reuse-impls` 단독(`--reuse-deployment` 없이)은 deployer 가 silent warn-and-ignore (v0.0.9 부터 wiring)
+  - 기존 `TestBuildDeployContractsArgs_RegistryPathRequiresReuse` / `_ReuseWithRegistryPath` 가 이미 회귀 가드
+  - 커밋: trh-sdk `21d6a3e`
+
 ## [2026-05-07] feature | tokamak-deployer v0.0.10 — Sepolia registry seeded, reuse 자동 활성화
 
 Pages updated:
