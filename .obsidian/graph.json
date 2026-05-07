@@ -8,24 +8,10 @@
   "collapse-color-groups": false,
   "colorGroups": [
     {
-      "query": "path:wiki/overview",
-      "color": {
-        "a": 1,
-        "rgb": 9464411
-      }
-    },
-    {
-      "query": "path:wiki/components/core",
+      "query": "path:wiki/components",
       "color": {
         "a": 1,
         "rgb": 3440895
-      }
-    },
-    {
-      "query": "path:wiki/components/integration",
-      "color": {
-        "a": 1,
-        "rgb": 5592575
       }
     },
     {
@@ -67,6 +53,6 @@
   "repelStrength": 14,
   "linkStrength": 1,
   "linkDistance": 250,
-  "scale": 1.0336840927660285,
+  "scale": 0.50015653661244,
   "close": false
 }

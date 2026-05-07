@@ -1195,3 +1195,27 @@ graph.json 변경:
 index.md 변경:
   - [[drb-deploy]] Integration → Workflows 섹션으로 이동
   - [[thanos-deployer-analysis]] Overview 섹션에 추가
+
+## [2026-05-07] refactor | 볼트 구조 단순화 (계층 축소)
+
+폴더 계층 7단계 → 5단계로 축소:
+
+통합된 폴더:
+  - wiki/components/core/ (8 files) → wiki/components/
+  - wiki/components/integration/ (5 files) → wiki/components/
+  - wiki/overview/ (2 files) → wiki/components/
+
+삭제된 빈 폴더: core/, integration/, overview/
+
+graph.json 색상 그룹:
+  - path:wiki/overview + path:wiki/components/core + path:wiki/components/integration
+  - → path:wiki/components 단일 그룹 (파란색)으로 통합
+
+index.md: Overview + Components/Core + Components/Integration → Components 단일 섹션
+
+최종 구조:
+  wiki/components/   (15 files — core + integration + architecture + analysis)
+  wiki/concepts/     (5 files)
+  wiki/workflows/    (6 files)
+  wiki/decisions/    (8 files)
+  wiki/troubleshooting/ (27 files)
