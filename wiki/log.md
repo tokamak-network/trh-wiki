@@ -6,7 +6,17 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
-## [2026-05-07] feature | trh-sdk `--reuse-impls` CLI 플래그 노출
+## [2026-05-07] backlog | tokamak-deployer 후속 후보 2개 TODO 형식으로 ingest
+
+Pages updated:
+  [[deploy-methods-comparison]] — §7.8 을 "완료/운영" + "TODO 2종(7.8.2/7.8.3)" 으로 재구조화
+
+Key facts captured:
+  - **§7.8.2 IMPL_SALT / CREATE2 도입** — 현재 plain CREATE 사용으로 매 deploy 랜덤 주소; CREATE2 factory(Arachnid `0x4e59b44…`) + deterministic salt 도입 시 cross-L1 주소 일관성, registry 폐기, 신규 L1 자동 온보딩, front-running 면역, source-drift 자동 격리. 비용: factory 의존성, gas 약간 증가, salt 정책 설계, ~10-task 모달. Trigger: 다수 앱-체인 출시, 외부 indexer 통합 요구, Mainnet 본격 런칭 직전, 또는 3번째 신규 L1 등록 시
+  - **§7.8.3 AnchorStateRegistry / DelayedWETH constructor-aware reuse** — Foundry parity 회복용. DelayedWETH 만 실효 (Sepolia delay=0, Mainnet delay=7일 통일이라 거의 항상 reuse). AnchorStateRegistry 는 DGF proxy 가 매 L2 체인 신규라 사실상 reuse 불가능 → skip 권장. 비용: registry schema 확장 (string|object union), view-call 추가, ~3-5 task 모달. 절감: fault-proof deploy 당 ~10-15s. Trigger: 사용자 명시 의문 제기, schema 변경과 묶어 처리, Foundry parity 요건
+  - 둘 다 backlog 유지 — 현재 시스템 동작 정상, marginal/특정 trigger 의존 개선
+  - 결정: 양쪽 모두 별도 brainstorming + spec/plan 사이클 필요. Sunk cost 회피 위해 trigger 발생 후 도입
+  - 커밋: trh-wiki 본 commit
 
 Pages updated:
   [[deploy-methods-comparison]] — §7.8 후속 후보 중 "--reuse-impls 노출" 항목 ✅ 완료 표시

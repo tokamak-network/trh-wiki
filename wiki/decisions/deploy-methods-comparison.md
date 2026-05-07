@@ -347,10 +347,109 @@ CLI override: `--reuse-impls <path>` 가 embedded 보다 우선.
 
 ### 7.8 후속 후보
 
-- **`IMPL_SALT` / CREATE2** — 본 변경에서 미포함. fallback 신규 배포에 deterministic 주소 도입하면 IMPL_SALT 환경변수로 멀티-체인 주소 일관성 확보 가능 (§6 의 별도 항목)
+#### 7.8.1 ✅ 완료 / 운영 항목
+
 - ~~**trh-sdk 에 `--reuse-impls <path>` CLI 플래그 추가**~~ ✅ **완료 (trh-sdk `21d6a3e`, 2026-05-07)** — `flags.ReuseImplsFlag` (StringFlag, env `TRH_SDK_REUSE_IMPLS`) → `DeployContractsInput.RegistryPath` → `deployContractsOpts.RegistryPath`. 사용자가 `trh-sdk deploy-contracts --reuse-deployment --reuse-impls /path/to/x.json` 으로 embedded registry override 가능
 - **Mainnet registry 등록** — Sepolia 절차 그대로. 첫 mainnet 배포 후 `deploy-output.json:implementations` 를 `registry/1.json` 으로 PR
-- **AnchorStateRegistry / DelayedWETH 의 constructor-aware reuse** — chain-specific 인자가 같은 경우에만 reuse 허용. Foundry 의 `delayedWETH.delay()` view check 패턴 참고
+
+#### 7.8.2 TODO — `IMPL_SALT` / CREATE2 도입
+
+**상태**: backlog — 명확한 trigger 발생 시까지 보류
+
+**현재 한계**:
+- Fallback 신규 배포는 plain `CREATE` opcode 사용 (`contracts.go:deployRawContract` → `types.NewContractCreation(nonce, ...)`)
+- 결과 주소가 `keccak256(rlp(deployer_addr, nonce))` — 즉 매 deploy 마다 random
+- Cross-L1 주소 일관성 없음 (Sepolia 의 SystemConfig 와 Mainnet 의 SystemConfig 가 다른 주소)
+- 신규 L1 마다 seed deploy + registry PR 필요 (현재 Sepolia 처럼)
+
+**제안 변경**:
+- 외부 CREATE2 factory (Arachnid `0x4e59b44847b379578588920cA78FbF26c0B4956C`) 또는 자체 factory 사용
+- Salt 스키마: `keccak256("tokamak-thanos/<deployer-version>/<contract-name>")` 같은 결정론적 규칙
+- `deployRawContract` 가 CREATE2 factory 경유로 변경; 사전에 주소 계산 후 `extcodesize > 0` 이면 reuse, 아니면 deploy
+- Embedded registry 자체가 불필요해짐 (주소가 pure function 으로 도출)
+
+**얻는 것**:
+1. **Cross-L1 주소 일관성** — 같은 impl 이 모든 L1 에서 같은 주소
+2. **Registry 유지보수 0** — `cmd/registry/{chainId}.json` 폐기
+3. **신규 L1 자동 온보딩** — coordination 없이 첫 사용자가 배포하면 모두에게 같은 주소
+4. **Front-running 면역** — 누가 먼저 같은 (factory, salt, initCode) 로 배포해도 동일 결과
+5. **Source-revision drift 자동 격리** — solc/source 변경 → 다른 initCodeHash → 다른 주소, silent isolate
+6. **L2 predeploy 와 동일한 mental model** — "버전 = 주소" 결정론
+
+**잃는 것**:
+- 외부 factory 의존성 (`0x4e59b44…`) — 일부 L1 에 미배포 가능 (대부분 known L1 OK)
+- Factory call 로 ~5-10K gas/deploy 추가 (9 deploys × ~10K = 거의 무시 가능)
+- Salt 관리 정책 필요 (충돌 / 버전 정책 문서화)
+- 기존 deploy 헬퍼 재작성 (작지 않은 작업)
+- AnchorStateRegistry / DelayedWETH 는 여전히 reuse 불가 (constructor 인자 chain-specific)
+
+**언제 도입할 가치가 있나**:
+- TRH 가 **앱-체인 / 게이밍 체인 다수 출시** 계획 → 매번 seed deploy 부담 누적될 때
+- 외부 통합(block explorer / indexer / DeFi tooling) 이 주소 하드코딩 필요로 할 때
+- 사설 / 엔터프라이즈 L1 다수 (각 고객별) → 자동 등록 매력적일 때
+- **Trigger 추천**: "Mainnet 본격 런칭 직전" 또는 "3번째 신규 L1 등록 시"
+
+**구현 모달**: ~10-task spec/plan 사이클 필요 (factory 통합 + salt 스키마 + deploy 헬퍼 재작성 + 테스트). 별도 brainstorming 권장.
+
+**참고**:
+- Foundry `Deploy.s.sol:148-149 _implSalt()` 가 같은 패턴 (`keccak256(bytes(Config.implSalt()))`)
+- `start-deploy.sh:323` 가 매 세션마다 `openssl rand -hex 32` 로 IMPL_SALT 갱신했음 — 우리 도입 시에는 random 대신 결정론적 salt 권장
+
+#### 7.8.3 TODO — AnchorStateRegistry / DelayedWETH constructor-aware reuse
+
+**상태**: backlog — marginal 이득, 트리거 발생 시 처리
+
+**현재 제외 사유** (`tokamak-deployer/internal/deployer/contracts.go:572,600`):
+- `AnchorStateRegistry(disputeGameFactoryProxyAddr)` — DGF proxy 가 매 L2 체인마다 신규
+- `DelayedWETH(_delay)` — withdrawal delay 가 환경 의존
+
+→ Constructor 인자가 baked in 되어 on-chain bytecode 가 v0.0.X embedded artifact 와 다름 → keccak256 hash 비교 실패 → 현재 reuse 대상에서 제외.
+
+**제안 변경 (Foundry parity)**:
+
+`Deploy.s.sol:1077-1090` 의 DelayedWETH 처리 패턴을 Go 로 포팅:
+```solidity
+if (savedAddress != address(0) && verifyImplementationExists(savedAddress)) {
+    uint256 onChainDelay = DelayedWETH(payable(savedAddress)).delay();
+    if (onChainDelay == cfg.faultGameWithdrawalDelay()) {
+        delayedWETH = savedAddress;  // ✓ args match → reuse
+    } else {
+        // fresh deploy
+    }
+}
+```
+
+Go 측:
+- Registry schema 확장: `"DelayedWETH": {"addr": "0x...", "args": {"delay": 0}}` (string 또는 object 의 union 으로 backward-compat)
+- Preflight 단계에서 ABI 호출 (`delay() view returns (uint256)`) 추가
+- Match 조건: `onChainDelay == registry.args.delay && registry.args.delay == cfg.DelayedWETHDelay`
+
+**컨트랙트별 효용**:
+
+| 컨트랙트 | 도입 시 reuse 빈도 | 비고 |
+|---|---|---|
+| **DelayedWETH** | 높음 (Sepolia 보통 delay=0, Mainnet 보통 7일 통일) | Foundry parity 회복 |
+| **AnchorStateRegistry** | 거의 0 — DGF proxy 가 매 L2 체인 신규 → 항상 mismatch | 도입해도 사실상 의미 없음, **skip 권장** |
+
+**얻는 것**:
+- DelayedWETH 1개 reuse → fault-proof deploy 당 ~10-15s 절감
+- Foundry parity 회복 (Go 경로의 documented gap 해소)
+- ASR 은 도입해도 reuse 안 됨 — 형식적 추가만 (실효 0)
+
+**잃는 것**:
+- Registry schema 변경 (backward-compat 처리 필요)
+- Preflight 단계에 view-call 1번 추가 (~50-200ms RPC)
+- ABI binding 코드 추가
+- 신규 unit test (match / mismatch 2 cases)
+- 구현 모달: ~3-5 task spec/plan
+
+**언제 도입할 가치가 있나**:
+- 사용자가 "왜 DelayedWETH 만 매번 배포되지?" 명시적 의문 제기
+- Registry schema 를 다른 이유로 확장할 때 (e.g., metadata, multi-arg) **묶어서** 처리
+- Foundry parity 가 audit / 일관성 검증 요건이 될 때
+- Fault-proof 배포가 빈번해지고 누적 시간 절감이 의미 있어질 때
+
+**구현 모달**: 작음 (~3-5 task). DelayedWETH 만 대상. 단독으로 우선 진행할 가치 낮음, 다른 schema 변경과 묶어 처리 권장.
 
 ## 관련 문서
 
