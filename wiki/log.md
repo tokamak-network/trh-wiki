@@ -6,6 +6,28 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-07] feature | tokamak-deployer v0.0.10 — Sepolia registry seeded, reuse 자동 활성화
+
+Pages updated:
+  [[deploy-methods-comparison]] — §7.6/§7.7 갱신: Sepolia seeding 완료, v0.0.10 binary populated registry 동봉
+
+Key facts captured:
+  - 2026-05-07 v0.0.9 binary 로 Sepolia 신규 fault-proof 배포 (chainId 111551149999, deployer 0x7220c734…499c, 35 steps, ~7m, 0.024 ETH)
+  - 9개 reuse-target impl 모두 cast code + keccak256 검증 → v0.0.9 artifact 와 9/9 MATCH
+  - 등록된 주소들 (`cmd/registry/11155111.json`):
+    * SuperchainConfig 0xE144C4b11DCFcAb788EBF97f6b7D74e3e3A7A3FF
+    * OptimismPortal 0x968aaf1A6010dc9d97A3dBA5d176dE7671F4abEA
+    * SystemConfig 0x531aC70DCa1934E8Ed870FBa52326f300C876480
+    * L1StandardBridge 0xDf4EA990EFb3ad65eE4751AE87A43BC62a5FbF8f
+    * L1CrossDomainMessenger 0x8265df0C2989a77e4C9250a4247030afFD6d6A5C
+    * OptimismMintableERC20Factory 0x8bbD92a394d21E11AEbd2aeB9b4B210242cdBaC7
+    * L1ERC721Bridge 0xb67BC25e95df5A1a83C28641b6D3089174c45048
+    * L2OutputOracle 0x9524b236b2F9B89eb288F32C4f3Ce7f4eCCfdA2b
+    * DisputeGameFactory 0xB68252C2d3530BC2d2141F1f0EEf8077b8d124a3
+  - v0.0.10 binary 실측 Sepolia preflight 로그: "Reuse preflight: 9/9 implementations reusable"
+  - trh-sdk `e57a915` 가 TokamakDeployerVersion v0.0.9 → v0.0.10 bump → 사용자 추가 액션 없이 즉시 reuse 활성화
+  - 커밋: tokamak-thanos `c0c6ec5a0f` (registry 등록) + tag `tokamak-deployer/v0.0.10`; trh-sdk `e57a915` (version bump)
+
 ## [2026-05-07] feature | tokamak-deployer Reuse 기능 — `--reuse-deployment` 플래그 도입 (v0.0.9)
 
 Pages updated:

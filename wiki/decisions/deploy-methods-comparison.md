@@ -323,25 +323,33 @@ CLI override: `--reuse-impls <path>` 가 embedded 보다 우선.
 
 실측 (anvil 로컬): nonce delta = `26 base steps - 8 reused (no fault-proof) = 18` 정확히 일치, L2OutputOracle impl 주소가 두 deploy 간 동일.
 
-### 7.6 알려진 제약 — Sepolia registry 채우기
+### 7.6 Sepolia seeding (v0.0.10)
 
-Foundry-era `packages/tokamak/contracts-bedrock/deployments/thanos-stack-sepolia/address.json` 의 9개 impl 모두 v0.0.9 embedded artifact 와 **bytecode 미일치** (검증 결과: SystemConfig 포함 9개 모두 selector 개수가 다름; 같은 solc 0.8.15 trailer 이지만 source revision 차이로 코드가 ~24-39% 더 큼). 
+**v0.0.9 제약 (해소됨)**: 초기 v0.0.9 발행 시점에 Foundry-era `packages/tokamak/contracts-bedrock/deployments/thanos-stack-sepolia/address.json` 의 9개 impl 모두 v0.0.9 embedded artifact 와 **bytecode 미일치** (검증: SystemConfig 포함 9개 모두 selector 개수가 다름; 같은 solc 0.8.15 trailer 이지만 source revision 차이로 코드가 ~24-39% 더 큼). 따라서 v0.0.9 의 Sepolia registry 는 `implementations: {}` 빈 상태로 발행됨.
 
-→ Sepolia registry 는 commit 시점에 **`implementations: {}` 비워둔 채** 유지. 다음 v0.0.9 으로의 Sepolia 신규 배포 후 `deploy-output.json:implementations` 를 PR 로 등록해야 활성화. 절차는 `tokamak-thanos/cmd/tokamak-deployer/cmd/registry/README.md` 참고.
+**v0.0.10 해결**: 2026-05-07 에 v0.0.9 binary 로 Sepolia 신규 fault-proof 배포(`chainId=111551149999`, deployer `0x7220c7…499c`, 35 steps, ~7m, 0.024 ETH) 를 실행. 결과 `deploy-output.json:implementations` 9개 주소 모두 `cast code + keccak256` 으로 v0.0.9 artifact 와 **9/9 MATCH** 검증 후 `cmd/registry/11155111.json` 에 등록 (`c0c6ec5a0f`). v0.0.10 binary 가 이 populated registry 를 동봉. 실측 v0.0.10 binary 의 Sepolia preflight 로그: `Reuse preflight: 9/9 implementations reusable`.
+
+**현재 상태**: trh-sdk v0.0.10 + `trh-sdk deploy-contracts --reuse-deployment` → Sepolia 에서 9개 impl 재사용 자동 활성화, 추가 설정 불필요.
+
+다른 L1 chainId (Mainnet 1, 사설 testnet 등) 등록 절차는 `tokamak-thanos/cmd/tokamak-deployer/cmd/registry/README.md` 참고.
 
 ### 7.7 커밋 레퍼런스
 
-| Repo | Commit | 내용 |
+| Repo | Commit / Tag | 내용 |
 |---|---|---|
 | tokamak-thanos | `68515b36ca` | tokamak-deployer reuse 기능 13-task 구현 |
-| tokamak-thanos | `tokamak-deployer/v0.0.9` (tag) | goreleaser 4 platform binaries 발행 |
+| tokamak-thanos | tag `tokamak-deployer/v0.0.9` | goreleaser 4 platform binaries 발행 (Sepolia registry 빈 상태) |
 | tokamak-thanos | `a063b10675` | Sepolia registry comment + README 갱신 (호환성 가이드) |
+| tokamak-thanos | `c0c6ec5a0f` | Sepolia registry 9 impl 등록 (fresh v0.0.9 deploy 결과) |
+| tokamak-thanos | tag `tokamak-deployer/v0.0.10` | populated Sepolia registry 동봉 binaries 발행 |
 | trh-sdk | `3b96c4d` | wiring + version bump v0.0.8 → v0.0.9 + 4 unit tests |
+| trh-sdk | `e57a915` | TokamakDeployerVersion v0.0.9 → v0.0.10 (populated Sepolia registry 활성) |
 
 ### 7.8 후속 후보
 
 - **`IMPL_SALT` / CREATE2** — 본 변경에서 미포함. fallback 신규 배포에 deterministic 주소 도입하면 IMPL_SALT 환경변수로 멀티-체인 주소 일관성 확보 가능 (§6 의 별도 항목)
 - **trh-sdk 에 `--reuse-impls <path>` CLI 플래그 추가** — 현재 wiring 은 `RegistryPath` 필드만 있고 노출 X. 사용자 직접 override 가 필요해질 때 추가
+- **Mainnet registry 등록** — Sepolia 절차 그대로. 첫 mainnet 배포 후 `deploy-output.json:implementations` 를 `registry/1.json` 으로 PR
 - **AnchorStateRegistry / DelayedWETH 의 constructor-aware reuse** — chain-specific 인자가 같은 경우에만 reuse 허용. Foundry 의 `delayedWETH.delay()` view check 패턴 참고
 
 ## 관련 문서
