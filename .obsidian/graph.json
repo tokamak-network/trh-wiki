@@ -1,20 +1,70 @@
 {
-  "collapse-filter": true,
-  "search": "",
+  "collapse-filter": false,
+  "search": "-path:raw",
   "showTags": false,
   "showAttachments": false,
-  "hideUnresolved": false,
+  "hideUnresolved": true,
   "showOrphans": true,
   "collapse-color-groups": false,
-  "colorGroups": [],
+  "colorGroups": [
+    {
+      "query": "path:wiki/overview",
+      "color": {
+        "a": 1,
+        "rgb": 9464411
+      }
+    },
+    {
+      "query": "path:wiki/components/core",
+      "color": {
+        "a": 1,
+        "rgb": 3440895
+      }
+    },
+    {
+      "query": "path:wiki/components/integration",
+      "color": {
+        "a": 1,
+        "rgb": 5592575
+      }
+    },
+    {
+      "query": "path:wiki/concepts",
+      "color": {
+        "a": 1,
+        "rgb": 3866625
+      }
+    },
+    {
+      "query": "path:wiki/workflows",
+      "color": {
+        "a": 1,
+        "rgb": 16744448
+      }
+    },
+    {
+      "query": "path:wiki/decisions",
+      "color": {
+        "a": 1,
+        "rgb": 16763904
+      }
+    },
+    {
+      "query": "path:wiki/troubleshooting",
+      "color": {
+        "a": 1,
+        "rgb": 14680064
+      }
+    }
+  ],
   "collapse-display": true,
   "showArrow": false,
   "textFadeMultiplier": 0,
-  "nodeSizeMultiplier": 1,
+  "nodeSizeMultiplier": 1.2,
   "lineSizeMultiplier": 1,
   "collapse-forces": true,
   "centerStrength": 0.518713248970312,
-  "repelStrength": 10,
+  "repelStrength": 14,
   "linkStrength": 1,
   "linkDistance": 250,
   "scale": 1.0336840927660285,

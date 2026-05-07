@@ -1172,3 +1172,26 @@ Key facts captured:
   - Genesis alloc funding (runtime 송금 회피, max(threshold×10, 1e18)) + 순차 depositAndActivate() 자동 호출
   - trh-sdk Makefile `update-drb-contracts VERSION=<semver>` 타겟 + `DRB_CONTRACTS_VERSION` env override
   - 구현: trh-sdk/pkg/stacks/thanos/drb_{genesis,orchestrator,activate,peer_id}.go
+
+## [2026-05-07] lint + cleanup | 그래프 뷰 정리
+
+파일 이동 (wiki 루트 → 하위 폴더):
+  - [[asr-dgf-proxy-address-bug]] → troubleshooting/
+  - [[set-env-path-reuse-bug]] → troubleshooting/
+  - [[tokamak-deployer-gas-price]] → troubleshooting/
+  - [[tokamak-deployer-logging]] → troubleshooting/
+  - [[drb-deploy]] → workflows/
+  - [[thanos-deployer-analysis]] → overview/
+
+새 stub 페이지:
+  - [[docker-health-checks]] (troubleshooting/) — ghost 노드 해소
+  - [[l2-deposit-verification]] (troubleshooting/) — ghost 노드 해소
+
+graph.json 변경:
+  - search: "-path:raw" (raw/ 폴더 노드 제외)
+  - hideUnresolved: true (미해결 ghost 노드 숨김)
+  - colorGroups 7개 추가 (overview/core/integration/concepts/workflows/decisions/troubleshooting)
+
+index.md 변경:
+  - [[drb-deploy]] Integration → Workflows 섹션으로 이동
+  - [[thanos-deployer-analysis]] Overview 섹션에 추가

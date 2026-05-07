@@ -1,5 +1,5 @@
 ---
-updated: 2026-05-06
+updated: 2026-05-07
 ---
 
 # TRH Wiki Index
@@ -13,6 +13,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | Page | Summary |
 |------|---------|
 | [[architecture]] | Full system architecture map — 4 repos, their roles, and how they connect |
+| [[thanos-deployer-analysis]] | Complete deployment logic analysis — 8-layer architecture, 6-phase flow, 51 functions, critical pitfalls |
 
 ## Components
 
@@ -38,7 +39,6 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[drb-project]] | DRB 프로젝트 umbrella — 프로토콜 흐름, 상태 머신, operator lifecycle, dispute/slashing, L2 gas |
 | [[commit-reveal2]] | 분산 랜덤 비컨(DRB) 스마트 컨트랙트 — 2단계 Commit-Reveal, last revealer attack 방지 (part of [[drb-project]]) |
 | [[drb-node]] | DRB Go 노드 구현체 — Leader/Regular 아키텍처, LibP2P, PostgreSQL (part of [[drb-project]]) |
-| [[drb-deploy]] | trh-sdk DRB 노드 AWS 배포 — EKS leader, EC2 regular, 보안 결정, 브랜치 고정 이유 |
 
 ## Concepts
 
@@ -59,12 +59,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[ec2-deploy]] | AWS EC2 deployment via Terraform — one-time setup and update flow |
 | [[release]] | Electron DMG/NSIS/AppImage 빌드, Docker 이미지 배포, 버전 고정 패턴 |
 | [[testing]] | 테스트 스택, 실행 명령어, E2E 3가지 모드, Vitest/Playwright 패턴 |
-
-## Deployment Analysis
-
-| Page | Summary |
-|------|---------|
-| [[thanos-deployer-analysis]] | Complete deployment logic analysis — 8-layer architecture, 6-phase flow, 51 functions, critical pitfalls |
+| [[drb-deploy]] | trh-sdk DRB 노드 AWS 배포 — EKS leader, EC2 regular, 보안 결정, 브랜치 고정 이유 |
 
 ## Decisions
 
