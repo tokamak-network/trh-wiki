@@ -6,6 +6,22 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-07] feature | tokamak-deployer Reuse 기능 — `--reuse-deployment` 플래그 도입 (v0.0.9)
+
+Pages updated:
+  [[deploy-methods-comparison]] — §6.3 ✅ 완료 표시 + 신규 §7 (Reuse 기능 도입) 추가
+
+Key facts captured:
+  - 신규 CLI 3개: `--reuse-deployment` (마스터 토글, default off), `--reuse-impls <path>` (registry override), `--reuse-strict` (mismatch=abort)
+  - 대상 9 impls: SuperchainConfig, OptimismPortal, SystemConfig, L1StandardBridge, L1CrossDomainMessenger, OptimismMintableERC20Factory, L1ERC721Bridge, L2OutputOracle, DisputeGameFactory. 모두 constructor 인자 없는 impl
+  - 검증: `eth_getCode` + keccak256 vs embedded `deployedBytecode.object`. mismatch → silent fallback (lenient default) / abort (strict)
+  - Embedded registry: `cmd/tokamak-deployer/cmd/registry/{l1ChainId}.json` via `//go:embed registry`
+  - trh-sdk wiring: `TokamakDeployerVersion` v0.0.8 → v0.0.9, `buildDeployContractsArgs` 가 `--reuse-deployment` 전달. 기존 `trh-sdk --reuse-deployment` 플래그가 이제 양쪽 경로(Foundry + Go) 동시 활성화 (이전엔 Foundry 만)
+  - 효과: Sepolia 5m47s → ~3m45s (1.5-4.5분 단축). anvil 측정 nonce delta = 26 - 8 = 18 정확
+  - **Sepolia registry 는 비워둔 채 유지**: Foundry-era `address.json` 의 9개 impl 모두 v0.0.9 artifact 와 bytecode 미일치 (selector 개수 다름, ~24-39% 코드 차이, source revision 차이). 다음 v0.0.9 신규 deploy 의 `deploy-output.json` 으로 채워야 함
+  - 커밋: tokamak-thanos `68515b36ca` (구현) + `a063b10675` (registry docs) + tag `tokamak-deployer/v0.0.9`; trh-sdk `3b96c4d` (wiring)
+  - Spec/plan: tokamak-thanos `docs/superpowers/{specs,plans}/2026-05-07-tokamak-deployer-impl-reuse*` (gitignored)
+
 ## [2026-05-06] hardening | terraform init/plan/apply 에 `-input=false` 일괄 적용
 
 Pages updated:

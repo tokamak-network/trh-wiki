@@ -225,7 +225,7 @@ logStep := func(format string, args ...interface{}) {
    - `transferDisputeGameFactoryOwnership` / `transferDelayedWETHOwnership` (394-395)
    - **Cannon prestate 는 Go 포팅 불가에 가까움** — MIPS + forge submodules + Rust 빌드 필요. 이 단계만은 외부 빌드 또는 사전 빌드된 해시 주입으로 우회해야 함
    - **AnchorStateRegistry 소스 패치** (`setInitialAnchorState` 추가) — `trh-sdk/deploy_contracts.go:485-522` 가 하는 clone+수정+재컴파일을 대체하려면 해당 함수를 upstream 에 병합하거나 deploy-time 바이트코드 패치로 대체 필요
-3. **`reuseDeployment`/`IMPL_SALT` 복구** — create2 로 주소 결정론성 재도입해 멀티-체인 배포 시 주소 일관성 확보
+3. ~~**`reuseDeployment` 복구**~~ ✅ **완료 (v0.0.9, 2026-05-07)** — `--reuse-deployment` / `--reuse-impls` / `--reuse-strict` CLI 추가, 9개 Proxy-backed impl(SuperchainConfig, OptimismPortal, SystemConfig, L1StandardBridge, L1CrossDomainMessenger, OptimismMintableERC20Factory, L1ERC721Bridge, L2OutputOracle, DisputeGameFactory) 의 재사용 지원. 자세히는 §7 참조. **`IMPL_SALT` (CREATE2)** 는 별도 후보로 남음 — fallback 신규 배포는 여전히 random-CREATE
 4. **병렬 nonce 구간** — 현재 완전 순차. 초기화 단계(step 5+8+11 등) 는 서로 독립적 → 제한적 병렬화 가능
 5. **L1 `initialize()` 호출 복원** — 현재 `contracts.go:202` 가 명시하듯 *"Try upgrade() first (simpler, no initialization)"* 로 plain `upgrade()` 만 수행. Foundry 경로의 `_upgradeAndCallViaSafe` 가 넣던 `initialize` 파라미터(Guardian / Challenger / Gas limit / SystemConfig 설정 등) 가 어디서 들어가는지 현재 문서화되지 않음. Safe 없이 `ProxyAdmin.upgradeToAndCall` 로 축소 포팅하면 5번을 먼저 끝낸 뒤 2번(fault-proof) 포팅이 쉬워짐
 
@@ -262,6 +262,87 @@ logStep := func(format string, args ...interface{}) {
 | 신규 호출자 | `trh-sdk/pkg/stacks/thanos/deployer_binary.go` | `:22 TokamakDeployerVersion`, `:33 ensureTokamakDeployer`, `:172 runDeployContracts`, `:187 runGenerateGenesis` |
 | 신규 호출자 보조 | `trh-sdk/pkg/stacks/thanos/genesis_prep.go` | `:40 prepareL2GenesisInputs`, `:67 writeAddressesOnly`, `:115 runForgeL2GenesisScript`, `:157 ensureOpNodeBinary` |
 | 전환 커밋 | trh-sdk | `df52538` (2026-04-16, L1 경로 교체), `8bd3fea` (2026-04-16, L2 Genesis 오케스트레이션), `230cdb8` (2026-04-17, v0.0.5 고정 가스) |
+
+## 7. Reuse 기능 도입 (v0.0.9, 2026-05-07)
+
+### 7.1 무엇이 추가됐나
+
+신규 CLI 플래그 3종 (`tokamak-deployer/cmd/deploy_contracts.go`):
+
+| 플래그 | 기본값 | 동작 |
+|---|---|---|
+| `--reuse-deployment` | `false` | 마스터 토글. on 일 때만 registry 검사 + 재사용 시도 |
+| `--reuse-impls <path>` | (없음) | embedded registry 를 외부 JSON 으로 override |
+| `--reuse-strict` | `false` | preflight 실패 시 즉시 abort. off 면 silent fallback to fresh deploy |
+
+**대상**: Proxy 뒤 implementation 9개 — SuperchainConfig, OptimismPortal, SystemConfig, L1StandardBridge, L1CrossDomainMessenger, OptimismMintableERC20Factory, L1ERC721Bridge, L2OutputOracle, DisputeGameFactory.
+
+**제외**: AddressManager / ProxyAdmin (per-chain 소유권), 모든 Proxy (체인별 신규), AnchorStateRegistry / DelayedWETH (constructor 인자가 chain-specific).
+
+### 7.2 검증 메커니즘
+
+`Deploy()` 진입 직후 preflight 실행 (`internal/deployer/reuse.go:Registry.verify`):
+1. registry 의 각 entry 에 대해 `eth_getCode(addr)` → on-chain runtime bytecode 획득
+2. binary 의 embedded `deployedBytecode.object` 와 keccak256 비교
+3. 일치 → reuseTable 에 등록 / 불일치 → silent skip (또는 strict 시 abort)
+
+**핵심 가정**: 9개 reuse 대상 모두 constructor 인자 없는 impl → immutable byte 영역 없음 → byte-for-byte equality 가 정확. (`AnchorStateRegistry` 는 DGF proxy 인자, `DelayedWETH` 는 delay 인자 받기 때문에 reuse 불가 → 후보에서 제외.)
+
+### 7.3 Registry 형식과 위치
+
+Embedded: `cmd/tokamak-deployer/cmd/registry/{l1ChainId}.json`
+
+```json
+{
+  "tokamakDeployerVersion": "v0.0.9",
+  "l1ChainId": 11155111,
+  "comment": "...",
+  "implementations": {
+    "SuperchainConfig":             "0x...",
+    "OptimismPortal":               "0x...",
+    ...
+  }
+}
+```
+
+`tokamakDeployerVersion` 은 informational (로그 출력만), `l1ChainId` 는 runtime client.ChainID() 와 일치해야 함 (불일치 = fatal). `implementations` 키 9개 중 일부만 있어도 동작.
+
+CLI override: `--reuse-impls <path>` 가 embedded 보다 우선.
+
+### 7.4 trh-sdk 측 wiring
+
+`trh-sdk/pkg/stacks/thanos/deployer_binary.go` (`3b96c4d`):
+- `TokamakDeployerVersion` v0.0.8 → **v0.0.9**
+- `deployContractsOpts.ReuseDeployment bool` + `RegistryPath string` 추가
+- `buildDeployContractsArgs` 가 `ReuseDeployment` 시 `--reuse-deployment` 전달; 추가로 `RegistryPath` 가 같이 set 되면 `--reuse-impls <path>` 도 전달
+- 기존 `trh-sdk --reuse-deployment` CLI 플래그가 이제 **양쪽 경로(Foundry + Go) 동시 활성화**. 이전엔 Foundry 만 영향
+
+### 7.5 성능 효과
+
+이론치: 9 step × 10-30s = **약 1.5-4.5 분** Sepolia deploy 시간 단축. `tokamak-deployer-gas-price` 의 5m47s 베이스라인 → ~3m45s 예상.
+
+실측 (anvil 로컬): nonce delta = `26 base steps - 8 reused (no fault-proof) = 18` 정확히 일치, L2OutputOracle impl 주소가 두 deploy 간 동일.
+
+### 7.6 알려진 제약 — Sepolia registry 채우기
+
+Foundry-era `packages/tokamak/contracts-bedrock/deployments/thanos-stack-sepolia/address.json` 의 9개 impl 모두 v0.0.9 embedded artifact 와 **bytecode 미일치** (검증 결과: SystemConfig 포함 9개 모두 selector 개수가 다름; 같은 solc 0.8.15 trailer 이지만 source revision 차이로 코드가 ~24-39% 더 큼). 
+
+→ Sepolia registry 는 commit 시점에 **`implementations: {}` 비워둔 채** 유지. 다음 v0.0.9 으로의 Sepolia 신규 배포 후 `deploy-output.json:implementations` 를 PR 로 등록해야 활성화. 절차는 `tokamak-thanos/cmd/tokamak-deployer/cmd/registry/README.md` 참고.
+
+### 7.7 커밋 레퍼런스
+
+| Repo | Commit | 내용 |
+|---|---|---|
+| tokamak-thanos | `68515b36ca` | tokamak-deployer reuse 기능 13-task 구현 |
+| tokamak-thanos | `tokamak-deployer/v0.0.9` (tag) | goreleaser 4 platform binaries 발행 |
+| tokamak-thanos | `a063b10675` | Sepolia registry comment + README 갱신 (호환성 가이드) |
+| trh-sdk | `3b96c4d` | wiring + version bump v0.0.8 → v0.0.9 + 4 unit tests |
+
+### 7.8 후속 후보
+
+- **`IMPL_SALT` / CREATE2** — 본 변경에서 미포함. fallback 신규 배포에 deterministic 주소 도입하면 IMPL_SALT 환경변수로 멀티-체인 주소 일관성 확보 가능 (§6 의 별도 항목)
+- **trh-sdk 에 `--reuse-impls <path>` CLI 플래그 추가** — 현재 wiring 은 `RegistryPath` 필드만 있고 노출 X. 사용자 직접 override 가 필요해질 때 추가
+- **AnchorStateRegistry / DelayedWETH 의 constructor-aware reuse** — chain-specific 인자가 같은 경우에만 reuse 허용. Foundry 의 `delayedWETH.delay()` view check 패턴 참고
 
 ## 관련 문서
 
