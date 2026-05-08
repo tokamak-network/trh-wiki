@@ -6,6 +6,18 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-08] feature | DeploymentProgressCard — wall-clock timer for parallel deployments
+
+Pages updated:
+  [[trh-platform-ui]] — "Deployment Progress UI" 섹션 추가
+
+Key facts captured:
+  - AWS 인프라 + L1 컨트랙트 병렬 배포 시 전체 wall-clock을 OverviewTab에 표시하는 카드 추가
+  - DeploymentProgressCard: min(started_at of active rows) → now, 1초 tick, 활성 step pill badges
+  - durationUtils.ts로 formatDuration 추출 — DeploymentsTab과 공유
+  - 활성 deployment 없으면 null 반환 (카드 자체 숨김)
+  - trh-platform-ui 커밋: `2a327f9`
+
 ## [2026-05-08] bugfix | forge L2Genesis implementations object revert
 
 Pages updated:
