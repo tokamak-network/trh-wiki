@@ -18,6 +18,19 @@ Key facts captured:
   - 활성 deployment 없으면 null 반환 (카드 자체 숨김)
   - trh-platform-ui 커밋: `2a327f9`
 
+## [2026-05-08] bugfix | Stage B terraform init "Backend configuration changed"
+
+Pages updated:
+  [[stage-b-backend-config-changed]] — 신규 트러블슈팅 페이지
+  [[index]] — Troubleshooting 섹션에 항목 추가
+
+Key facts captured:
+  - Stage A → Stage B 전환 시 ConvertChainNameToNamespace 재호출로 랜덤 namespace 재생성 (full-eu5up → full-w8ygx)
+  - makeTerraformEnvFile이 TF_VAR_backend_bucket_name에 하드코딩 "" 사용 → .envrc 덮어쓰기로 bucket_name.sh가 설정한 값 소멸
+  - 두 원인이 합쳐져 terraform init backend hash 불일치 → "Backend configuration changed" 실패
+  - 수정: thanos-stack/.terraform/terraform.tfstate (Stage A 산출물)에서 namespace + bucket 복원
+  - trh-sdk 커밋: `1f58eee`
+
 ## [2026-05-08] bugfix | forge L2Genesis implementations object revert
 
 Pages updated:
