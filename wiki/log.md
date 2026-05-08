@@ -6,6 +6,22 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-08] bugfix | forge L2Genesis implementations object revert
+
+Pages updated:
+  [[forge-l2genesis-implementations-object]] — 신규 트러블슈팅 페이지
+  [[index]] — Troubleshooting 섹션에 항목 추가
+
+Key facts captured:
+  - tokamak-deployer v0.0.10이 deploy-output.json에 `implementations` 키(중첩 JSON 오브젝트) 추가
+  - `writeAddressesOnly`가 이를 필터링하지 않아 staged addresses 파일에 포함됨
+  - forge L2Genesis가 모든 키를 `vm.parseJsonAddress`로 파싱 시도 → "expected address, found JSON object" → `<empty revert data>` revert
+  - 수정: 값의 첫 바이트가 `{`, `[`, `0-9`인 경우 skip (숫자형/오브젝트형 값 전체 필터)
+  - trh-sdk 커밋: `c170452`
+  - 회귀 테스트: `genesis_prep_test.go::TestWriteAddressesOnly_stripsNonAddressFields`
+
+---
+
 ## [2026-05-07] backlog | tokamak-deployer 후속 후보 2개 TODO 형식으로 ingest
 
 Pages updated:
