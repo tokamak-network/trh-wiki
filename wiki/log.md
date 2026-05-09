@@ -6,6 +6,20 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-09] bugfix | AWS 인프라 배포 실시간 로그 미표시
+
+Pages updated:
+  [[aws-deploy-logs-not-visible]] — 신규 트러블슈팅 페이지
+  [[index]] — Troubleshooting 섹션에 항목 추가
+
+Key facts captured:
+  - `executeDeploymentsAWSParallel`이 단일 공유 SDK 클라이언트를 `l1Step.LogPath`로 초기화
+  - AWS step용 `tailAndIngestDeploymentLogs` goroutine은 `awsStep.LogPath`를 기다리지만 해당 파일은 절대 생성되지 않음
+  - goroutine 영구 블로킹 → DB에 AWS 로그 0건 → LogDialog "No logs available"
+  - 수정: AWS ingestion goroutine이 `l1Step.LogPath`(공유 파일)를 읽도록 변경
+  - 부작용: 같은 로그 라인이 l1Step + awsStep 두 deployment에 각각 저장됨 (기능 동작에 무해)
+  - trh-backend 커밋: `958d898`
+
 ## [2026-05-08] feature | DeploymentProgressCard — wall-clock timer for parallel deployments
 
 Pages updated:
