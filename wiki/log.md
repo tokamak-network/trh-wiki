@@ -6,6 +6,20 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-09] bugfix | CrossTrade double deployment — nonce collision root cause & fix
+
+Pages updated:
+  [[troubleshooting/crosstrade-aws-install-hang]] — 2차 버그(이중 배포, nonce 충돌) 섹션 추가
+
+Key facts captured:
+  - SDK `installPresetModules`와 백엔드 goroutine이 각각 `AutoInstallCrossTradeAWS`를 호출 → 이중 배포
+  - SDK 호출은 백엔드 DB `integrations` 레코드를 업데이트하지 않음 → 여전히 Pending → 백엔드도 goroutine 실행
+  - 두 번째 호출: deployer nonce 소진 → 예측 주소 불일치 → 120초 timeout → Failed
+  - Fix: SDK `deploy_chain.go`에서 AWS CrossTrade 브랜치 제거 (trh-sdk@0c62dc9)
+  - 백엔드 goroutine이 state machine 유일 소유자로 확립
+
+---
+
 ## [2026-05-09] feature | Deployment Log UX — progress bar, level filter, LogDialog enhancement
 
 Pages updated:

@@ -1,5 +1,5 @@
 ---
-updated: 2026-05-03
+updated: 2026-05-09
 related:
   - "[[cross-trade]]"
   - "[[op-node-pectra-blob-base-fee]]"
@@ -109,3 +109,58 @@ backend goroutine timeout(50분)과 동기화.
 | `trh-sdk/pkg/stacks/thanos/cross_trade.go:108,186` | `forge script --rpc-url $L2_RPC --broadcast` |
 | `trh-sdk/pkg/utils/command.go` | `ExecuteCommandStream` — context 취소 시 forge kill |
 | `tokamak-thanos-stack/terraform/thanos-stack/scripts/generate-thanos-stack-values.sh` | op-geth 이미지 태그 생성 |
+
+---
+
+## 2차 버그: 이중 배포로 인한 nonce 충돌 (2026-05-09 발견)
+
+### 증상
+
+배포 로그에 `"↳ cross-trade: deploying L2 contracts via deposit tx"` 메시지가 **두 번** 나타남.
+첫 번째 배포는 성공하지만 두 번째는 실패:
+
+```
+2026-05-09T12:05:33  ↳ cross-trade: deploying L2 contracts via deposit tx...
+  → contract deployed at 0x5537... (attempt 42/60)
+  → L2 CrossTrade contracts deployed: proxy=0x5537... l2l2proxy=0x23249...
+  → ✅ CrossTrade deployed
+
+2026-05-09T12:23:42  ↳ cross-trade: deploying L2 contracts via deposit tx...
+  → ERROR: L2 contract deployment failed: step 1 L2 verification failed:
+           contract at 0x53D0... not deployed after 120s
+```
+
+crossTradeUrl 등 metadata 필드가 NULL인 채로 배포 완료.
+
+### 근본 원인
+
+두 개의 코드 경로가 모두 `AutoInstallCrossTradeAWS`를 호출:
+
+1. **SDK `installPresetModules`** (`deploy_chain.go:2391`): `DeployAWSStageBInfra` 도중 호출. L2 contracts를 성공적으로 배포하지만 **백엔드 DB `integrations` 레코드를 업데이트하지 않음** (여전히 `Pending` 상태).
+2. **백엔드 goroutine** (`deployment.go:499-531`): `executeDeploymentsAWSParallel` 반환 후, `GetIntegrationByStatus(Pending)`이 여전히 Pending 레코드를 발견 → goroutine 실행 → **동일 SDK 함수 두 번째 호출**.
+
+두 번째 호출 시 deployer nonce가 이미 소진되어, L1 deposit tx로 예측한 L2 contract 주소가 달라짐 → 120초 대기 후 실패.
+
+### 수정 (2026-05-09, trh-sdk@0c62dc9)
+
+**파일:** `trh-sdk/pkg/stacks/thanos/deploy_chain.go`
+
+SDK `installPresetModules`에서 AWS CrossTrade 브랜치를 제거. 백엔드 goroutine이 integration record state machine(Pending → InProgress → Completed/Failed)을 관리하는 유일한 소유자가 됨.
+
+```go
+// Before: SDK도 AutoInstallCrossTradeAWS를 호출
+if modules["crossTrade"] {
+    if t.deployConfig.K8s != nil {  // AWS
+        t.AutoInstallCrossTradeAWS(ctx)  // ← 제거
+    } else {
+        t.logger.Info("ℹ️  Run 'trh install cross-trade'...")
+    }
+}
+
+// After: 로컬 안내 메시지만 남김
+if modules["crossTrade"] && t.deployConfig.K8s == nil {
+    t.logger.Info("ℹ️  Run 'trh install cross-trade'...")
+}
+```
+
+**설계 원칙**: SDK는 infra를 프로비저닝하고 결과를 반환하는 역할. 상태 머신(Pending→Completed)을 관리하는 것은 백엔드의 책임. SDK가 직접 백엔드 DB를 모르는 채로 통합 레코드 기반 흐름에 개입해서는 안 됨.
