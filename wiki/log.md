@@ -6,6 +6,19 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-09] bugfix | terraform destroy secretsmanager child module backend block
+
+Pages updated:
+  [[terraform-destroy-secretsmanager-backend]] — 신규 트러블슈팅 페이지
+  [[index]] — Troubleshooting 섹션에 항목 추가
+
+Key facts captured:
+  - `modules/secretsmanager/backend.tf`에 `backend "s3" {}` 블록이 child module에 선언되어 Terraform 1.x에서 금지
+  - VPC destroy 18분 진행 후 이 오류로 중단됨
+  - tokamak-thanos-stack 커밋 `1dd0d70`으로 backend 블록 제거
+  - 수동 복구: SG 삭제 → VPC 삭제 → terraform state rm → S3 버전 전체 삭제 → DynamoDB 테이블 삭제
+  - 수정 전 배포본은 수동 복구 필요; 신규 배포부터 적용
+
 ## [2026-05-09] bugfix | AWS 인프라 배포 실시간 로그 미표시
 
 Pages updated:

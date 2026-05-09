@@ -85,6 +85,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[block-explorer-envrc-thanos-stack-name-stripped]] | `makeBlockExplorerEnvs`가 .envrc에서 `TF_VAR_thanos_stack_name`을 strip 후 빈 StackName이면 미복구 → block-explorer terraform plan이 stdin 프롬프트로 무한 hang. trh-sdk f6f2f92에서 caller 명시 + 함수 방어로 수정 |
 | [[stage-b-backend-config-changed]] | Stage B `terraform init`이 "Backend configuration changed" 실패 — namespace 랜덤 재생성 + 빈 bucket name 2가지 원인. trh-sdk 1f58eee에서 `.terraform/terraform.tfstate`에서 복원하도록 수정 |
 | [[aws-deploy-logs-not-visible]] | AWS 인프라 배포 LogDialog "No logs available" — 단일 공유 SDK 클라이언트가 l1Step.LogPath만 기록 → awsStep ingestion goroutine 영구 블로킹. trh-backend 958d898에서 수정 |
+| [[terraform-destroy-secretsmanager-backend]] | `terraform destroy` 실패 — secretsmanager child module에 `backend "s3" {}` 블록 선언 → Terraform 1.x 금지. tokamak-thanos-stack 1dd0d70에서 제거, 수동 복구 절차 포함 |
 
 ---
 
