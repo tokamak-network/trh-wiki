@@ -6,6 +6,21 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-09] feature | Deployment Log UX — progress bar, level filter, LogDialog enhancement
+
+Pages updated:
+  [[trh-platform-ui]] — "Deployment Progress UI" 섹션 확장 (ActiveStepProgress, LogDialog, 로그 파싱 유틸)
+
+Key facts captured:
+  - `ActiveStepProgress`가 `ActiveStepPill`을 대체 — step 진행 바, subtask 레이블, 에러 상태, Logs→ 버튼 포함
+  - `DeploymentProgressCard`는 `flex-col gap-4` 레이아웃으로 변경, `ActiveStepProgress` per deployment
+  - `LogDialog` Progress Panel 추가: `extractStepProgress` + `extractCurrentSubtask` + 첫 에러 배너
+  - 레벨 필터 버튼 (ALL/ERROR/WARN/INFO) 및 색상 코딩 추가 (어두운 배경 기준 4색)
+  - `extractStepProgress`: 로그 역방향 스캔, `step X/Y` 패턴 파싱, total=0이면 null
+  - `classifyLogLevel`: JSON 우선(`level`/`lvl` 필드) → plain text 키워드 fallback
+  - 실패 시 자동 첫 error 라인 스크롤, Realtime ON 시 최하단 자동 스크롤
+  - trh-platform-ui 커밋: `efc1308`~`d43ea3d` (5 tasks, 8 commits)
+
 ## [2026-05-09] bugfix | terraform destroy secretsmanager child module backend block
 
 Pages updated:
