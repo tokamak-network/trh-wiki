@@ -71,6 +71,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[docker-health-checks]] | Backend health check timeouts and retry strategies |
 | [[l2-deposit-verification]] | Verifying L2 deposit transaction execution — polling strategy |
 | [[l1-deposit-tx-pitfalls]] | L1 Deposit Tx CrossTrade 배포 시 13개 주요 함정과 방지법 |
+| [[cross-trade-deposit-verification-timeout]] | sequencer_l1_confs=5 → 72s 구조적 지연 → 120s timeout 실패 원인 & 300s 증가 |
 | [[tokamak-deployer-logging]] | Debugging contract deployment hangs via comprehensive logging (v1.0.1+) |
 | [[tokamak-deployer-gas-price]] | Fixed gas price reuse strategy (v0.0.5+) — 5m47s measured on Sepolia, 0 retries |
 | [[drb-local-compose-path-template-bugs]] | DRB gaming preset 로컬 배포 시 드러난 5개 경로·템플릿 버그 (path, FuncMap, range-scope, PORT, op-geth volume) |

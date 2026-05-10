@@ -6,6 +6,19 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-10] fix | CrossTrade L2 deposit verification timeout — sequencer_l1_confs root cause
+
+Pages created:
+  [[cross-trade-deposit-verification-timeout]] — step 3 120s 타임아웃 실패 원인: sequencer_l1_confs=5 구조적 72s 지연 + 분산
+
+Key facts captured:
+  - sequencer_l1_confs=5 → 5 L1 confirmations × 12s = 60s op-node 의도적 대기
+  - L1 receipt 10s + 60s 대기 + 2s L2 = 72s 이론 최소, 실측 85-123s
+  - 타임아웃 60→150 attempts (120s→300s): trh-sdk 5bf42c5
+  - L1Block predeploy 0x4200...0015 number()로 op-node lag 실측 가능
+
+---
+
 ## [2026-05-10] perf | ELB DNS propagation delay — authoritative resolver bypass
 
 Pages created:
