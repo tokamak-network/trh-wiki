@@ -6,6 +6,20 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-10] perf | ELB DNS propagation delay — authoritative resolver bypass
+
+Pages created:
+  [[elb-dns-propagation-delay]] — AWS ELB 생성 후 12분 대기 근본 원인 & 권위 DNS 우회 해결책
+
+Key facts captured:
+  - 공개 DNS(Docker 내 127.0.0.11 포함)는 새 ELB A 레코드를 5-10분간 캐시 지연
+  - deploy_chain.go Phase 1(~8분) + uptime_service.go Phase 2(~4분) = 총 ~12분 낭비
+  - Fix: `net.Resolver`로 Route53 권위 NS 직접 쿼리 → 즉시 해소
+  - `NewELBHTTPClient` + `rpc.DialOptions(WithHTTPClient)` 패턴 적용
+  - trh-sdk ca84863
+
+---
+
 ## [2026-05-09] bugfix | CrossTrade double deployment — nonce collision root cause & fix
 
 Pages updated:
