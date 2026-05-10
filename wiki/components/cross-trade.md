@@ -1,5 +1,5 @@
 ---
-updated: 2026-04-19
+updated: 2026-05-10
 sources:
   - raw/decisions/PRD-CrossTrade-TRH-Integration-v2.1.md
   - raw/inbox/crosstrade-deployment-guide.md
@@ -167,11 +167,19 @@ L2toL2CrossTradeL1.setChainInfo(l2ChainId, crossDomainMessenger, l2toL2CrossTrad
 
 ### AWS 자동 설치 (`cross_trade_aws.go`)
 
-DeFi/Full preset AWS 배포 시 `installPresetModules`가 `autoInstallCrossTradeAWS`를 자동 호출한다:
+DeFi/Full preset AWS 배포 시 trh-backend goroutine이 `AutoInstallCrossTradeAWS`를 자동 호출한다 (SDK `installPresetModules`는 이 경로 처리 안 함):
 
 1. `readDeploymentContracts()` — `deploy-output.json`에서 `OptimismPortalProxy`, `L1CrossDomainMessengerProxy` 읽기
 2. `DeployCrossTradeLocal` — L1 Deposit Tx로 L2 CrossTrade 컨트랙트 배포 (20-40분)
-3. `installCrossTradeHelmAWS` — CrossTrade dApp을 Helm으로 배포, ALB ingress 대기
+3. `installCrossTradeHelmAWS` — 단일 CrossTrade Helm 릴리스 배포, ALB ingress 대기
+
+**단일 릴리스 구조 (2026-05-10):** L2→L1과 L2→L2를 각각 별도 Helm 릴리스로 배포하던 방식에서 **단일 릴리스**로 통합. dApp이 `getCommunicationMode()`로 도착 체인 기반 자동 모드 분기하므로 두 체인 config(`NEXT_PUBLIC_CHAIN_CONFIG_L2_L1` + `NEXT_PUBLIC_CHAIN_CONFIG_L2_L2`)를 하나의 릴리스에 모두 주입하는 것으로 충분. ALB group name: `"cross-trade"` 하나.
+
+**`AutoInstallCrossTradeAWSOutput` 구조:**
+- `DAppURL string` — 단일 dApp ALB URL (이전: `L2L1DAppURL`/`L2L2DAppURL` 두 필드)
+- `L2CrossTradeProxy`, `L2toL2CrossTradeProxy`, `L1CrossTradeProxy`, `L2toL2CrossTradeL1` — 컨트랙트 주소
+
+**Backend metadata 저장:** `finalMetadata["url"] = output.DAppURL` + `stack.Metadata.CrossTradeUrl` — Integration UI의 `integration.info?.url` 키와 매핑됨.
 
 **주의:** `DeployCrossTradeApplication` 함수는 `input.L2ChainConfig[l2ChainID]`에서 uint64 체인 ID를 슬라이스 인덱스로 사용하는 버그가 있다 (e.g. 111551215120 → 즉시 panic). AWS 경로는 이 함수를 우회하여 Helm 로직을 inline으로 구현한다.
 

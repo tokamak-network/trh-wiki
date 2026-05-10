@@ -6,6 +6,19 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-10] refactor | CrossTrade AWS — single Helm release + metadata URL fix
+
+Pages updated:
+  [[cross-trade]] — AWS 자동 설치 섹션 갱신: 단일 Helm 릴리스 구조, DAppURL 필드, backend metadata 키
+
+Key facts captured:
+  - installCrossTradeHelmAWS: L2→L1/L2→L2 두 릴리스 → 단일 릴리스 (L2L1Config + L2L2Config 동시 주입)
+  - AutoInstallCrossTradeAWSOutput: L2L1DAppURL/L2L2DAppURL → DAppURL (단일 ALB URL)
+  - backend finalMetadata["url"] / stack.Metadata.CrossTradeUrl 로 통일 (UI 매핑 수정)
+  - trh-sdk: 59a8cac | trh-backend: ab34e1f
+
+---
+
 ## [2026-05-10] fix | CrossTrade L2 deposit verification timeout — sequencer_l1_confs root cause
 
 Pages created:
