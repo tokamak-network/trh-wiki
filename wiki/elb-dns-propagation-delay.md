@@ -42,6 +42,12 @@ Docker 컨테이너 DNS(127.0.0.11)
 
 **커밋**: trh-sdk `ca84863`
 
+## 이후 개선 (trh-sdk `e4765c8`)
+
+- `newELBDialer`에 `sync.Map` 기반 NS 캐시(TTL 5분) 추가 — 5초 폴링 루프에서 매 호출마다 `LookupNS` + `LookupHost`를 수행하던 문제 해결.
+- `IsURLReachableCtx(ctx, url)` 추가로 호출자 context 취소 전파.
+- ALB provisioning wait 전반 최적화는 [[aws-stage-b-provisioning-optimization]] 참조.
+
 ## 예상 효과
 
 Phase 1 + Phase 2 합산 ~12분 → 실제 NLB 프로비저닝 + 파드 기동 시간(~2-4분)으로 단축.

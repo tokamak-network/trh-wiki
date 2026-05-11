@@ -83,6 +83,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[asr-dgf-proxy-address-bug]] | tokamak-deployer step 31이 ASR constructor에 DGF 구현체 주소 전달 → resolve() 항상 UnregisteredGame() revert → 프록시 주소로 수정 |
 | [[optimism-portal-proxy-uninitialized]] | tokamak-deployer가 OptimismPortalProxy initialize() 미호출 → systemConfig=0 → depositTransaction() _metered() revert → CrossTrade L2 배포 실패 |
 | [[elb-dns-propagation-delay]] | AWS ELB 생성 후 공개 DNS 전파 지연(~12분) — 권위 NS 직접 쿼리로 우회 (trh-sdk ca84863) |
+| [[aws-stage-b-provisioning-optimization]] | Stage B ALB 프로비저닝 대기 최적화 — probe 튜닝, ALB annotation, NS 캐시, errgroup 병렬화로 41min→~30min |
 | [[destroy-namespace-timeout]] | AWS destroy 시 `kubectl delete namespace` 가 5분 timeout — finalizer 자가복구 부재 + EFS MT 정리 순서 결함 + Conditions 타입 버그, trh-sdk 4099570에서 자가복구 5단계로 수정 |
 | [[block-explorer-envrc-thanos-stack-name-stripped]] | `makeBlockExplorerEnvs`가 .envrc에서 `TF_VAR_thanos_stack_name`을 strip 후 빈 StackName이면 미복구 → block-explorer terraform plan이 stdin 프롬프트로 무한 hang. trh-sdk f6f2f92에서 caller 명시 + 함수 방어로 수정 |
 | [[stage-b-backend-config-changed]] | Stage B `terraform init`이 "Backend configuration changed" 실패 — namespace 랜덤 재생성 + 빈 bucket name 2가지 원인. trh-sdk 1f58eee에서 `.terraform/terraform.tfstate`에서 복원하도록 수정 |

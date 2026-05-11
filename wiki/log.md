@@ -6,6 +6,23 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-12] perf | Stage B ALB 프로비저닝 대기 최적화 — 41min→~30min
+
+Pages created:
+  [[aws-stage-b-provisioning-optimization]] — op-geth probe, ALB annotation, NS 캐시, errgroup 병렬화 4종 최적화 전략과 근거
+
+Pages updated:
+  [[elb-dns-propagation-delay]] — P2 NS 캐시(sync.Map, TTL 5min) 추가 및 후속 최적화 링크
+
+Key facts captured:
+  - op-geth RPC entrypoint는 ALB(NLB 아님) — WaitForIngressAddress 반환 시점 ≠ 트래픽 가능 시점
+  - L1 init 함수 전체(SystemConfig/CDM/Portal/L2OO/DGF/OP2)는 L2 RPC에 의존하지 않음 → errgroup 병렬화 근거
+  - ALB success-codes: '200-499' 필수 — op-geth GET / → 4xx, 기본 200-399면 영구 unhealthy
+  - initDisputeGameFactory는 게임 생성하지 않음 → initGenesisAnchorState를 DGF init 이후로 안전하게 후치 가능
+  - tokamak-thanos-stack: c2e8354 | trh-sdk: e4765c8
+
+---
+
 ## [2026-05-10] refactor | CrossTrade AWS — single Helm release + metadata URL fix
 
 Pages updated:
