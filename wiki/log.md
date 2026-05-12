@@ -6,6 +6,21 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-12] fix | Genesis/Rollup hash mismatch — go-ethereum 버전 분기 근본 원인 수정
+
+Pages updated:
+  [[genesis-rollup-hash-mismatch]] — go-ethereum v1.14.0 vs v1.17.1 RequestsHash 분기 추가, outdated 실증 검증 주석 수정
+
+Key facts captured:
+  - 근본 원인: 0e66bf443c(PragueTime=IsthmusTime) 이후 v1.14.0은 RequestsHash 미포함 → 다른 해시
+  - tokamak-deployer v1.14.0: 0xdf0f38a0..., trh-sdk v1.17.1: 0x92ebfee7...
+  - ensureRollupGenesisHashSync regeneration loop가 futile: binary가 여전히 wrong hash 생성
+  - tokamak-thanos-geth(op-geth fork)도 동일 RequestsHash 로직 포함 확인
+  - 수정: tokamak-deployer go.mod v1.14.0 → v1.17.1 (249763524e)
+  - 기존 "3개 테스트넷 실증 검증" 주석은 Prague 비활성 시절 데이터 — outdated
+
+---
+
 ## [2026-05-12] fix | Genesis/Rollup hash mismatch — op-node CrashLoopBackOff
 
 Pages created:
@@ -16,7 +31,7 @@ Pages updated:
 
 Key facts captured:
   - maybeFundAAAdmin: genesis.json alloc 패치 → block 0 해시 변경 → rollup.json 미동기화
-  - core.Genesis.ToBlock().Hash() == tokamak-deployer genesis.l2.hash (3개 테스트넷 실증 검증)
+  - core.Genesis.ToBlock().Hash() == tokamak-deployer genesis.l2.hash (3개 테스트넷 실증 검증 — Prague 비활성 시절)
   - ensureRollupGenesisHashSync: 2파일 읽기 + 해시 비교만 (정상 경로 overhead ≈ 0)
   - mismatch 시만 binary lazy-download → runGenerateGenesis --base-genesis 호출
   - OutPath에 임시파일 필수: OutPath == BaseGenesisPath 동일 경로 시 truncate 방지
