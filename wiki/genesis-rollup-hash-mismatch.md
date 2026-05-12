@@ -1,5 +1,5 @@
 ---
-updated: 2026-05-12
+updated: 2026-05-13
 ---
 
 # Genesis/Rollup Hash Mismatch — op-node CrashLoopBackOff
@@ -66,7 +66,7 @@ binary(v1.14.0)가 같은 wrong hash(0xdf0f38a0...) 다시 기록
 3. 일치 → 통과 (정상 경로, binary 다운로드 없음)
 4. 불일치 → `tokamak-deployer --base-genesis`로 `rollup.json` 재생성 후 재검증
 
-### 2차 수정 — 근본 원인 해결 (tokamak-thanos 249763524e)
+### 2차 수정 — 근본 원인 해결 (tokamak-thanos 249763524e → tokamak-deployer/v0.0.12)
 
 tokamak-deployer `go.mod`에서 `go-ethereum v1.14.0 → v1.17.1` 로 업그레이드.
 
@@ -74,7 +74,14 @@ tokamak-deployer `go.mod`에서 `go-ethereum v1.14.0 → v1.17.1` 로 업그레�
 - tokamak-thanos-geth(op-geth 포크)도 동일 로직 적용 확인(v0.0.0-20250316144452-ffef43a7e0ca)
 - 이후 tokamak-deployer binary가 trh-sdk와 동일한 해시 계산
 
+**배포 이력 (2026-05-13)**:
+- tokamak-thanos에 `tokamak-deployer/v0.0.12` 태그 생성 → CI가 바이너리 빌드/릴리스
+- trh-sdk `TokamakDeployerVersion` → `"v0.0.12"` 로 bump (commit c7bce50)
+- trh-backend CI가 새 이미지 빌드 트리거 (자동)
+
 ⚠️ **주의**: 1차 수정의 wiki 기록 중 "3개 테스트넷 배포에서 실증 검증"은 `0e66bf443c` 이전(Prague 비활성 상태)에 이루어진 것이어서 이 케이스를 커버하지 못했다.
+
+⚠️ **타이밍 함정**: `trh-backend:latest` 이미지 빌드 시각(12:58 UTC)이 2차 수정 커밋(14:04 UTC)보다 먼저여서, 2026-05-12 배포는 v0.0.11 binary를 사용하여 실패했다. 이미지 빌드 후 픽스 커밋이 들어온 경우 반드시 이미지를 재빌드해야 한다.
 
 ## 설계 결정
 

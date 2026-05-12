@@ -6,6 +6,19 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-13] fix | genesis/rollup hash mismatch — tokamak-deployer v0.0.12 릴리스
+
+Pages updated:
+  [[genesis-rollup-hash-mismatch]] — 2차 수정 배포 이력 + 타이밍 함정 추가
+
+Key facts captured:
+  - 실패 원인: trh-backend:latest 이미지(12:58 UTC) < 2차 수정 커밋(14:04 UTC)
+  - tokamak-thanos `tokamak-deployer/v0.0.12` 태그 → CI 바이너리 빌드/릴리스
+  - trh-sdk `TokamakDeployerVersion` v0.0.11 → v0.0.12 (commit c7bce50)
+  - trh-backend CI 이미지 재빌드 트리거 (자동)
+
+---
+
 ## [2026-05-12] feat | DeploymentProgressCard — phase-level metrics with realtime substep velocity
 
 Pages updated:
