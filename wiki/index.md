@@ -89,6 +89,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[stage-b-backend-config-changed]] | Stage B `terraform init`이 "Backend configuration changed" 실패 — namespace 랜덤 재생성 + 빈 bucket name 2가지 원인. trh-sdk 1f58eee에서 `.terraform/terraform.tfstate`에서 복원하도록 수정 |
 | [[aws-deploy-logs-not-visible]] | AWS 인프라 배포 LogDialog "No logs available" — 단일 공유 SDK 클라이언트가 l1Step.LogPath만 기록 → awsStep ingestion goroutine 영구 블로킹. trh-backend 958d898에서 수정 |
 | [[terraform-destroy-secretsmanager-backend]] | `terraform destroy` 실패 — secretsmanager child module에 `backend "s3" {}` 블록 선언 → Terraform 1.x 금지. tokamak-thanos-stack 1dd0d70에서 제거, 수동 복구 절차 포함 |
+| [[eip7702-prague-not-set-in-l2-genesis]] | NewL2Genesis()가 PragueTime 미설정 → txpool이 EIP-7702 type 4 tx "pool not yet in Prague"로 거부 — IsthmusTime과 PragueTime은 별개 필드, tokamak-thanos 0e66bf4에서 수정 |
 
 ---
 

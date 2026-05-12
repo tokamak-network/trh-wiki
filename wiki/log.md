@@ -6,6 +6,23 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-12] fix | EIP-7702 "pool not yet in Prague" — NewL2Genesis PragueTime 누락
+
+Pages created:
+  [[eip7702-prague-not-set-in-l2-genesis]] — NewL2Genesis()가 IsthmusTime만 설정하고 PragueTime을 누락하여 type 4 tx 거부
+
+Pages updated:
+  [[index]] — Troubleshooting 섹션에 신규 항목 추가
+
+Key facts captured:
+  - OP Stack Isthmus ↔ EVM Prague: 두 포크가 별개 ChainConfig 필드 (IsthmusTime ≠ PragueTime)
+  - Canyon→ShanghaiTime, Ecotone→CancunTime 패턴과 동일하게 Isthmus→PragueTime 매핑 필요
+  - txpool validation.go:105: PragueTime=nil이면 SetCode(type 4) tx 항상 거부
+  - 수정: NewL2Genesis()에 PragueTime: config.IsthmusTime(block.Time()) 한 줄 추가
+  - tokamak-thanos: 0e66bf4
+
+---
+
 ## [2026-05-12] perf | Stage B ALB 프로비저닝 대기 최적화 — 41min→~30min
 
 Pages created:
