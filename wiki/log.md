@@ -6,6 +6,25 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-12] fix | Genesis/Rollup hash mismatch — op-node CrashLoopBackOff
+
+Pages created:
+  [[genesis-rollup-hash-mismatch]] — maybeFundAAAdmin alloc 패치 후 rollup.json 미갱신 → l2_genesis_block_hash mismatch → op-node crash
+
+Pages updated:
+  [[index]] — Troubleshooting 섹션에 신규 항목 추가
+
+Key facts captured:
+  - maybeFundAAAdmin: genesis.json alloc 패치 → block 0 해시 변경 → rollup.json 미동기화
+  - core.Genesis.ToBlock().Hash() == tokamak-deployer genesis.l2.hash (3개 테스트넷 실증 검증)
+  - ensureRollupGenesisHashSync: 2파일 읽기 + 해시 비교만 (정상 경로 overhead ≈ 0)
+  - mismatch 시만 binary lazy-download → runGenerateGenesis --base-genesis 호출
+  - OutPath에 임시파일 필수: OutPath == BaseGenesisPath 동일 경로 시 truncate 방지
+  - genesisRegenerateFn 주입: binary 없이 10개 단위 테스트 가능
+  - trh-sdk 18fc5d4, Stage B Step 2에 preflight 삽입
+
+---
+
 ## [2026-05-12] fix | EIP-7702 "pool not yet in Prague" — NewL2Genesis PragueTime 누락
 
 Pages created:
