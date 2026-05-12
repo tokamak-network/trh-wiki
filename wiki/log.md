@@ -6,6 +6,23 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-12] feat | DeploymentProgressCard — phase-level metrics with realtime substep velocity
+
+Pages updated:
+  [[trh-platform-ui]] — Deployment Progress UI 섹션 전면 개선
+
+Key facts captured:
+  - Phase(core/integration) 전체 기준 Elapsed/ETA/Progress% 계산 (step 전환 시 리셋 없음)
+  - Substep velocity: log timestamps(`created_at`) + `step N/M` 패턴 → substep/sec 측정
+  - STEP_SUBSTEP_TOTAL: Go source 검증값만 사용 (`deploy-aws-infra`=18, `deploy-local-infra`=7)
+  - 병렬 step (l1-contracts + aws-infra): max(remaining) — 더 느린 row 기준
+  - velocity null 시 ETA/Progress null로 정직하게 fallback
+  - 신규 파일: `deploymentProgress.ts` (computeVelocity + computePhaseMetrics), vitest 14개
+  - 수정 파일: `DeploymentProgressCard.tsx` → `PhaseProgressCard` 컴포넌트로 교체
+  - commit: 2ae4b2a
+
+---
+
 ## [2026-05-12] fix | Genesis/Rollup hash mismatch — go-ethereum 버전 분기 근본 원인 수정
 
 Pages updated:
