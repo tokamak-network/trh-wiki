@@ -6,6 +6,24 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-13] ingest | Tokamak Network 크립토이코노믹스 문서 wiki 추가
+
+Pages updated:
+  [[tokamak-cryptoeconomics]] — 신규 Concepts 페이지
+
+Key facts captured:
+  - 이더리움 블록당 3.92 TON 시뇨리지, 연간 약 10.3M TON (Merge 이후)
+  - Staking V1: 스테이커/DAO/sTOS 비례 분배. V2: L2 시퀀서 TVL 비율 추가
+  - L2 수수료 토큰 딜레마: 시뇨리지로 TON 수수료 운영 부담 완화
+  - 챌린지(DTD 7~14일) — MinChal 담보 예치, 그룹 챌린지, 슬래싱 분배
+  - 빠른 출금: 스테이커가 TON 유동성 미리 제공 → DTD 없이 즉시 L1 수령
+  - 검증자의 딜레마 임계: 기본 $X=1/2$ → 스테이킹+FW $X=2/13$ (더 안전)
+  - ZK 도입 시: 빠른 출금 필요성 소멸, 챌린지 스테이킹은 유지
+
+Source: docs/tokamak-cryptoeconomics-kr.md (v1.1)
+
+---
+
 ## [2026-05-13] feat | PhaseTimeline — Deployments Tab 세션/단계별 소요시간 표시
 
 Pages updated:

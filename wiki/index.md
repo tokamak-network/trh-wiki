@@ -37,6 +37,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[l2-deployment]] | End-to-end L2 deployment flow — from preset selection to running chain |
 | [[keystore]] | Electron safeStorage + BIP44 key derivation — mnemonic → deployer keys |
 | [[docker-compose-lifecycle]] | How the platform manages Docker Compose services at runtime |
+| [[tokamak-cryptoeconomics]] | TON 시뇨리지, 스테이킹 V1/V2, 검증자의 딜레마, 빠른 출금 — L2 경제 설계 전문 |
 
 ## Workflows
 
