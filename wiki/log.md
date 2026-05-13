@@ -6,6 +6,20 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-13] fix | forkchoiceUpdatedV3 post-Cancun 거부 → L2 block 0 stuck
+
+Pages updated:
+  [[fcu-v3-post-cancun-rejected]] — 신규 트러블슈팅 페이지
+
+Key facts captured:
+  - tokamak-thanos-geth api.go의 FCU V3 핸들러가 `!= forks.Cancun`으로 Cancun만 허용
+  - pragueTime = isthmusTime = genesis.timestamp인 체인에서 모든 블록이 Prague → 항상 거부
+  - 수정: `< forks.Cancun`으로 변경 → Cancun 이상 모두 허용 (ff0caa15b)
+  - NewPayloadV3 동일 체크는 올바름 (변경 불필요)
+  - 재시작: chaindata 초기화 불필요, imagePullPolicy IfNotPresent 주의
+
+---
+
 ## [2026-05-13] feat | deploy-aws-infra anchor state tail substep 가시화
 
 Pages updated:
