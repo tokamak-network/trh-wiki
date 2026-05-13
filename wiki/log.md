@@ -6,6 +6,24 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-13] bugfix | L1StandardBridgeProxy uninitialized + L1CrossTradeProxy setChainInfo missing in AWS deploy
+
+Pages updated:
+  [[l1-standard-bridge-proxy-uninitialized]] — 신규 Troubleshooting 페이지
+  [[l1-cross-trade-proxy-set-chain-info-missing]] — 신규 Troubleshooting 페이지
+
+Key facts captured:
+  - tokamak-deployer는 upgrade(proxy, impl)만 호출; initialize()를 호출하지 않아 L1StandardBridgeProxy.messenger() = address(0)
+  - AutoInstallCrossTradeAWS는 L2 side(DeployCrossTradeLocal)만 처리; L1CrossTradeProxy.setChainInfo() 미호출 → provideCT 항상 revert
+  - 수정: deploy_chain.go에 initL1StandardBridge() 추가(idempotent, messenger() 체크 후 skip)
+  - 수정: deploy_chain.go에 setL1CrossTradeChainInfo() 추가; cross_trade_aws.go에서 호출
+  - chainData(uint256) 반환값은 2개 (crossDomainMessenger, l2CrossTradeContract) — nativeToken 필드 없음
+  - L1CrossTradeProxy Sepolia 주소: 0xf3473E20F1d9EB4468C72454a27aA1C65B67AB35
+
+Source: trh-sdk/pkg/stacks/thanos/deploy_chain.go, cross_trade_aws.go
+
+---
+
 ## [2026-05-13] ingest | Tokamak Network 크립토이코노믹스 문서 wiki 추가
 
 Pages updated:
