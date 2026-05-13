@@ -6,6 +6,23 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-13] feat | deploy-aws-infra anchor state tail substep 가시화
+
+Pages updated:
+  [[trh-sdk]] — Stage B Substep 로깅 섹션 신규 추가
+  [[trh-platform-ui]] — STEP_SUBSTEP_TOTAL 업데이트 (deploy-aws-infra: 18→16, deploy-l1-contracts: 35 추가)
+
+Key facts captured:
+  - FP Path `stageBTotalSteps` 15→16: steps 15-16이 기존 "보이지 않는 19분 tail" 커버
+  - `initGenesisAnchorState`에 `onProgress func(string)` 파라미터 추가
+  - Step 15: "Waiting for L2 genesis block" (op-geth ALB health 대기, ctx-aware retry)
+  - Step 16: "Submitting anchor state to L1" (Guard A/B + L1 tx)
+  - ctx-aware sleep: `time.Sleep` → `select { case <-time.After: case <-ctx.Done(): }` 변경
+  - 프론트엔드 `STEP_SUBSTEP_TOTAL['deploy-aws-infra']` 35(오류)→16(FP Stage B 실측)
+  - TDD: `anchor_state_progress_test.go` 신규 (pre-cancelled ctx로 빠른 검증)
+
+---
+
 ## [2026-05-13] fix | genesis/rollup hash mismatch — tokamak-deployer v0.0.12 릴리스
 
 Pages updated:

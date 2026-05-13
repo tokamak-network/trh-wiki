@@ -136,17 +136,22 @@ phase metrics를 계산하는 순수 함수 모음.
 
 #### STEP_SUBSTEP_TOTAL
 
-Go source에서 실제 검증된 step별 substep 수. **step N/M 로그를 emit하는 step만 포함** (나머지는 velocity 측정 불가):
+trh-sdk `[deployer] Step N/M` 로그 기반으로 검증된 step별 substep 수.
 
 ```ts
 const STEP_SUBSTEP_TOTAL: Record<string, number> = {
-  'deploy-aws-infra': 18,   // Stage A(5) + Stage B(13, non-FP baseline)
-  'deploy-local-infra': 7,  // non-FP baseline
+  'deploy-l1-contracts': 35,  // tokamak-deployer deploy-contracts subcommand
+  'deploy-aws-infra': 16,     // FP Path Stage B — steps 15-16은 anchor state tail 커버
+  'deploy-local-infra': 7,    // non-FP local Docker preset
 };
 ```
 
-- `deploy-l1-contracts`는 `step N/M` 로그 없음 → 제외
-- integration steps도 해당 패턴 없음 → 제외
+**주의사항**:
+- `deploy-l1-contracts`의 35는 tokamak-deployer가 emit하는 별도 시퀀스로, trh-sdk Stage B와 무관하다.
+- `deploy-aws-infra` FP Path: Stage B step 수는 **16** (2026-05-13 변경, 이전: 15). steps 15-16이 ~19분 tail 커버.
+  - Step 15: "Waiting for L2 genesis block" — op-geth ALB health + 기동 대기 (최대 3600×5s retry)
+  - Step 16: "Submitting anchor state to L1" — Guard A(idempotency), Guard B(simulation), L1 tx + WaitMined
+- integration steps는 `step N/M` 패턴 없음 → 제외 (velocity 측정 불가)
 
 #### computeVelocity(logs)
 

@@ -91,3 +91,31 @@ receipt, err := bind.WaitMined(ctx, client, tx)
 
 - Image: `tokamaknetwork/trh-sdk`
 - Architectures: linux/amd64 + arm64
+
+---
+
+## Stage B Substep 로깅 (deploy_chain.go)
+
+`DeployAWSStageB`는 `logStep` 클로저를 통해 `[deployer] Step N/M: <desc>` 메시지를 emit한다. 프론트엔드 regex `/\bstep\s+(\d+)\s*\/\s*(\d+)/i`가 이를 파싱해 velocity 기반 ETA를 계산한다.
+
+### FP Path (EnableFraudProof=true) — stageBTotalSteps = 16
+
+| 구간 | Steps | 설명 |
+|------|-------|------|
+| 공통 (FP+non-FP) | 1–11 | WaitForIngressAddress, SystemConfig, CDM, DGF 설정 등 |
+| FP 전용 | 12–14 | DisputeGameFactory 등록, Portal2 초기화 |
+| **anchor state tail** | **15–16** | initGenesisAnchorState 내부에서 emit |
+
+**step 15**: `"Waiting for L2 genesis block"` — op-geth ALB health + 기동 대기. 최대 3600×5s retry. ctx 취소 시 즉시 종료.
+
+**step 16**: `"Submitting anchor state to L1"` — Guard A(idempotency), Guard B(simulation), L1 tx + `bind.WaitMined`.
+
+이 두 step이 기존 "보이지 않는 19분 tail"을 커버한다 (2026-05-13 개선, 이전: 15 steps, tail 미표시).
+
+### non-FP Path — stageBTotalSteps = 13
+
+L2OO 없는 기본 배포. initGenesisAnchorState 호출 없음.
+
+### Local Docker Path (local_network.go) — totalSteps = 10 (FP), 8 (L2OO), 7 (기본)
+
+FP 기준 10 steps. deploy_chain.go와 동일한 anchor state tail 처리.
