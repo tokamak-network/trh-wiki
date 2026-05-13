@@ -228,3 +228,55 @@ progress = min(1, (completedActualMs + currentElapsedMs) / totalMs)
 
 `formatDuration(start?, end?, now?)` 함수를 `src/features/rollup/utils/durationUtils.ts`로 추출.
 `DeploymentsTab`과 `DeploymentProgressCard` 모두 이 함수를 공유한다.
+
+---
+
+## Phase Timeline (Deployments Tab)
+
+### 개요
+
+`DeploymentsTab` 상단에 배포 세션별 소요 시간 내역을 표시하는 카드 그룹.
+기존 flat 테이블(스텝별 행 나열)을 보완하며, 하나의 배포 세션에서 각 스텝이 얼마나 걸렸는지 한눈에 확인 가능.
+
+`deploy-aws-infra` 스텝의 경우 내부 로그를 파싱해 4개 하위 단계로 세분화:
+- **EKS / VPC / EFS** — Stage A 완료까지
+- **K8s / Helm** — Stage B 시작 → Helm 설치 완료까지
+- **L1 Init & Anchor** — Helm 완료 → Preset 모듈 시작 (또는 step 종료)까지
+- **Preset Modules** — 프리셋 모듈 설치 구간
+
+### 파일 구조
+
+| 파일 | 역할 |
+|------|------|
+| `src/features/rollup/components/detail/PhaseTimeline.tsx` | UI 컴포넌트 (`PhaseTimeline`, `SessionCard`, `AwsInfraSubPhases`) |
+| `src/features/rollup/utils/sessionGrouping.ts` | 배포 행을 시간 간격 기준으로 세션 그룹화 |
+| `src/features/rollup/utils/phaseTimings.ts` | deploy-aws-infra 로그에서 phase 경계 타임스탬프 추출 |
+
+### 세션 그룹화 (`groupIntoSessions`)
+
+ThanosDeployment[] 배열을 시간 간격으로 묶어 `DeploymentSession[]` 반환 (최신 세션 먼저).
+
+**알고리즘**: started_at 기준 ASC 정렬 → `sessionEndMs = max(finished_at)` 추적 → 다음 행의 `started_at > sessionEndMs + 5min`이면 새 세션.
+
+**설계 이유**: 병렬 실행 스텝(deploy-l1-contracts + deploy-aws-infra)이 동일 세션 내에 속하려면 단순 인접 비교가 아닌 세션 전체 끝 시간과 비교해야 한다.
+
+### Phase 경계 추출 (`extractAwsInfraPhases`)
+
+deploy-aws-infra 로그(ASC 순)를 한 번 스캔하여 각 경계의 첫 번째 등장 타임스탬프를 반환.
+
+| 경계 | 패턴 |
+|------|------|
+| `stageAStart` | `Deploying Stage A AWS infrastructure` |
+| `stageBStart` | `Deploying Thanos stack infrastructure.*Stage B` |
+| `k8sDone` | `Helm charts installed successfully` |
+| `presetStart` | `Installing preset modules` |
+
+JSON 래핑(`{msg: ...}`) + ANSI 이스케이프 자동 제거. 패턴 미발견 시 `null` (graceful degradation — 해당 하위 행 미표시).
+
+### 컴포넌트 설계 (무한 루프 방지)
+
+**잘못된 패턴**: 자식 컴포넌트가 로그 로드 완료 시 `onPhases` 콜백으로 부모 state를 업데이트 → `useEffect([logs, onPhases])` → 부모 리렌더 → 새 콜백 참조 → 무한 루프.
+
+**채택된 패턴**: `AwsInfraSubPhases`가 `useThanosDeploymentLogsQuery` + `useMemo(() => extractAwsInfraPhases(logs), [logs])`로 완전 자립. 부모로 state를 절대 push하지 않는다.
+
+로그는 `refetchIntervalMs: false`로 1회만 fetch (completed step 대상, 변경 없음).

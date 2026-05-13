@@ -6,6 +6,19 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-13] feat | PhaseTimeline — Deployments Tab 세션/단계별 소요시간 표시
+
+Pages updated:
+  [[trh-platform-ui]] — "Phase Timeline (Deployments Tab)" 섹션 추가
+
+Key facts captured:
+  - 세션 그룹화: `groupIntoSessions()` — started_at ASC 정렬 후 sessionEndMs(max finished_at) 기준 5분 gap으로 분할
+  - Phase 경계: `extractAwsInfraPhases()` — deploy-aws-infra 로그 스캔, 4개 경계 타임스탬프 추출
+  - 하위 단계: EKS/VPC/EFS → K8s/Helm → L1 Init & Anchor → Preset Modules
+  - 설계 핵심: AwsInfraSubPhases가 useMemo로 자립 → 콜백 push 패턴 금지 (무한 루프 원인)
+
+---
+
 ## [2026-05-13] fix | forkchoiceUpdatedV3 post-Cancun 거부 → L2 block 0 stuck
 
 Pages updated:
