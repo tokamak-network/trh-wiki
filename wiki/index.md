@@ -93,6 +93,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[terraform-destroy-secretsmanager-backend]] | `terraform destroy` 실패 — secretsmanager child module에 `backend "s3" {}` 블록 선언 → Terraform 1.x 금지. tokamak-thanos-stack 1dd0d70에서 제거, 수동 복구 절차 포함 |
 | [[eip7702-prague-not-set-in-l2-genesis]] | NewL2Genesis()가 PragueTime 미설정 → txpool이 EIP-7702 type 4 tx "pool not yet in Prague"로 거부 — IsthmusTime과 PragueTime은 별개 필드, tokamak-thanos 0e66bf4에서 수정 |
 | [[genesis-rollup-hash-mismatch]] | `maybeFundAAAdmin`의 alloc 패치가 block 0 해시를 바꾸지만 rollup.json 미갱신 → op-node CrashLoopBackOff. Stage B preflight check(trh-sdk 18fc5d4)로 자동 재동기화 |
+| [[local-testnet-missing-deploy-contracts-step]] | local+Testnet 배포 시 deploy-l1-contracts 스텝 누락 — InfraProvider 조건 오류, Network 기준으로 수정 (trh-backend 351cebb) |
 
 ---
 

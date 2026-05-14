@@ -6,6 +6,21 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-14] bugfix | local+Testnet 배포 시 deploy-l1-contracts 스텝 누락
+
+Pages updated:
+  [[local-testnet-missing-deploy-contracts-step]] — 신규 Troubleshooting 페이지
+
+Key facts captured:
+  - `getThanosStackDeployments`가 `InfraProvider != "local"` 조건으로 local provider 전체에서 deploy-l1-contracts 스텝을 건너뜀
+  - Testnet+local은 Sepolia에 컨트랙트 배포 필요; LocalDevnet만 SDK가 L1+L2 함께 처리
+  - 수정: `config.Network != entities.DeploymentNetworkLocalDevnet` 조건으로 변경
+  - 부수 수정: 31c2295에서 삭제된 installDRBOperators의 stale 컴파일 타임 체크 제거
+
+Source: trh-backend/pkg/services/thanos/helpers.go, commit 351cebb
+
+---
+
 ## [2026-05-13] bugfix | L1StandardBridgeProxy uninitialized + L1CrossTradeProxy setChainInfo missing in AWS deploy
 
 Pages updated:
