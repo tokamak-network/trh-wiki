@@ -62,6 +62,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[requirements-v1]] | CrossTrade 통합 v1 요구사항 30개 — 전체 완료, Phase traceability 포함 |
 | [[deploy-methods-comparison]] | Deploy.s.sol (Foundry) vs tokamak-deployer (Go) — L1 배포 방식 비교, 하이브리드 전환 상태 |
 | [[block-explorer-update-pattern]] | Block Explorer 사용자 설정 변경 = `helm upgrade` 별도 경로(PUT) — Install 멱등성 유지 + DB cred 자동 복원 |
+| [[concurrent-deployment-guard]] | 동시 배포 차단 — checkNoActiveDeployingStack(), LocalDevnet 면제, UI guard, L1 nonce conflict 방지 |
 
 ## Troubleshooting
 

@@ -6,6 +6,24 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-14] feature | concurrent deployment guard — L1 nonce conflict prevention
+
+Pages updated:
+  [[concurrent-deployment-guard]] — 신규 Decision 페이지
+
+Key facts captured:
+  - `checkNoActiveLocalStack()`는 Local+Local 포트 충돌만 방지; Local+AWS, AWS+AWS 동시 배포는 차단 안 됨
+  - 동일 시드 → 동일 admin 주소 → 동시 Sepolia tx → nonce conflict
+  - 해결: `checkNoActiveDeployingStack()` — Pending/Deploying 상태 + non-LocalDevnet 스택 존재 시 HTTP 409 반환
+  - LocalDevnet 면제: 격리된 로컬 L1 노드, Testnet/Mainnet과 nonce 충돌 없음
+  - local 인프라 스택은 Docker 실행 여부로 reconcile (좀비 스택 방지, fail-open)
+  - UI guard: `isDeploymentInProgress` → step 3 경고 배너 + Deploy 버튼 tooltip+disabled
+  - 테스트 13개 (check_deploying_stack_test.go)
+
+Source: trh-backend/pkg/services/thanos/stack_lifecycle.go fdb772d, trh-platform-ui/src/app/rollup/create/page.tsx 3e23bfe
+
+---
+
 ## [2026-05-14] bugfix | local+Testnet 배포 시 deploy-l1-contracts 스텝 누락
 
 Pages updated:
