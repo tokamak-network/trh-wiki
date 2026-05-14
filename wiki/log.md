@@ -6,6 +6,13 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-14] bugfix | Blockscout 로컬 배포에서 TON 가격이 $25 표시 — CoinGecko 심볼 충돌
+
+- 원인: `COIN=TON`만 설정, `EXCHANGE_RATES_COINGECKO_COIN_ID` 누락 → CoinGecko "TON" 심볼 충돌(5개 코인 공유)
+- 두 fetcher(stats vs market_history)가 각각 다른 코인 선택 → 1000%+ price change noise
+- 수정: trh-sdk `5a74242` — `FeeTokenConfig.CoinGeckoID` 추가, compose template에 `EXCHANGE_RATES_COINGECKO_COIN_ID` 방출
+- 페이지: [[blockscout-wrong-coin-price]]
+
 ## [2026-05-14] bugfix | L1StandardBridgeProxy 미초기화 — 로컬 배포 시 bridgeETH revert
 
 Pages updated:
