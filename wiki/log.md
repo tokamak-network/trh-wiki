@@ -6,6 +6,20 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-14] bugfix | L1StandardBridgeProxy 미초기화 — 로컬 배포 시 bridgeETH revert
+
+Pages updated:
+  [[l1-standard-bridge-proxy-not-initialized]] — 신규 Troubleshooting 페이지
+
+Key facts captured:
+  - `local_network.go`에 `initL1StandardBridge` 누락 → `MESSENGER()` = 0x0 → `bridgeETH` 항상 revert
+  - AWS path(`deploy_chain.go`)에만 있고 로컬 path에는 없었던 버그
+  - Thanos `initialize(address,address,address)` = (_messenger, _superchainConfig, _systemConfig)
+  - 기존 배포 핫픽스: `cast send` 직접 호출로 초기화 가능 (idempotent)
+  - trh-sdk 0fe9569 (main)
+
+---
+
 ## [2026-05-14] bugfix | op-bridge Thanos SDK 초기화 crash — L1UsdcBridge 미배포 시
 
 Pages updated:
