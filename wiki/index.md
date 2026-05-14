@@ -45,6 +45,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 |------|---------|
 | [[local-dev]] | 레포별 개발 서버 기동, 환경 변수, mock 패턴 |
 | [[l2-deploy-local]] | Full walkthrough: deploying an L2 chain locally via Docker Compose |
+| [[integration-install]] | Bridge / Block Explorer / Monitoring / CrossTrade 사후 설치 API — curl 예제 + 필드 설명 |
 | [[ec2-deploy]] | AWS EC2 deployment via Terraform — one-time setup and update flow |
 | [[release]] | Electron DMG/NSIS/AppImage 빌드, Docker 이미지 배포, 버전 고정 패턴 |
 | [[testing]] | 테스트 스택, 실행 명령어, E2E 3가지 모드, Vitest/Playwright 패턴 |

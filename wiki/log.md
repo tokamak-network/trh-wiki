@@ -6,6 +6,17 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-14] docs | Integration 별도 설치 가이드 추가
+
+신규: `wiki/workflows/integration-install.md`
+
+General preset 배포 후 Bridge / Block Explorer / Monitoring / System Pulse / CrossTrade를 API로 개별 설치하는 curl 예제, 필드 설명, preset별 포함 여부 표, 서비스 포트 목록 수록.
+에이전트향 TRH 가이드 작성 시 참조용. tag: `agent-guide`.
+
+index.md: `[[integration-install]]` Workflows 섹션에 추가.
+
+---
+
 ## [2026-05-14] bugfix | Linux 로컬 L2 배포 시 host.docker.internal DNS 실패
 
 신규: `wiki/troubleshooting/host-docker-internal-linux.md`
