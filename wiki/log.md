@@ -6,6 +6,18 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-14] bugfix | Linux 로컬 L2 배포 시 host.docker.internal DNS 실패
+
+신규: `wiki/troubleshooting/host-docker-internal-linux.md`
+
+원인: Linux에서 `host.docker.internal`은 자동 DNS 등록 안 됨 (macOS Docker Desktop과 달리). `make up`이 사용하는 루트 `docker-compose.yml`에 `extra_hosts: host-gateway`가 누락되어 있었음 → `localL2RPCURL()`이 반환하는 `host.docker.internal:8545`로 연결 불가.
+
+수정: `docker-compose.yml` backend 서비스에 `extra_hosts: ["host.docker.internal:host-gateway"]` 추가 (trh-platform d5929a1).
+
+index.md: `[[host-docker-internal-linux]]` Troubleshooting 섹션에 추가.
+
+---
+
 ## [2026-05-14] bugfix | Blockscout 로컬 배포에서 TON 가격이 $25 표시 — CoinGecko 심볼 충돌
 
 - 원인: `COIN=TON`만 설정, `EXCHANGE_RATES_COINGECKO_COIN_ID` 누락 → CoinGecko "TON" 심볼 충돌(5개 코인 공유)

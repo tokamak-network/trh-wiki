@@ -96,6 +96,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[genesis-rollup-hash-mismatch]] | `maybeFundAAAdmin`의 alloc 패치가 block 0 해시를 바꾸지만 rollup.json 미갱신 → op-node CrashLoopBackOff. Stage B preflight check(trh-sdk 18fc5d4)로 자동 재동기화 |
 | [[local-testnet-missing-deploy-contracts-step]] | local+Testnet 배포 시 deploy-l1-contracts 스텝 누락 — InfraProvider 조건 오류, Network 기준으로 수정 (trh-backend 351cebb) |
 | [[blockscout-wrong-coin-price]] | 로컬 Blockscout에서 TON이 $25 표시 — CoinGecko 심볼 "TON" 충돌(5개 코인), EXCHANGE_RATES_COINGECKO_COIN_ID 누락. trh-sdk 5a74242에서 수정 |
+| [[host-docker-internal-linux]] | Linux에서 `host.docker.internal` DNS 미등록 → L2 genesis 블록 대기 실패("no such host") — `extra_hosts: host-gateway` 누락, trh-platform d5929a1에서 수정 |
 
 ---
 
