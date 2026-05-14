@@ -6,6 +6,22 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-14] bugfix | local 배포 시 thanos stack 이미지 태그 형식 불일치
+
+Pages updated:
+  [[local-docker-image-tag-nightly]] — 신규 Troubleshooting 페이지
+
+Key facts captured:
+  - `ThanosStackImageTag: "af052710"` (커밋 해시)를 local_network.go에서 직접 사용 → `tokamaknetwork/thanos-op-node:af052710` (Docker Hub에 없음)
+  - AWS EKS Helm 스크립트는 `nightly-` 접두사를 붙여 `nightly-af052710` 사용 → 정상
+  - 로컬 경로만 접두사 없이 사용하여 Step 3/10에서 image pull 실패
+  - 수정: local_network.go에서 op-node/batcher/proposer/challenger를 `nightly` floating tag로 통일
+  - trh-sdk f6f1df6
+
+Source: trh-sdk/pkg/stacks/thanos/local_network.go
+
+---
+
 ## [2026-05-14] feature | concurrent deployment guard — L1 nonce conflict prevention
 
 Pages updated:
