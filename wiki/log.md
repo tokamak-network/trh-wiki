@@ -6,6 +6,19 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-14] bugfix | op-bridge Thanos SDK 초기화 crash — L1UsdcBridge 미배포 시
+
+Pages updated:
+  [[op-bridge-sdk-init-crash]] — 신규 Troubleshooting 페이지
+
+Key facts captured:
+  - `NEXT_PUBLIC_L1_USDC_BRIDGE_ADDRESS=` 빈 값 → SDK `getBridgeAdapters()`에서 `undefined.l1` crash
+  - 조건: `L1StandardBridge` 있고 `L1UsdcBridge` 없을 때, SDK fallback이 `CONTRACT_ADDRESSES[localChainId].l1` 접근 → crash
+  - 수정: compose 템플릿에서 empty 시 zero address fallback
+  - trh-sdk d0b7413 (main), 7c0915b (feat/l2-deploy-optimization)
+
+---
+
 ## [2026-05-14] bugfix | local 배포 시 thanos stack 이미지 태그 형식 불일치
 
 Pages updated:
