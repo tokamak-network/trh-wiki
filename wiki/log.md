@@ -17,6 +17,26 @@ index.md: `[[integration-install]]` Workflows 섹션에 추가.
 
 ---
 
+## [2026-05-15] bugfix | docker exec에 이미지 이름 사용 → No such container
+
+신규: `wiki/troubleshooting/docker-exec-container-name.md`
+
+원인: `stack-resolver.ts`의 `resolveContractAddresses()`가 `docker exec` 기본 컨테이너 이름으로 `'trh-backend'`(이미지 이름)를 사용 → Docker Compose가 생성하는 실제 컨테이너 이름 `'trh-platform-backend-1'`과 불일치 → `No such container` 에러.
+
+수정: `stack-resolver.ts:129` 기본값을 `'trh-platform-backend-1'`으로 변경 (trh-platform 23d11e5). 환경변수 `BACKEND_CONTAINER_NAME`으로 오버라이드 가능.
+
+index.md: `[[docker-exec-container-name]]` Troubleshooting 섹션에 추가.
+
+---
+
+## [2026-05-15] docs | EFP-01~11 테스트 스위트 wiki 추가
+
+갱신: `wiki/workflows/testing.md`
+
+EFP(Electron Full Preset) 11개 테스트 스위트 섹션 추가. 실행 조건(Sepolia RPC, 시드 구문, `LIVE_STACK_ID` 재사용 옵션), 테스트 ID 표, 알려진 제한사항(EKS TCP 포트, 단일 L2 L2→L2 provide, Blockscout 미배포) 포함. 2026-05-15 실행 결과: 11 passed (3.0m).
+
+---
+
 ## [2026-05-14] bugfix | Linux 로컬 L2 배포 시 host.docker.internal DNS 실패
 
 신규: `wiki/troubleshooting/host-docker-internal-linux.md`

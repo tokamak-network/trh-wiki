@@ -218,4 +218,65 @@ await page.addInitScript(() => {
 
 ---
 
-*Source: `.planning/codebase/TESTING.md` (2026-04-09), 추가 업데이트: 2026-04-11*
+## Electron Full Preset 테스트 (EFP)
+
+**파일:** `tests/e2e/electron-full-preset-features.live.spec.ts`
+
+Full Suite preset 전체 기능을 AWS EKS 실제 스택 위에서 검증하는 11개 직렬 테스트.
+
+**실행 조건:**
+- Electron 앱 빌드 완료 (`npm run build`)
+- `make up` 불필요 — Electron이 Docker를 직접 기동
+- Sepolia L1 RPC URL (`LIVE_L1_RPC_URL`)
+- 테스트 지갑 시드 구문 (`LIVE_SEED_PHRASE`) — L1·L2 ETH 잔고 필요
+- (선택) 기존 스택 재사용: `LIVE_STACK_ID=<uuid>` — EFP-01 배포 단계 스킵
+
+**실행 명령어:**
+```bash
+# 신규 배포 + 전체 테스트
+LIVE_L1_RPC_URL=https://... \
+LIVE_SEED_PHRASE="word1 word2 ..." \
+npx playwright test --config playwright.electron.config.ts \
+  tests/e2e/electron-full-preset-features.live.spec.ts
+
+# 기존 스택 재사용 (배포 생략)
+LIVE_L1_RPC_URL=https://... \
+LIVE_SEED_PHRASE="word1 word2 ..." \
+LIVE_STACK_ID=773435b7-272d-4d4f-aa65-a8a047ee514d \
+npx playwright test --config playwright.electron.config.ts \
+  tests/e2e/electron-full-preset-features.live.spec.ts
+```
+
+**테스트 ID:**
+
+| ID | 설명 | 검증 포인트 |
+|----|------|------------|
+| EFP-01 | Full Suite preset (USDC) 배포 (AWS 마법사) | 스택 생성 또는 `LIVE_STACK_ID` 재사용 |
+| EFP-02 | 배포 완료 — 6개 모듈 전부 존재 | CrossTrade Completed, 6 modules verified |
+| EFP-03 | Genesis predeploys 바이트코드 (OP + DRB + AA) | 18개 predeploy 컨트랙트 검증 |
+| EFP-04 | Fault proof 컨트랙트 (DGF, ASR, DelayedWETH) | gameCount, version 검증 |
+| EFP-05 | DRB — reader node L2 RPC + operator 상태 + fee | fee=0.01 ETH, TCP 포트는 EKS에서 스킵 |
+| EFP-06 | AA — predeploys + depositTo EntryPoint + 잔고 | TON 잔고 증가 확인 |
+| EFP-07 | CrossTrade — L1→L2 ETH + L2→L2 ETH 전체 사이클 | request/provide/claim 이벤트 |
+| EFP-08 | 첫 번째 dispute game 생성 | gameCount≥1, game index 0 존재 |
+| EFP-09 | Game DEFENDER_WINS, ASR anchor 업데이트 | resolution=2, l2BlockNumber, root 해시 |
+| EFP-10 | Thanos Bridge L1→L2 ETH 입금 | L1StandardBridge depositTransaction TX |
+| EFP-11 | Thanos Bridge L2→L1 ETH 출금 개시 | L2ToL1MessagePasser initiateWithdrawal TX |
+
+**알려진 제한사항:**
+
+| 항목 | 이유 |
+|------|------|
+| EFP-05: DRB TCP 포트(9600) 스킵 | AWS EKS NodePort로 노출 안 됨 |
+| EFP-07: L2→L2 provideCT 실패 | 단일 L2 환경에서 동일 체인 provide 거부 — 정상 동작 |
+| EFP-06/07/10/11: Blockscout 스킵 | 해당 스택에 Block Explorer 미배포 |
+| EFP-06: Bundler(4337) 스킵 | Bundler 서비스 미배포 |
+
+**관련 트러블슈팅:**
+- [[docker-exec-container-name]] — EFP-04 실패 원인: `docker exec`에 이미지 이름 사용
+
+→ [[cross-trade]], [[thanos-bridge]], [[drb-project]]
+
+---
+
+*Source: `.planning/codebase/TESTING.md` (2026-04-09), 추가 업데이트: 2026-05-15*
