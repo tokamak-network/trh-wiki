@@ -6,6 +6,20 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-16] bugfix | L2toL2CrossTradeL1.setChainInfo AWS 경로 누락
+
+신규: `wiki/troubleshooting/l2tol2-cross-trade-l1-set-chain-info-missing.md`
+
+`AutoInstallCrossTradeAWS`가 L2→L1 방향(`L1CrossTradeProxy.setChainInfo`)만 호출하고
+L2→L2 방향(`L2toL2CrossTradeL1.setChainInfo`, 7-param)을 호출하지 않아 AWS 배포에서
+L2→L2 브릿지가 L1 컨트랙트 레벨에서 revert되는 버그. 로컬 경로는 `RegisterCrossTradeL2`가
+두 방향 모두 처리하지만 AWS 경로에 누락. trh-sdk 8aba331에서 `setL2toL2CrossTradeL1ChainInfo`
+함수 추가 및 `AutoInstallCrossTradeAWS` 호출 삽입으로 수정. idempotency guard 포함.
+
+index.md: `[[l2tol2-cross-trade-l1-set-chain-info-missing]]` Troubleshooting 섹션에 추가.
+
+---
+
 ## [2026-05-14] docs | Integration 별도 설치 가이드 추가
 
 신규: `wiki/workflows/integration-install.md`
