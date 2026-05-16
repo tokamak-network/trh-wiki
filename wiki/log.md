@@ -6,6 +6,20 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-17] bugfix | CrossTrade dApp L2→L1 fee token 라벨 불일치 (polymorphic native token)
+
+수정: `wiki/components/cross-trade.md` — "defi-eth 프리셋 native token 메타데이터 오류" 섹션을 polymorphic fee token 섹션으로 확장.
+
+3계층 불일치 버그 수정 (trh-backend 355732d):
+1. `deployment.go` ETH-only 분기 제거 → `FeeTokenSymbol: stackConfig.FeeToken` 전달.
+2. `cross_trade_local.go` 하드코딩 token maps → `buildL2L1Tokens`/`buildL2L2Tokens` 동적 헬퍼로 교체.
+   - native gas token = zero address (fee token symbol).
+   - USDC ERC20 predeploy(`0x4200...0778`)는 fee token이 USDC가 아닐 때만 추가.
+3. `BuildDAppEnvConfig`에서 `FeeTokenSymbol` 기반 switch로 `native_token_name/symbol` 파생.
+dApp 변경 없음 — 백엔드의 올바른 tokens 배열 첫 원소가 기존 `sendToken state` 초기화 로직을 통해 정상 표시됨.
+
+---
+
 ## [2026-05-16] bugfix | L2toL2CrossTradeL1.setChainInfo AWS 경로 누락
 
 신규: `wiki/troubleshooting/l2tol2-cross-trade-l1-set-chain-info-missing.md`

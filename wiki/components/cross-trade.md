@@ -222,13 +222,36 @@ Tokamak 팀이 배포한 공유 인프라 — 모든 L2 체인이 동일한 L1 �
 
 **코드:** `crossTrade/frontend/cross-trade-dapp/src/components/CreateRequest.tsx` — `getAllowedDestinationChains()` 함수
 
-### defi-eth 프리셋 native token 메타데이터 오류
+### Fee token 라벨 불일치 (polymorphic native token)
 
-**증상:** defi-eth 프리셋(fee token = ETH)으로 배포한 L2가 CrossTrade dApp에서 native token이 "TON"으로 잘못 표시된다.
+**증상:** fee token이 ETH/USDT/USDC가 아닌 경우 CrossTrade dApp L2→L1 모드에서 native token이 "TON"으로 잘못 표시되고, USDT/TON 스택에서는 dropdown에서 native token이 아예 사라지고 "eth"가 첫 원소로 잡힌다.
 
-**근본 원인:** `cross_trade_local.go`가 preset과 무관하게 `NativeTokenName: "Tokamak Network"`, `NativeTokenSymbol: "TON"`을 하드코딩.
+**3계층 불일치:**
 
-**해결책 (2026-04-15):** `CrossTradeDAppConfig`에 `L2NativeTokenName`/`L2NativeTokenSymbol` 필드 추가. `deployment.go`에서 preset fee token 타입에 따라 `"Ethereum"/"ETH"` vs `"Tokamak Network"/"TON"`을 분기해 전달.
+| Layer | 잘못된 동작 | 올바른 동작 |
+|-------|------------|-----------|
+| Backend metadata | `native_token_symbol="TON"` (ETH 이외 모두 디폴트) | fee token symbol 그대로 |
+| Token map | `l2l1Tokens["USDT"]=""` (빈 주소) → dApp이 항목 제외 | `{"USDT": "0x0000..."}` (native = zero addr) |
+| dApp 표시 | `sendToken state = "eth"` (ETH가 첫 원소) | `sendToken state = fee token symbol` |
+
+**근본 원인:** `deployment.go`가 ETH만 명시적으로 `L2NativeTokenName/Symbol`을 설정하고 나머지는 모두 `cross_trade_local.go`의 "Tokamak Network"/"TON" 하드코딩 디폴트로 폴백. 또한 `l2l1Tokens` / `l2l2Tokens`가 USDT·TON에 빈 문자열 주소를 가졌음.
+
+**해결책 (2026-05-17):** 
+
+- `CrossTradeDAppConfig`에 `FeeTokenSymbol` 필드 추가.
+- `buildL2L1Tokens(feeSymbol)` / `buildL2L2Tokens(feeSymbol, destChain)` helper 도입 — native gas token은 항상 zero address, USDC ERC20 predeploy(`0x4200...0778`)는 fee token이 USDC가 아닐 때만 추가.
+- `BuildDAppEnvConfig`에서 `feeSymbol` 기반 switch로 `native_token_name`/`native_token_symbol` 파생 (ETH→Ethereum, USDT→Tether USD, USDC→USD Coin, default→Tokamak Network/TON).
+- `deployment.go` 두 호출처에서 ETH-only if 블록 제거 → `FeeTokenSymbol: stackConfig.FeeToken` 전달.
+- dApp 변경 없음 — 백엔드가 올바른 tokens 배열의 첫 원소를 fee token으로 보내면 기존 `useState(tokens[0].name)` 로직이 자동 해결.
+
+**Token 매핑 결과:**
+
+| Fee Token | native_token_symbol | L2 Tokens (L2L1/L2L2) |
+|-----------|---------------------|----------------------|
+| ETH | ETH | `{ETH: 0x0000…, USDC: 0x4200…0778}` |
+| USDT | USDT | `{USDT: 0x0000…, USDC: 0x4200…0778}` |
+| TON | TON | `{TON: 0x0000…, USDC: 0x4200…0778}` |
+| USDC | USDC | `{USDC: 0x0000…}` (ERC20 USDC 중복 제외) |
 
 ---
 
