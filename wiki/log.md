@@ -12,6 +12,19 @@ Key fixes:
 
 ---
 
+## [2026-05-19] feat | Bridge sync-block-explorer API endpoint
+
+**trh-backend `5491623`**: 이미 배포된 스택의 bridge pod 에 block-explorer URL 을
+즉시 주입하는 API 엔드포인트 추가.
+
+`POST /stacks/thanos/{id}/integrations/bridge/sync-block-explorer`
+- `stackMeta.ExplorerUrl` (DB에 저장된 값) 을 읽어 `UpdateBridgeBlockExplorer` 호출
+- URL 없으면 400 반환
+
+참고: `wiki/troubleshooting/bridge-l2-chain-switch-error.md` 의 기존 배포 복구 섹션
+
+---
+
 ## [2026-05-19] feat | Bridge L2 chain auto-switch — block explorer URL post-deploy propagation
 
 `wallet_addEthereumChain` 호출 시 `blockExplorerUrls: [""]` 로 인한

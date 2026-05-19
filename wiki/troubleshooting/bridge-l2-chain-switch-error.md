@@ -97,11 +97,24 @@ block-explorer URL sync 성공 블록에 `UpdateBridgeBlockExplorer` 호출 추�
 
 ## 기존 배포 복구
 
-이미 배포된 스택에서 bridge pod 이 빈 URL 로 실행 중이라면, trh-backend 이미지를
-최신으로 업데이트하고 재배포하면 다음 `markCompletedAndAutoInstall` 호출 시 자동으로
-`UpdateBridgeBlockExplorer` 가 실행된다.
+### API 엔드포인트 (권장)
 
-수동으로 즉시 적용하려면:
+이미 배포된 스택에서 block-explorer URL 이 stack metadata 에 저장되어 있다면
+(`ExplorerUrl != ""`), 다음 API 호출로 즉시 bridge pod 을 업데이트할 수 있다:
+
+```
+POST /stacks/thanos/{stackId}/integrations/bridge/sync-block-explorer
+```
+
+내부 동작: `stackMeta.ExplorerUrl` 읽기 → `op-bridge-values.yaml` 패치 → `helm upgrade` → pod 재시작
+
+### 자동 복구
+
+trh-backend 이미지를 최신으로 업데이트하면 다음 `markCompletedAndAutoInstall` 호출 시
+`UpdateBridgeBlockExplorer` 가 자동으로 실행된다.
+
+### 수동 복구
+
 1. `op-bridge-values.yaml` 에서 `l2_block_explorer` 를 실제 URL 로 업데이트
 2. `helm upgrade <op-bridge-release> <chart-path> --values op-bridge-values.yaml -n <namespace>`
 
