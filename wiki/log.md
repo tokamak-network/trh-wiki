@@ -4,6 +4,10 @@ Append-only chronological record of all wiki operations.
 
 Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
+## [2026-05-19] restructure | wiki root 파일 → 서브디렉토리 이동
+Pages moved: 12개 troubleshooting 파일 → wiki/troubleshooting/, [[concurrent-deployment-guard]] → wiki/decisions/
+Key changes: wiki 루트 정리 — wiki-link([[page-name]]) 형식은 경로 무관하므로 기존 링크 영향 없음. 루트 잔류: index.md, log.md, tokamak-cryptoeconomics.md
+
 ## [2026-05-19] lint-fix | broken links + orphan pages
 Pages updated: [[thanos-deployer-analysis]], [[index]]
 Key fixes:
