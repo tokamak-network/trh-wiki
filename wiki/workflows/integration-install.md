@@ -1,5 +1,5 @@
 ---
-updated: 2026-05-14
+updated: 2026-05-19
 sources:
   - trh-backend/pkg/api/routes/route.go
   - trh-backend/pkg/api/handlers/thanos/integrations.go
@@ -79,10 +79,11 @@ curl -s -X POST http://localhost:8000/api/v1/stacks/thanos/{STACK_ID}/integratio
 |------|------|------|
 | `databaseUsername` | ✅ | Blockscout DB 전용 유저명 (RDS username 규칙) |
 | `databasePassword` | ✅ | Blockscout DB 비밀번호 (RDS password 규칙) |
-| `coinmarketcapKey` | ✅ | CoinMarketCap API Key (토큰 가격 표시용) |
+| `coinmarketcapKey` | ❌ | CoinMarketCap API Key (토큰 가격 표시용, 없으면 가격 표시 비활성) |
 | `coinmarketcapTokenId` | ❌ | CMC 특정 코인 ID (없으면 심볼로 자동 검색) |
-| `walletConnectId` | ✅ | WalletConnect Project ID |
+| `walletConnectId` | ❌ | WalletConnect Project ID (없으면 WC 기능 비활성) |
 
+> CMC/WalletConnect 키가 없어도 설치 가능. 가격 표시·WC 기능만 비활성화됨.
 > `coinmarketcapTokenId`를 설정하지 않으면 TON 심볼 충돌로 잘못된 가격이 표시될 수 있음. → [[blockscout-wrong-coin-price]]
 
 **현재 설정 조회**:

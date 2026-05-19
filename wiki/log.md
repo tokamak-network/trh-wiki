@@ -4,6 +4,13 @@ Append-only chronological record of all wiki operations.
 
 Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
+## [2026-05-19] bugfix | block-explorer CMC/WC 키 optional로 변경
+
+`trh-backend/pkg/api/dtos/thanos.go` — `InstallBlockExplorerRequest.CoinmarketcapKey`, `WalletConnectID` 필드를 `binding:"required"` → optional로 변경.
+`Validate()`에서 두 필드의 empty-string 검사도 제거.
+SDK는 빈 문자열을 env var로 그대로 전달하므로 문제없음 (가격 표시·WalletConnect 기능만 비활성화).
+wiki `integration-install.md` 필드 필수 여부 업데이트.
+
 ## [2026-05-19] frontmatter | 53개 wiki 페이지 표준화
 Pages updated: 53개 (troubleshooting 40, decisions 5, workflows 2, concepts 2, overview·core·integration 나머지)
 Key additions: 누락된 `updated`, `sources`, `related`, `tags` 필드 일괄 추가. tags는 디렉토리 기반 자동 분류, related는 본문 내 [[...]] 링크 추출, sources는 raw/ 파일 없는 경우 `[]` 처리.
