@@ -6,18 +6,11 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
-## [2026-05-19] update | Thanos Sepolia chain ID deprecation (111551119090 → 111551132354)
+## [2026-05-19] ingest | thanos-sepolia-information.md (complete)
 
-Pages updated: [[cross-trade]], [[drb-project]], [[drb-node]]
-Key additions: Replaced deactivated L2 chain ID 111551119090 with new deployment 111551132354 across all wiki pages. Raw source files (crosstrade-deployment-guide.md, debug-withdraw-network-switch-balance-zero.md) retain old ID as historical record — do not use for current configuration.
-
----
-
-## [2026-05-19] ingest | thanos-sepolia-information.md
-
-Pages updated: [[thanos-bridge]], [[tokamak-thanos]]
+Pages updated: [[thanos-bridge]], [[tokamak-thanos]], [[cross-trade]], [[drb-project]], [[drb-node]]
 New pages: [[thanos-sepolia-testnet]]
-Key additions: Live Thanos Sepolia Testnet reference — L2 chain ID 111551132354, Cloudflare public endpoints (rpc/explorer/bridge.thanos-sepolia.tokamak.network), full L1 contract list (16 contracts, deployment UUID 8671124e), fault proof configuration (Cannon, 30m proposal interval, ~91m withdrawal latency).
+Key additions: New Thanos Sepolia deployment (111551132354) fully propagated — endpoints (rpc/explorer/bridge.thanos-sepolia.tokamak.network), 16 L1 contracts (deployment UUID 8671124e), fault proof config (Cannon, 30m proposal, ~91m withdrawal). Deactivated chain ID 111551119090 removed from all wiki pages; raw source files retain old ID as historical record.
 
 ---
 

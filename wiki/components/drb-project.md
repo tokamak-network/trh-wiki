@@ -1,11 +1,13 @@
 ---
-updated: 2026-04-17
-sources: []
+updated: 2026-05-19
+sources:
+  - raw/inbox/thanos-sepolia-information.md
 related:
   - "[[drb-node]]"
   - "[[commit-reveal2]]"
   - "[[trh-sdk]]"
   - "[[presets]]"
+  - "[[thanos-sepolia-testnet]]"
 tags: [component, integration]
 ---
 

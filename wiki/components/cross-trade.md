@@ -1,8 +1,9 @@
 ---
-updated: 2026-05-10
+updated: 2026-05-19
 sources:
   - raw/decisions/PRD-CrossTrade-TRH-Integration-v2.1.md
   - raw/inbox/crosstrade-deployment-guide.md
+  - raw/inbox/thanos-sepolia-information.md
 related:
   - "[[deposit-tx]]"
   - "[[l2-deployment]]"
