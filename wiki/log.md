@@ -6,6 +6,13 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-19] update | Thanos Sepolia chain ID deprecation (111551119090 → 111551132354)
+
+Pages updated: [[cross-trade]], [[drb-project]], [[drb-node]]
+Key additions: Replaced deactivated L2 chain ID 111551119090 with new deployment 111551132354 across all wiki pages. Raw source files (crosstrade-deployment-guide.md, debug-withdraw-network-switch-balance-zero.md) retain old ID as historical record — do not use for current configuration.
+
+---
+
 ## [2026-05-19] ingest | thanos-sepolia-information.md
 
 Pages updated: [[thanos-bridge]], [[tokamak-thanos]]

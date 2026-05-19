@@ -207,7 +207,7 @@ DRB-node/contract/regular/        ←  Regular용 Go 바인딩
 | Anvil (local) | 31337 | 개발용 | `make deploy` |
 | Ethereum Sepolia | 11155111 | 테스트넷 | `--network sepolia` |
 | Optimism Sepolia | 11155420 | L2 테스트넷 | `--network optimismsepolia` |
-| Thanos Sepolia | 111551119090 | TRH L2 테스트넷 | `--network thanossepolia` |
+| Thanos Sepolia | 111551132354 | TRH L2 테스트넷 | `--network thanossepolia` |
 
 DRB-node 필수 환경 변수:
 

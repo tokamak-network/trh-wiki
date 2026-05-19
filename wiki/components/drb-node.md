@@ -102,7 +102,7 @@ Leader: reveal 순서 결정 → Sequential Secret 요청
 | `STATUS` | `dev` 또는 `prod` — 로깅 레벨 등 제어 |
 | `ETH_RPC_URLS` | Ethereum RPC 엔드포인트 (콤마 구분, 페일오버 지원) |
 | `CONTRACT_ADDRESS` | 배포된 CommitReveal2 컨트랙트 주소 |
-| `CHAIN_ID` | 네트워크 체인 ID (예: 111551119090 = ThanosSepolia) |
+| `CHAIN_ID` | 네트워크 체인 ID (예: 111551132354 = ThanosSepolia) |
 | `POSTGRES_*` | PostgreSQL 연결 정보 |
 
 ---

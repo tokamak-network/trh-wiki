@@ -126,8 +126,8 @@ dApp은 세 개의 env var를 읽는다:
   "17001": {
     "name": "...", "rpc_url": "...", "contracts": {...},
     "tokens": [
-      {"name": "ETH", "address": "0x000...000", "destination_chains": [111551119090]},
-      {"name": "USDC", "address": "0x420...778", "destination_chains": [111551119090]}
+      {"name": "ETH", "address": "0x000...000", "destination_chains": [111551132354]},
+      {"name": "USDC", "address": "0x420...778", "destination_chains": [111551132354]}
     ]
   }
 }
@@ -210,7 +210,7 @@ Tokamak 팀이 배포한 공유 인프라 — 모든 L2 체인이 동일한 L1 �
 - `trh-backend/pkg/services/thanos/integrations/cross_trade_local.go` — `thanosL2L2Tokens` 세 항목(ETH, TON, USDC) 모두 `DestinationChains: []uint64{}`
 - `crossTrade/frontend/cross-trade-dapp/src/components/CreateRequest.tsx` — destination picker 아래 `thanos-direction-notice` 조건부 렌더링
 
-**반대 방향(신규L2 → Thanos Sepolia)은 정상 동작.** 신규 L2의 `L2toL2CrossTradeProxy`에는 우리가 admin이므로 Thanos Sepolia 체인 ID를 등록할 수 있다. `destination_chains: [111551119090]`으로 설정되어 있다.
+**반대 방향(신규L2 → Thanos Sepolia)은 정상 동작.** 신규 L2의 `L2toL2CrossTradeProxy`에는 우리가 admin이므로 Thanos Sepolia 체인 ID를 등록할 수 있다. `destination_chains: [111551132354]`으로 설정되어 있다.
 
 ### destination picker에서 L1 체인이 누락되는 문제
 
