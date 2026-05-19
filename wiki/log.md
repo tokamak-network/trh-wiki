@@ -6,6 +6,31 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-19] feat | Bridge L2 chain auto-switch — block explorer URL post-deploy propagation
+
+`wallet_addEthereumChain` 호출 시 `blockExplorerUrls: [""]` 로 인한
+"You can't automatically switch the chain in this app." 에러 수정.
+
+**thanos-bridge `network.ts`**: `NEXT_PUBLIC_L2_BLOCK_EXPLORER` 가 비어있으면
+`blockExplorers` 필드 자체를 생략 (conditional spread). 기존 코드는 `name` 필드에도
+URL 값을 잘못 사용하던 버그 동시 수정.
+
+**trh-sdk**:
+- `OpBridgeConfig.OpBridge.Env.L2BlockExplorer` 필드 추가 → `NEXT_PUBLIC_L2_BLOCK_EXPLORER` 로 매핑
+- `InstallBridge()` 에서 `t.deployConfig.BlockExplorerURL` 을 필드에 세팅 (deploy 시점에는 빈 문자열)
+- `UpdateBridgeBlockExplorer(ctx, url)` 추가: 기존 `op-bridge-values.yaml` 을 읽어
+  L2BlockExplorer 만 패치 후 `helm upgrade` → deployment.yaml checksum 어노테이션이
+  ConfigMap 변경 감지해 pod 자동 재시작
+
+**trh-backend `deployment.go`**: block-explorer URL sync 성공 후
+`thanos.UpdateBridgeBlockExplorer(ctx, sdkClient, beUrl)` 호출 추가.
+
+수정 커밋: thanos-bridge `9b5df75`, trh-sdk `0177f33`, trh-backend `dfba2e0`
+
+참고: `wiki/troubleshooting/bridge-l2-chain-switch-error.md`
+
+---
+
 ## [2026-05-19] ingest | thanos-sepolia-information.md (complete)
 
 Pages updated: [[thanos-bridge]], [[tokamak-thanos]], [[cross-trade]], [[drb-project]], [[drb-node]]
