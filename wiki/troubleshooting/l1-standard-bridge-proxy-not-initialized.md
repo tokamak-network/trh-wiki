@@ -2,7 +2,12 @@
 title: L1StandardBridgeProxy 미초기화 — 로컬 배포 시 bridgeETH revert
 created: 2026-05-14
 type: troubleshooting
+updated: 2026-05-19
+sources: []
+related: []
+tags: [troubleshooting]
 ---
+
 
 # L1StandardBridgeProxy 미초기화 — 로컬 배포 시 bridgeETH revert
 

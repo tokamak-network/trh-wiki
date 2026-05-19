@@ -1,3 +1,10 @@
+---
+
+updated: 2026-05-19
+sources: []
+related: []
+tags: [troubleshooting]
+---
 # L1CrossTradeProxy.setChainInfo Missing in AWS Auto-Install
 
 ## Symptoms

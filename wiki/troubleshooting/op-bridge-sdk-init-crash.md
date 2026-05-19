@@ -2,7 +2,12 @@
 title: op-bridge Thanos SDK 초기화 crash — L1UsdcBridge 미배포 시
 created: 2026-05-14
 type: troubleshooting
+updated: 2026-05-19
+sources: []
+related: []
+tags: [troubleshooting]
 ---
+
 
 # op-bridge Thanos SDK 초기화 crash — L1UsdcBridge 미배포 시
 

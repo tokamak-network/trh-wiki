@@ -3,7 +3,11 @@ title: ASR/DGF Proxy Address Bug — AnchorStateRegistry initialized with implem
 date: 2026-05-05
 status: fixed
 tags: [fault-proof, tokamak-deployer, bugfix]
+updated: 2026-05-19
+sources: []
+related: []
 ---
+
 
 # ASR/DGF Proxy Address Bug
 

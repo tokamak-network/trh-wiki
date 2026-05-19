@@ -1,3 +1,13 @@
+---
+
+updated: 2026-05-19
+sources: []
+related:
+  - "[[sequential-l2-deploy]]"
+  - "[[l2-deploy-local]]"
+  - "[[port-conflicts]]"
+tags: [troubleshooting]
+---
 # Preset Deploy 409 — "a local stack is already active"
 
 ## 증상

@@ -1,3 +1,10 @@
+---
+
+updated: 2026-05-19
+sources: []
+related: []
+tags: [troubleshooting]
+---
 # forkchoiceUpdatedV3 post-Cancun 거부 → L2 block 0 stuck
 
 **증상**: L2 체인이 block 0에서 멈춤. op-node 로그에 `"Unsupported fork"`, op-geth 로그에 `"forkchoiceUpdatedV3 must only be called for cancun payloads"`. op-proposer는 `"L2 safe/finalized head is at genesis (block 0)"` 반복.

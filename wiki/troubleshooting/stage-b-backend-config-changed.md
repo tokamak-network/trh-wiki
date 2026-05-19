@@ -1,3 +1,11 @@
+---
+
+updated: 2026-05-19
+sources: []
+related:
+  - "[[destroy-namespace-timeout]]"
+tags: [troubleshooting]
+---
 # Stage B: Backend configuration changed
 
 **Symptom**: AWS L2 배포 Stage B에서 `terraform init`이 즉시 실패.

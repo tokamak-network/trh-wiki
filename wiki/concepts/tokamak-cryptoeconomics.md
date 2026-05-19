@@ -1,7 +1,15 @@
 ---
 updated: 2026-05-13
 source: docs/tokamak-cryptoeconomics-kr.md (v1.1, Tokamak Network)
+sources: []
+related:
+  - "[[deposit-tx]]"
+  - "[[l2-deployment]]"
+  - "[[drb-project]]"
+  - "[[tech-debt-and-risks]]"
+tags: [concept]
 ---
+
 
 # Tokamak Network 크립토이코노믹스
 

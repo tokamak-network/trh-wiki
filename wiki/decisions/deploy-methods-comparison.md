@@ -3,7 +3,16 @@ title: Deploy.s.sol vs tokamak-deployer — L1 배포 방식 비교
 date: 2026-04-18
 status: final
 tags: [deployment, L1, L2-genesis, foundry, tokamak-deployer, trh-sdk]
+updated: 2026-05-19
+sources: []
+related:
+  - "[[thanos-deployer-analysis]]"
+  - "[[tokamak-deployer-logging]]"
+  - "[[tokamak-deployer-gas-price]]"
+  - "[[l2-deployment]]"
+  - "[[drb-local-compose-path-template-bugs]]"
 ---
+
 
 # Deploy.s.sol vs tokamak-deployer — L1 배포 방식 비교
 

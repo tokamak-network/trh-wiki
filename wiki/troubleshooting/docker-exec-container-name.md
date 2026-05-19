@@ -1,7 +1,13 @@
 ---
 updated: 2026-05-15
 source: EFP E2E test run — EFP-04 failure investigation
+sources: []
+related:
+  - "[[testing]]"
+  - "[[docker-compose-lifecycle]]"
+tags: [troubleshooting]
 ---
+
 
 # docker exec: container name vs image name
 

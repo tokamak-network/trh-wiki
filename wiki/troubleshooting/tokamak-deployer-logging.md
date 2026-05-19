@@ -1,7 +1,15 @@
 ---
 updated: 2026-04-17
 category: troubleshooting
+sources: []
+related:
+  - "[[tokamak-deployer-gas-price]]"
+  - "[[l2-deployment]]"
+  - "[[sequential-l2-deploy]]"
+  - "[[trh-sdk]]"
+tags: [troubleshooting]
 ---
+
 
 # tokamak-deployer Logging & Observability
 

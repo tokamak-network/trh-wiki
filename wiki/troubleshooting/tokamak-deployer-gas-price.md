@@ -1,7 +1,15 @@
 ---
 updated: 2026-04-17
 category: decision
+sources: []
+related:
+  - "[[tokamak-deployer-logging]]"
+  - "[[l2-deployment]]"
+  - "[[thanos-deployer-analysis]]"
+  - "[[trh-sdk]]"
+tags: [troubleshooting]
 ---
+
 
 # tokamak-deployer Fixed Gas Price Strategy (v0.0.5+)
 

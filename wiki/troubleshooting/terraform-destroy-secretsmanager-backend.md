@@ -1,6 +1,10 @@
 ---
 updated: 2026-05-09
+sources: []
+related: []
+tags: [troubleshooting]
 ---
+
 
 # Terraform Destroy — secretsmanager backend block 오류
 

@@ -4,6 +4,10 @@ Append-only chronological record of all wiki operations.
 
 Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
+## [2026-05-19] frontmatter | 53개 wiki 페이지 표준화
+Pages updated: 53개 (troubleshooting 40, decisions 5, workflows 2, concepts 2, overview·core·integration 나머지)
+Key additions: 누락된 `updated`, `sources`, `related`, `tags` 필드 일괄 추가. tags는 디렉토리 기반 자동 분류, related는 본문 내 [[...]] 링크 추출, sources는 raw/ 파일 없는 경우 `[]` 처리.
+
 ## [2026-05-19] restructure | components/core·integration·overview 분리, concepts 통합
 Pages moved:
 - `wiki/components/{trh-platform,trh-sdk,trh-backend,trh-platform-ui,tokamak-thanos,tokamak-thanos-stack,tokamak-thanos-geth,tokamak-rollup-hub-v2}.md` → `wiki/components/core/`

@@ -1,6 +1,10 @@
 ---
 updated: 2026-05-19
+sources: []
+related: []
+tags: [decision]
 ---
+
 
 # Block Explorer Update Pattern
 

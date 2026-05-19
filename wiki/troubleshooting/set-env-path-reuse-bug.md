@@ -1,6 +1,10 @@
 ---
 updated: 2026-05-04
+sources: []
+related: []
+tags: [troubleshooting]
 ---
+
 
 # SetKubeconfigFile / SetAWSConfigFile env path reuse bug
 

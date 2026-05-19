@@ -1,3 +1,10 @@
+---
+
+updated: 2026-05-19
+sources: []
+related: []
+tags: [troubleshooting]
+---
 # local+Testnet 배포 시 deploy-l1-contracts 스텝 누락
 
 **레포**: trh-backend  

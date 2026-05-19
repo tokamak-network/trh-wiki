@@ -1,7 +1,11 @@
 ---
 updated: 2026-04-28
 component: tokamak-thanos / op-node / op-service
+sources: []
+related: []
+tags: [troubleshooting]
 ---
+
 
 # op-node Pectra BlobBaseFee 계산 오류
 

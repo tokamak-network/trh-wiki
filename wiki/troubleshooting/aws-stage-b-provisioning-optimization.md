@@ -1,3 +1,11 @@
+---
+
+updated: 2026-05-19
+sources: []
+related:
+  - "[[elb-dns-propagation-delay]]"
+tags: [troubleshooting]
+---
 # AWS Stage B 프로비저닝 대기 최적화
 
 ## 배경

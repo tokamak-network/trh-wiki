@@ -1,7 +1,12 @@
 ---
 updated: 2026-04-27
 component: trh-backend / thanos_stack.go
+sources: []
+related:
+  - "[[drb-deposit-and-activate-threshold-mismatch]]"
+tags: [troubleshooting]
 ---
+
 
 # BuildLocalChainInformation — L1ChainID is 0 (wrong rollup.json path)
 

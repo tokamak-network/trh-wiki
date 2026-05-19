@@ -1,7 +1,11 @@
 ---
 updated: 2026-04-27 (rev2)
 component: tokamak-thanos / op-batcher / trh-sdk
+sources: []
+related: []
+tags: [troubleshooting]
 ---
+
 
 # op-batcher Blob Fee Spike Fix
 

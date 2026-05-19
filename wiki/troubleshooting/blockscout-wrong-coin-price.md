@@ -1,6 +1,10 @@
 ---
 updated: 2026-05-14
+sources: []
+related: []
+tags: [troubleshooting]
 ---
+
 
 # Blockscout Wrong Coin Price (Symbol Collision on CoinGecko)
 

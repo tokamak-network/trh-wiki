@@ -1,3 +1,11 @@
+---
+
+updated: 2026-05-19
+sources: []
+related:
+  - "[[l1-cross-trade-proxy-set-chain-info-missing]]"
+tags: [troubleshooting]
+---
 # L2toL2CrossTradeL1.setChainInfo Missing in AWS Auto-Install
 
 ## Symptoms

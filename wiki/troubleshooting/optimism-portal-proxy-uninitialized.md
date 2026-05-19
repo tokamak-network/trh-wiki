@@ -4,7 +4,9 @@ related:
   - "[[l2-output-oracle-uninitialized]]"
   - "[[cross-trade]]"
 tags: [troubleshooting, aws, crosstrade, optimism-portal]
+sources: []
 ---
+
 
 # OptimismPortalProxy Uninitialized → CrossTrade Deposit Tx Revert
 

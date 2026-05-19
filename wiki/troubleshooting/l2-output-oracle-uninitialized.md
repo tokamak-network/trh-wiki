@@ -1,7 +1,12 @@
 ---
 updated: 2026-04-27
 component: tokamak-thanos / op-proposer / trh-sdk
+sources: []
+related:
+  - "[[tokamak-deployer-logging]]"
+tags: [troubleshooting]
 ---
+
 
 # L2OutputOracle Uninitialized — op-proposer "only the proposer address can propose new outputs"
 

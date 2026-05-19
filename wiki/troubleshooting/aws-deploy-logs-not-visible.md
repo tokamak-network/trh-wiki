@@ -1,6 +1,10 @@
 ---
 updated: 2026-05-09
+sources: []
+related: []
+tags: [troubleshooting]
 ---
+
 
 # AWS 인프라 배포 실시간 로그 미표시
 

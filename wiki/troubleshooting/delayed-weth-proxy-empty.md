@@ -1,7 +1,11 @@
 ---
 updated: 2026-04-28
 component: tokamak-deployer / trh-sdk / tokamak-thanos
+sources: []
+related: []
+tags: [troubleshooting]
 ---
+
 
 # delayedWETHProxyAddr is empty
 

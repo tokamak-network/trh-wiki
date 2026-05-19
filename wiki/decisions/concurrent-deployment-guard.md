@@ -1,3 +1,10 @@
+---
+
+updated: 2026-05-19
+sources: []
+related: []
+tags: [decision]
+---
 # Concurrent Deployment Guard — L1 Nonce Conflict Prevention
 
 ## Problem

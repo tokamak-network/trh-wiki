@@ -1,3 +1,12 @@
+---
+
+updated: 2026-05-19
+sources: []
+related:
+  - "[[dispute-game-factory-no-implementations-pre-v006]]"
+  - "[[op-node-genesis-l1-block-zero]]"
+tags: [troubleshooting]
+---
 # DRB depositAndActivate — execution reverted (L2 at genesis)
 
 ## 증상

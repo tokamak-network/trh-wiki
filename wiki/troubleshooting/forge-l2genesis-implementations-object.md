@@ -1,7 +1,11 @@
 ---
 updated: 2026-05-08
 tags: [troubleshooting, forge, genesis, tokamak-deployer]
+sources: []
+related:
+  - "[[forge-l2genesis-silent-slow]]"
 ---
+
 
 # forge L2Genesis: "expected address, found JSON object" revert
 

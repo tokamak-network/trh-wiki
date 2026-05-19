@@ -1,6 +1,10 @@
 ---
 updated: 2026-05-13
+sources: []
+related: []
+tags: [troubleshooting]
 ---
+
 
 # Genesis/Rollup Hash Mismatch — op-node CrashLoopBackOff
 

@@ -1,3 +1,11 @@
+---
+
+updated: 2026-05-19
+sources: []
+related:
+  - "[[gaming-full-preset-genesis-hash-mismatch]]"
+tags: [troubleshooting]
+---
 # AnchorStateRegistry — setInitialAnchorState 누락 (RC3)
 
 ## 증상

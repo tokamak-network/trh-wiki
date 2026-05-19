@@ -4,7 +4,9 @@ related:
   - "[[cross-trade]]"
   - "[[op-node-pectra-blob-base-fee]]"
 tags: [troubleshooting, aws, crosstrade]
+sources: []
 ---
+
 
 # CrossTrade AWS Auto-Install Hang (InProgress timeout)
 

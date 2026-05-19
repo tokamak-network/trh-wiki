@@ -2,7 +2,12 @@
 title: local docker image tag — thanos stack uses nightly
 created: 2026-05-14
 type: troubleshooting
+updated: 2026-05-19
+sources: []
+related: []
+tags: [troubleshooting]
 ---
+
 
 # Local Docker Image Tag: thanos stack uses nightly
 

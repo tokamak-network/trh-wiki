@@ -1,3 +1,10 @@
+---
+
+updated: 2026-05-19
+sources: []
+related: []
+tags: [troubleshooting]
+---
 # op-node genesis: l1 block = 0 (SystemConfig.startBlock() uninitialized)
 
 **Symptom**: After deploying a new L2 stack, `rollup.json` has `"genesis":{"l1":{"hash":"0x000...","number":0}}`. The op-node must replay all of Sepolia history before the L2 safe head advances, so the proposer stays stuck at "L2 safe/finalized head is at genesis (block 0)".

@@ -1,3 +1,11 @@
+---
+
+updated: 2026-05-19
+sources: []
+related:
+  - "[[aws-stage-b-provisioning-optimization]]"
+tags: [troubleshooting]
+---
 # ELB DNS Propagation Delay (12-minute bottleneck)
 
 ## 증상

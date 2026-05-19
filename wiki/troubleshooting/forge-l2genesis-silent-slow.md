@@ -1,7 +1,14 @@
 ---
 updated: 2026-04-18
 category: troubleshooting
+sources: []
+related:
+  - "[[tokamak-deployer-logging]]"
+  - "[[thanos-deployer-analysis]]"
+  - "[[l2-deploy-local]]"
+tags: [troubleshooting]
 ---
+
 
 # forge L2Genesis Step: Silent and Slow
 

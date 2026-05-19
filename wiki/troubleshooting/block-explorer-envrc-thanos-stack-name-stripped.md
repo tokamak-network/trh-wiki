@@ -4,7 +4,9 @@ related:
   - "[[block-explorer-update-pattern]]"
   - "[[crosstrade-aws-install-hang]]"
 tags: [troubleshooting, aws, block-explorer, terraform]
+sources: []
 ---
+
 
 # Block Explorer .envrc 재작성으로 `TF_VAR_thanos_stack_name` 누락 → terraform plan stdin hang
 

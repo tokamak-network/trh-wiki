@@ -1,6 +1,10 @@
 ---
 updated: 2026-05-12
+sources: []
+related: []
+tags: [troubleshooting]
 ---
+
 
 # EIP-7702 type 4 tx "pool not yet in Prague" — L2 genesis PragueTime 누락
 

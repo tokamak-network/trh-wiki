@@ -3,7 +3,13 @@ updated: 2026-04-10
 sources:
   - raw/architecture/deployment-pitfalls.md
   - raw/inbox/crosstrade-deployment-guide.md
+related:
+  - "[[deposit-tx]]"
+  - "[[cross-trade]]"
+  - "[[l2-deposit-verification]]"
+tags: [troubleshooting]
 ---
+
 
 # L1 Deposit Tx Pitfalls
 

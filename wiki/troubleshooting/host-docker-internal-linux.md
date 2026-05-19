@@ -3,7 +3,14 @@ created: 2026-05-14
 severity: high
 repos: trh-platform
 fixed-in: trh-platform d5929a1
+updated: 2026-05-19
+sources: []
+related:
+  - "[[l2-deploy-local]]"
+  - "[[docker-compose-lifecycle]]"
+tags: [troubleshooting]
 ---
+
 
 # host.docker.internal DNS 실패 — Linux 로컬 L2 배포
 

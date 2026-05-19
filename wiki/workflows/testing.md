@@ -1,7 +1,18 @@
 ---
 updated: 2026-04-11
 source: raw/architecture/testing-guide.md
+sources: []
+related:
+  - "[[trh-platform]]"
+  - "[[l2-deploy-local]]"
+  - "[[cross-trade]]"
+  - "[[l1-gas-limits]]"
+  - "[[docker-exec-container-name]]"
+  - "[[thanos-bridge]]"
+  - "[[drb-project]]"
+tags: [workflow]
 ---
+
 
 # Testing Strategy
 

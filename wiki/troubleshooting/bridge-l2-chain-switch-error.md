@@ -1,6 +1,10 @@
 ---
 updated: 2026-05-19
+sources: []
+related: []
+tags: [troubleshooting]
 ---
+
 
 # Bridge — "You can't automatically switch the chain in this app."
 

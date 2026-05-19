@@ -1,3 +1,10 @@
+---
+
+updated: 2026-05-19
+sources: []
+related: []
+tags: [troubleshooting]
+---
 # Gaming/Full Preset: Genesis Hash Mismatch (RC1)
 
 ## 증상

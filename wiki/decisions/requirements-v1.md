@@ -1,7 +1,14 @@
 ---
 updated: 2026-04-09
 source: raw/decisions/requirements-v1.md
+sources: []
+related:
+  - "[[trh-platform]]"
+  - "[[cross-trade]]"
+  - "[[l2-deploy-local]]"
+tags: [decision]
 ---
+
 
 # Requirements v1 — CrossTrade Integration
 

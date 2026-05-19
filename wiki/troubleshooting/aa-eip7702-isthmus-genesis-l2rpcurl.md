@@ -1,3 +1,10 @@
+---
+
+updated: 2026-05-19
+sources: []
+related: []
+tags: [troubleshooting]
+---
 # AA / EIP-7702 두 가지 Root Cause 수정
 
 **발생 환경**: AWS L2 testnet (full preset, AA 활성화)  

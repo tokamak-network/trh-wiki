@@ -1,7 +1,13 @@
 ---
 updated: 2026-04-09
 source: raw/decisions/tech-debt-and-risks.md
+sources: []
+related:
+  - "[[trh-platform]]"
+  - "[[docker-health-checks]]"
+tags: [decision]
 ---
+
 
 # Tech Debt and Risks
 

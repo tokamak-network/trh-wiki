@@ -1,3 +1,12 @@
+---
+
+updated: 2026-05-19
+sources: []
+related:
+  - "[[drb-deposit-and-activate-l2-not-ready]]"
+  - "[[dispute-game-factory-no-implementations-pre-v006]]"
+tags: [troubleshooting]
+---
 # DRB depositAndActivate — execution reverted (threshold mismatch)
 
 ## 증상

@@ -1,3 +1,12 @@
+---
+
+updated: 2026-05-19
+sources: []
+related:
+  - "[[anchor-state-registry-missing-set-initial-anchor-state]]"
+  - "[[op-node-genesis-l1-block-zero]]"
+tags: [troubleshooting]
+---
 # DisputeGameFactory — no game implementations (pre-v0.0.6 stacks)
 
 ## 증상

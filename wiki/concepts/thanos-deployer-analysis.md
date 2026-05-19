@@ -3,7 +3,17 @@ title: thanos-deployer Deployment Logic Analysis
 date: 2026-04-16
 status: final
 tags: [deployment, L1, L2, genesis, preset]
+updated: 2026-05-19
+sources: []
+related:
+  - "[[op-batcher-blob-fee-spike]]"
+  - "[[ec2-deploy]]"
+  - "[[tokamak-thanos-stack]]"
+  - "[[l1-deposit-tx-pitfalls]]"
+  - "[[deploy-methods-comparison]]"
+  - "[[presets]]"
 ---
+
 
 # thanos-deployer Deployment Logic Analysis
 
