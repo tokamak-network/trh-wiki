@@ -6,6 +6,22 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-19] bugfix | Quick Links "Provisioning" — block-explorer/uptime URL stackMeta 미갱신
+
+추가: `wiki/troubleshooting/quick-links-provisioning-after-deploy.md`
+
+**block-explorer**: `deployment.go` AWS auto-mark 시 `integrationRepo.UpdateMetadataAfterInstalled`만
+호출하고 `stacks.metadata.ExplorerUrl` 갱신을 빠뜨림. 수정: `UpdateMetadataAfterInstalled` 성공 후
+`stackMeta.ExplorerUrl = beUrl` + `stackRepo.UpdateMetadata` 추가 호출.
+
+**uptime_service**: `installTask` goroutine 이 launch 시점 `stack.Metadata` 스냅샷을 30분 후 그대로
+쓰면서 그 사이 설정된 `ExplorerUrl` 을 덮어씌우는 레이스. 수정: goroutine 완료 시점에 DB 에서
+metadata re-fetch, nil pointer guard 로 빈 struct 덮어쓰기 방지.
+
+수정 커밋: trh-backend `4393632`
+
+---
+
 ## [2026-05-19] bugfix | AWS block-explorer AwaitingConfig 고착 — pod 타이밍 경쟁
 
 수정: `wiki/decisions/block-explorer-update-pattern.md` — "AWS 배포 후 AwaitingConfig 자동 전환" 섹션 추가.
