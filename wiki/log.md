@@ -6,6 +6,23 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-19] bugfix | AWS block-explorer AwaitingConfig 고착 — pod 타이밍 경쟁
+
+수정: `wiki/decisions/block-explorer-update-pattern.md` — "AWS 배포 후 AwaitingConfig 자동 전환" 섹션 추가.
+
+**근본 원인**: `InstallBlockExplorer`는 K8s ingress 에 ELB hostname 이 할당되면 리턴하지만,
+이 시점에 block-explorer-be pod 이 아직 `Initializing`일 수 있다. 기존 `ShowInformation`은
+pod Running **AND** ingress 주소 두 조건을 모두 요구 → pod 준비 전이면 빈 URL → auto-mark 스킵
+→ integration row 가 `AwaitingConfig` 에 고착 → UI 에서 "설치 안 됨" 으로 표시.
+
+**수정 (trh-sdk f21af16, trh-backend 6e3101c)**:
+- trh-sdk: `buildIngressURLs()` 순수 함수 추출, block-explorer-be 의 pod 조건 제거 (ingress 주소만 있으면 URL 반환).
+- trh-backend: `resolveBlockExplorerURL()` 폴백 헬퍼 추가 — `ShowChainInformation` 빈 URL 시 `GetBlockExplorerURL` 재시도.
+
+기존 배포 복구: `POST /integrations/block-explorer` 재호출 (SDK 가 기존 pod 감지 → helm 건너뜀 → URL 반환 → DB 갱신).
+
+---
+
 ## [2026-05-17] bugfix | CrossTrade dApp L2→L1 fee token 라벨 불일치 (polymorphic native token)
 
 수정: `wiki/components/cross-trade.md` — "defi-eth 프리셋 native token 메타데이터 오류" 섹션을 polymorphic fee token 섹션으로 확장.

@@ -1,5 +1,5 @@
 ---
-updated: 2026-05-06
+updated: 2026-05-19
 ---
 
 # Block Explorer Update Pattern
@@ -113,6 +113,52 @@ Config 에 `coinmarketcapTokenId` 필드가 없다. 이 경우 GET config endpoi
 (혹은 빈 칸 그대로 제출하면 exchange rates 가 비활성화됨).
 
 신규 설치는 영향 없음.
+
+## AWS 배포 후 AwaitingConfig 자동 전환 (2026-05-19 수정)
+
+### 문제
+
+AWS Full/DeFi 프리셋 배포 시 block-explorer 통합 row 가 `AwaitingConfig` 에 머무는
+버그가 있었다. `InstallBlockExplorer` 는 K8s ingress 에 ELB hostname 이 할당되는 순간
+리턴하는데, 이 시점에 block-explorer-be pod 이 아직 `Initializing` 상태일 수 있다.
+
+기존 `ShowInformation` 코드는 pod 이 Running **이면서** ingress 에 주소가 있을 때만
+`blockExplorerUrl` 을 반환했다(`status["block-explorer-be"] && ingress 주소`). pod 이
+준비되지 않으면 → `ShowChainInformation` 이 빈 URL 반환 → auto-mark 스킵 → UI 에서
+block-explorer 가 "설치 안 됨" 으로 보임.
+
+### 수정 (trh-sdk `f21af16`, trh-backend `6e3101c`)
+
+**trh-sdk**: `ShowInformation` 의 URL 빌드 로직을 `buildIngressURLs()` 순수 함수로
+추출하고, block-explorer-be 의 **pod 조건을 제거** — ingress 주소만 있으면 URL 반환.
+chain(L2 RPC)과 bridge 는 pod 이 Running 이어야 실제로 사용 가능하므로 pod 가드 유지.
+
+**trh-backend**: `deployment.go` auto-mark 에 `resolveBlockExplorerURL()` 폴백 추가.
+`ShowChainInformation` 이 빈 URL 반환 시 `GetBlockExplorerURL` (ingress only 쿼리)
+으로 한 번 더 시도한 뒤 Warn 로그. 실제로는 Fix 1 이 대부분의 케이스를 커버하므로
+폴백까지 필요한 경우는 드물다.
+
+### 기존 배포 복구 (stuck AwaitingConfig)
+
+위 수정 이전에 배포된 스택에서 block-explorer 가 실제 설치되어 있음에도
+integration 탭에 안 보인다면:
+
+```bash
+# DB 자격증명과 CoinMarketCap 키를 알고 있는 경우 — 완전 재설치 + DB mark
+curl -X POST http://localhost:8000/api/v1/stacks/{stackId}/integrations/block-explorer \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "databaseUsername": "blockscout",
+    "databasePassword": "...",
+    "coinmarketcapKey": "...",
+    "coinmarketcapTokenId": "...",
+    "walletConnectId": "..."
+  }'
+```
+
+SDK 가 pod 이 이미 존재하면 `helm install` 을 건너뛰고 기존 ingress URL 을 반환하면서
+DB 행만 `Completed` 로 갱신한다. CoinMarketCap 키를 모르는 경우도 빈 문자열로 전송하면
+URL 은 정상 복원된다(exchange rates 기능만 비활성화).
 
 ## 검증 상태
 
