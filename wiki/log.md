@@ -6,6 +6,14 @@ Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
 ---
 
+## [2026-05-19] ingest | thanos-sepolia-information.md
+
+Pages updated: [[thanos-bridge]], [[tokamak-thanos]]
+New pages: [[thanos-sepolia-testnet]]
+Key additions: Live Thanos Sepolia Testnet reference — L2 chain ID 111551132354, Cloudflare public endpoints (rpc/explorer/bridge.thanos-sepolia.tokamak.network), full L1 contract list (16 contracts, deployment UUID 8671124e), fault proof configuration (Cannon, 30m proposal interval, ~91m withdrawal latency).
+
+---
+
 ## [2026-05-19] bugfix | Quick Links "Provisioning" — block-explorer/uptime URL stackMeta 미갱신
 
 추가: `wiki/troubleshooting/quick-links-provisioning-after-deploy.md`

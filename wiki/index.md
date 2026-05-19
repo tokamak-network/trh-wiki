@@ -50,6 +50,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[release]] | Electron DMG/NSIS/AppImage 빌드, Docker 이미지 배포, 버전 고정 패턴 |
 | [[testing]] | 테스트 스택, 실행 명령어, E2E 3가지 모드, Vitest/Playwright 패턴 |
 | [[drb-deploy]] | trh-sdk DRB 노드 AWS 배포 — EKS leader, EC2 regular, 보안 결정, 브랜치 고정 이유 |
+| [[thanos-sepolia-testnet]] | Live Thanos Sepolia Testnet — public endpoints, L1 contracts, fault proof config (deployment 8671124e, L2 chain ID 111551132354) |
 
 ## Decisions
 

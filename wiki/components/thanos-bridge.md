@@ -1,9 +1,11 @@
 ---
-updated: 2026-04-09
-sources: []
+updated: 2026-05-19
+sources:
+  - raw/inbox/thanos-sepolia-information.md
 related:
   - "[[tokamak-thanos]]"
   - "[[trh-sdk]]"
+  - "[[thanos-sepolia-testnet]]"
 tags: [component, integration]
 ---
 
@@ -114,6 +116,19 @@ yarn start
 # Docker
 docker build -t thanos-bridge:latest .
 ```
+
+---
+
+## Live Testnet
+
+See [[thanos-sepolia-testnet]] for the live Thanos Sepolia Testnet deployment.
+
+| Name | URL |
+|------|-----|
+| Bridge | https://bridge.thanos-sepolia.tokamak.network |
+| L2 Chain ID | 111551132354 |
+| `L1StandardBridgeProxy` | `0x52A0CCA2600c50B316e382fEb511D4274867B6f0` |
+| `OptimismPortalProxy` | `0xf6168f0caC94d88550bB09c7d55C170199eF1d47` |
 
 ---
 

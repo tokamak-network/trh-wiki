@@ -7,6 +7,7 @@ related:
   - "[[trh-sdk]]"
   - "[[l2-deployment]]"
   - "[[deposit-tx]]"
+  - "[[thanos-sepolia-testnet]]"
 tags: [component]
 ---
 
@@ -98,3 +99,9 @@ Docker 이미지: `docker-bake.hcl` 기반 멀티플랫폼 빌드
 | `.env.example` | L1 RPC, Native Token 설정 |
 | `versions.json` | abigen, foundry, geth, kontrol 버전 고정 |
 | `docker-bake.hcl` | Docker 빌드 레이어 |
+
+---
+
+## Live Reference Deployment
+
+See [[thanos-sepolia-testnet]] — the Tokamak Thanos Sepolia Testnet running on Ethereum Sepolia. Deployment UUID `8671124e`, L2 Chain ID `111551132354`, Fault Proof enabled (Cannon). Runs op-node, op-batcher, op-proposer, op-challenger as Docker containers.
