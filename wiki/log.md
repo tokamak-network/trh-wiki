@@ -4,6 +4,16 @@ Append-only chronological record of all wiki operations.
 
 Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
+## [2026-05-19] feat | Deployment History 탭 — Integration 카드 분해 (per-type sub-cards)
+
+`trh-platform-ui` `ef49598` — `DeploymentsTab.tsx`의 단일 `Integration` 그룹 테이블을 8개 integration-type 서브카드로 분해.
+- `INTEGRATION_CARDS` 상수: bridge / block-explorer / monitoring / system-pulse / drb / cross-trade / register-candidate / register-metadata-dao
+- `preset.modules[card.moduleKey] === true` 이고 이력 없으면 `NotInstalledCard` (회색 placeholder + "Not Installed" 배지) 표시
+- `AppHistoryCard`에 `showStatusPill` prop 추가 — 최신 row 기반 status pill (Active/In Progress/Failed/Stopped/Uninstalled)
+- `registerCandidate`는 backend preset `ChainDefaults`에 있고 `Modules`에 없어 placeholder 판정 불가 → 이력 있을 때만 표시
+- 매핑 안 된 step은 `Other` 카드로 fallback
+wiki `components/core/trh-platform-ui.md` 업데이트.
+
 ## [2026-05-19] feat | blockscout per-fee-token exchange rate config (AWS+local 정렬)
 
 `trh-sdk` `88b35d4` — `FeeTokenConfig`에 `DisableExchangeRates bool` 추가 (USDT/USDC=true, TON/ETH=false).

@@ -280,3 +280,73 @@ JSON 래핑(`{msg: ...}`) + ANSI 이스케이프 자동 제거. 패턴 미발견
 **채택된 패턴**: `AwsInfraSubPhases`가 `useThanosDeploymentLogsQuery` + `useMemo(() => extractAwsInfraPhases(logs), [logs])`로 완전 자립. 부모로 state를 절대 push하지 않는다.
 
 로그는 `refetchIntervalMs: false`로 1회만 fetch (completed step 대상, 변경 없음).
+
+---
+
+## Deployment History — Per-Integration Card Layout
+
+### 배경
+
+기존 Deployment History 탭은 Integration 관련 스텝(23개)을 단일 `Integration` 그룹 테이블 하나에 나열했다.
+어떤 integration이 어디까지 진행됐는지 파악하기 어렵고, 아직 설치 시도가 없는 integration은 탭에 노출조차 되지 않았다.
+
+### 결정 (2026-05-19)
+
+**Integration 그룹을 8개 integration-type 서브카드로 분해.**
+
+#### INTEGRATION_CARDS 매핑
+
+| 카드 ID | 라벨 | preset.modules 키 | 포함 step(s) |
+|---------|------|-------------------|--------------|
+| `bridge` | Bridge | `bridge` | `install-bridge`, `uninstall-bridge` |
+| `block-explorer` | Block Explorer | `blockExplorer` | `install-block-explorer`, `uninstall-block-explorer`, `update-block-explorer` |
+| `monitoring` | Monitoring Dashboard | `monitoring` | `install-monitoring`, `uninstall-monitoring` |
+| `system-pulse` | System Pulse | `uptimeService` | `install-system-pulse`, `uninstall-system-pulse` |
+| `drb` | DRB Nodes | `drb` | `install-drb`, `uninstall-drb` |
+| `cross-trade` | Cross-Trade | `crossTrade` | `install-cross-trade-{bridge,l2-l1,l2-l2}`, `uninstall-cross-trade-*`, `register-tokens-*`, `deploy-new-l2-chain-*` |
+| `register-candidate` | Staking / DAO Candidate | (없음) | `register-candidate` |
+| `register-metadata-dao` | DAO Metadata | (없음) | `register-metadata-dao` |
+
+#### 카드 노출 규칙
+
+```
+hasHistory = deployments 중 card.steps에 속하는 row 존재
+isExpectedByPreset = preset.modules[card.moduleKey] === true
+
+결과:
+  hasHistory → 정상 카드 (AppHistoryCard + 헤더 status pill)
+  !hasHistory && isExpectedByPreset → NotInstalledCard (회색 placeholder)
+  !hasHistory && !isExpectedByPreset → 숨김
+  moduleKey 없는 카드 (register-candidate, register-metadata-dao) → hasHistory일 때만 표시
+```
+
+**왜 `registerCandidate`에 placeholder가 없는가**: 백엔드 preset 정의에서 `registerCandidate`는 `ChainDefaults` 맵에 있고 `Modules` 맵에 없다. `preset.modules.registerCandidate`는 항상 `undefined`이므로 placeholder 판정 불가. 역사가 있을 때만 카드 표시.
+
+#### Status Pill
+
+`AppHistoryCard`에 `showStatusPill` prop 추가. 가장 최근 deployment row의 status 기반:
+- `InProgress | Pending` → "In Progress" (파랑)
+- `Success` + `step.startsWith("uninstall-")` → "Uninstalled" (회색)
+- `Success` → "Active" (초록)
+- `Failed` → "Failed" (빨강)
+- `Stopped | Cancelled` → "Stopped" (주황)
+
+#### NotInstalledCard
+
+- 배경: `from-slate-50 to-gray-50` (정상 카드보다 옅음)
+- 제목: `text-slate-500`
+- 배지: `Not Installed` (gray outline)
+- 확장 시 안내: "No deployment attempts yet — this integration is expected by the `<presetName>` preset."
+- View/Logs/Download 버튼 없음
+
+#### 데이터 소스
+
+- `usePresetDetailQuery(presetId)` — 5분 staleTime, preset.modules 조회용. 로딩 중에는 placeholder 판정 보류.
+- `useThanosDeploymentsQuery` — 기존 10초 폴링 그대로.
+
+#### APP_GROUPS 변경
+
+`APP_GROUPS`는 `L1 Contracts`, `Infrastructure` 두 그룹만 남기고 `integration` 그룹 제거.
+매핑되지 않은 step은 기존과 동일하게 `Other` 카드로 fallback.
+
+**구현 파일**: `src/features/rollup/components/detail/tabs/DeploymentsTab.tsx` (ef49598)
