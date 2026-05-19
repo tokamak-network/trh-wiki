@@ -1,7 +1,11 @@
 ---
-updated: 2026-05-14
-sources: []
-related: []
+updated: 2026-05-19
+sources:
+  - trh-sdk/pkg/constants/chain.go
+  - trh-sdk/pkg/stacks/thanos/block_explorer.go
+  - tokamak-thanos-stack/charts/blockscout-stack/scripts/generate-blockscout.sh
+related:
+  - "[[integration-install]]"
 tags: [troubleshooting]
 ---
 
@@ -47,6 +51,26 @@ trh-sdk `5a74242`에서 수정:
         - EXCHANGE_RATES_COINGECKO_COIN_ID={{.BlockExplorerCoinGeckoID}}
   {{- end}}
   ```
+
+## AWS 배포 동작 (trh-sdk `88b35d4` 이후)
+
+`FeeTokenConfig.DisableExchangeRates`를 단일 진실 소스로 삼아 AWS 배포에서도 per-fee-token
+환율 설정이 자동 적용된다.
+
+| Fee Token | AWS Blockscout 동작 |
+|-----------|---------------------|
+| TON | CoinGecko `tokamak-network` |
+| ETH | CoinGecko `ethereum` |
+| USDT | `DISABLE_EXCHANGE_RATES=true` |
+| USDC | `DISABLE_EXCHANGE_RATES=true` |
+
+`coinmarketcapKey` + `coinmarketcapTokenId`를 둘 다 제공하면 CMC로 override되지만,
+stablecoin (`DisableExchangeRates=true`)이면 CMC 설정이 있어도 비활성 우선.
+
+우선순위: `stablecoin disable` > `CMC` > `CoinGecko default`
+
+이는 `generate-blockscout.sh`의 3-branch `exchange_rates_section` 빌드 로직에 의해 구현됨.
+로컬 배포는 이미 `local-compose.yml.tmpl`에서 같은 방식으로 처리하고 있었으며 이제 두 경로가 정렬됨.
 
 ## 기존 배포 수동 적용
 

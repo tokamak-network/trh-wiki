@@ -84,7 +84,8 @@ curl -s -X POST http://localhost:8000/api/v1/stacks/thanos/{STACK_ID}/integratio
 | `walletConnectId` | ❌ | WalletConnect Project ID (없으면 WC 기능 비활성) |
 
 > CMC/WalletConnect 키가 없어도 설치 가능.
-> CMC 키 미설정 시 CoinGecko(`tokamak-network` coin ID)를 자동으로 사용. API 키 불필요.
+> CMC 키 미설정 시 L2 fee token에 따라 CoinGecko ID가 자동 결정됨 (TON→`tokamak-network`, ETH→`ethereum`). API 키 불필요.
+> USDC/USDT fee token L2는 stablecoin이므로 가격 조회 자체가 비활성화됨 (`DISABLE_EXCHANGE_RATES=true`). CMC 키를 설정해도 무시됨.
 > WalletConnect 미설정 시 WC 지갑 연결 기능만 비활성화됨. → [[blockscout-wrong-coin-price]]
 
 **현재 설정 조회**:

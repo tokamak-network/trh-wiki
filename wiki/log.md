@@ -4,6 +4,15 @@ Append-only chronological record of all wiki operations.
 
 Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
+## [2026-05-19] feat | blockscout per-fee-token exchange rate config (AWS+local 정렬)
+
+`trh-sdk` `88b35d4` — `FeeTokenConfig`에 `DisableExchangeRates bool` 추가 (USDT/USDC=true, TON/ETH=false).
+`block_explorer.go` Install/Update 양쪽에서 `stack_coingecko_coin_id`, `stack_disable_exchange_rates` env var 방출.
+`local_network.go` — `BlockExplorerStableCoin` 계산을 inline token 문자열 비교 대신 `feeTokenConfig.DisableExchangeRates`로 위임.
+`tokamak-thanos-stack` `76bc12a` — `generate-blockscout.sh`에 3-branch exchange rate 로직:
+  stablecoin disable > CMC(key+id 둘 다 필요) > CoinGecko(per-fee-token ID). 기본값 backwards-compat.
+wiki `blockscout-wrong-coin-price.md`, `integration-install.md` 업데이트.
+
 ## [2026-05-19] fix | blockscout exchange rate CoinGecko fallback 추가
 
 `tokamak-thanos-stack/charts/blockscout-stack/scripts/generate-blockscout.sh` — CMC 키 미설정 시 `EXCHANGE_RATES_ENABLED: "false"` 대신 CoinGecko(`tokamak-network` coin ID)를 자동 사용하도록 변경.
