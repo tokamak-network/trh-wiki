@@ -25,9 +25,9 @@ trh-wiki/
 │   ├── index.md       # Master index — update on every ingest
 │   ├── log.md         # Append-only operation log
 │   ├── overview/      # High-level architecture maps
-│   ├── components/    # Per-repository deep-dives
-│   │   ├── core/      # Core repos (trh-platform, trh-sdk, trh-backend, etc.)
-│   │   └── integration/ # Integration repos (cross-trade, thanos-bridge, etc.)
+│   ├── components/    # Per-repository deep-dives — MUST use core/ or integration/ subdirectory
+│   │   ├── core/      # Core repos (trh-platform, trh-sdk, trh-backend, tokamak-thanos, ...)
+│   │   └── integration/ # Integration repos (cross-trade, thanos-bridge, drb-*, ...)
 │   ├── concepts/      # Core technical concepts
 │   ├── workflows/     # Step-by-step operational guides
 │   ├── decisions/     # ADR summaries with rationale
@@ -39,6 +39,8 @@ trh-wiki/
 New documents go into `raw/inbox/`. The ingest agent reads the content and determines which wiki pages to create or update.
 
 **Rule**: `raw/` is read-only. If a source needs correction, add a new file noting the correction — do not edit the original.
+
+**Rule**: Component pages live in `components/core/` or `components/integration/` — never directly under `components/`. The ingest agent decides which subdirectory based on the canonical Component names list below.
 
 ---
 
@@ -54,9 +56,14 @@ sources:
 related:
   - "[[other-page]]"
   - "[[another-page]]"
-tags: [component|concept|workflow|decision|troubleshooting]
+tags: [<primary>, <secondary>, ...]   # primary ∈ {component, overview, concept, workflow, decision, troubleshooting}
 ---
 ```
+
+**Tags convention**:
+- The first tag is the **primary tag** and determines the directory: `component` → `components/core/` or `components/integration/`, `overview` → `overview/`, `concept` → `concepts/`, `workflow` → `workflows/`, `decision` → `decisions/`, `troubleshooting` → `troubleshooting/`.
+- For component pages, add a **secondary tag** of `core` or `integration` (e.g., `[component, core]`, `[component, integration]`).
+- Additional descriptive sub-tags are allowed (e.g., `[troubleshooting, aws, crosstrade]`) — keep them lowercase, hyphenated, and reuse existing tags before inventing new ones.
 
 Then the page body:
 - One-paragraph summary at the top (what this page is about)
@@ -74,7 +81,10 @@ When the user says "ingest [file]" or drops a new file into `raw/inbox/`:
 
 1. Read the source file fully
 2. Identify key facts, decisions, concepts, and components it touches
-3. Determine which wiki section the content belongs to (component / concept / workflow / decision / troubleshooting)
+3. Determine which wiki section the content belongs to:
+   - `component` → choose `components/core/` (core repo) or `components/integration/` (DApp/integration repo) per the canonical Component names list
+   - `overview` → `overview/` (system-wide maps)
+   - `concept` / `workflow` / `decision` / `troubleshooting` → matching directory
 4. Check `wiki/index.md` to find all pages that should be updated
 5. Update each affected page — revise summaries, add new facts, note contradictions
 6. If a new concept appears with no existing page, create one
@@ -147,8 +157,9 @@ When the user says "lint":
 **Integration**
 - `cross-trade` — the CrossTrade DeFi integration module
 - `thanos-bridge` — L1↔L2 asset bridge DApp
-- `commit-reveal2` — Distributed Random Beacon smart contracts
-- `drb-node` — DRB Go node (Leader/Regular architecture)
+- `drb-project` — DRB umbrella page (protocol flow, state machine, dispute/slashing)
+- `commit-reveal2` — Distributed Random Beacon smart contracts (part of `drb-project`)
+- `drb-node` — DRB Go node implementation, Leader/Regular architecture (part of `drb-project`)
 
 ### Preset names (canonical)
 - `General` — base L2, no DeFi modules
