@@ -1,5 +1,5 @@
 ---
-updated: 2026-05-07 (structure simplified)
+updated: 2026-05-19 (components → core/integration/overview/concepts 분류)
 ---
 
 # TRH Wiki Index
@@ -8,12 +8,16 @@ Master index of all wiki pages. Updated on every ingest operation.
 
 ---
 
-## Components
+## Overview
 
 | Page | Summary |
 |------|---------|
 | [[architecture]] | Full system architecture map — 4 repos, their roles, and how they connect |
-| [[thanos-deployer-analysis]] | Complete deployment logic analysis — 8-layer architecture, 6-phase flow, 51 functions, critical pitfalls |
+
+## Components — Core
+
+| Page | Summary |
+|------|---------|
 | [[trh-platform]] | Electron desktop app — main/renderer/preload architecture, IPC patterns |
 | [[trh-sdk]] | Go CLI deployment engine — preset configs, L2 deployment orchestration |
 | [[trh-backend]] | Go REST API — Gin + GORM, endpoints, Docker lifecycle management |
@@ -22,6 +26,11 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[tokamak-thanos-stack]] | Terraform + Helm IaC — AWS EKS 인프라, 체인 노드 K8s 배포 |
 | [[tokamak-thanos-geth]] | go-ethereum OP Stack 포크 — L2 실행 계층, Deposit TX, Engine API |
 | [[tokamak-rollup-hub-v2]] | Rollup Hub 마케팅 웹사이트 — 제품 허브, TRH Desktop 릴리즈 연동 |
+
+## Components — Integration
+
+| Page | Summary |
+|------|---------|
 | [[cross-trade]] | CrossTrade DeFi integration — L1→L2 deposit tx pattern, dApp service |
 | [[thanos-bridge]] | L1↔L2 자산 브리지 DApp — Next.js, Thanos SDK, Wagmi |
 | [[drb-project]] | DRB 프로젝트 umbrella — 프로토콜 흐름, 상태 머신, operator lifecycle, dispute/slashing, L2 gas |
@@ -38,6 +47,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[keystore]] | Electron safeStorage + BIP44 key derivation — mnemonic → deployer keys |
 | [[docker-compose-lifecycle]] | How the platform manages Docker Compose services at runtime |
 | [[tokamak-cryptoeconomics]] | TON 시뇨리지, 스테이킹 V1/V2, 검증자의 딜레마, 빠른 출금 — L2 경제 설계 전문 |
+| [[thanos-deployer-analysis]] | Complete deployment logic analysis — 8-layer architecture, 6-phase flow, 51 functions, critical pitfalls |
 
 ## Workflows
 
