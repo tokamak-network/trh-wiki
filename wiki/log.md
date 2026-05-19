@@ -4,6 +4,12 @@ Append-only chronological record of all wiki operations.
 
 Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
+## [2026-05-19] lint-fix | broken links + orphan pages
+Pages updated: [[thanos-deployer-analysis]], [[index]]
+Key fixes:
+- `thanos-deployer-analysis.md` 깨진 링크 3개 수정: `[[troubleshooting]]`→`[[l1-deposit-tx-pitfalls]]`, `[[design-decisions]]`→`[[deploy-methods-comparison]]`, `[[preset-system]]`→`[[presets]]`
+- `index.md`에 고아 페이지 4개 등록: [[build-local-chain-information-wrong-rollup-path]], [[aa-eip7702-isthmus-genesis-l2rpcurl]], [[bridge-l2-chain-switch-error]], [[quick-links-provisioning-after-deploy]]
+
 ---
 
 ## [2026-05-19] feat | Bridge L2 chain auto-switch — block explorer URL post-deploy propagation

@@ -200,9 +200,9 @@ git log --oneline --grep="blob" /Users/theo/workspace_tokamak/tokamak-thanos | h
 
 - **[[ec2-deploy]]** — AWS EC2 deployment procedures (Terraform+Helm)
 - **[[tokamak-thanos-stack]]** — Infrastructure (Terraform/Helm IaC)
-- **[[troubleshooting]]** — Known issues and fixes
-- **[[design-decisions]]** — Architecture rationale
-- **[[preset-system]]** — Preset configuration system
+- **[[l1-deposit-tx-pitfalls]]** — Known deployment pitfalls
+- **[[deploy-methods-comparison]]** — Architecture rationale for deployment approach
+- **[[presets]]** — Preset configuration system
 - **[[op-batcher-blob-fee-spike]]** — Blob fee handling workarounds
 
 ## Tools & Integration

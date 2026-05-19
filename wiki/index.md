@@ -101,6 +101,10 @@ Master index of all wiki pages. Updated on every ingest operation.
 | [[blockscout-wrong-coin-price]] | 로컬 Blockscout에서 TON이 $25 표시 — CoinGecko 심볼 "TON" 충돌(5개 코인), EXCHANGE_RATES_COINGECKO_COIN_ID 누락. trh-sdk 5a74242에서 수정 |
 | [[host-docker-internal-linux]] | Linux에서 `host.docker.internal` DNS 미등록 → L2 genesis 블록 대기 실패("no such host") — `extra_hosts: host-gateway` 누락, trh-platform d5929a1에서 수정 |
 | [[docker-exec-container-name]] | `docker exec`는 이미지 이름이 아닌 컨테이너 이름 필요 — Docker Compose 생성 규칙 `{project}-{service}-{replica}`, EFP-04 실패 원인 |
+| [[build-local-chain-information-wrong-rollup-path]] | `BuildLocalChainInformation`에서 L1ChainID=0 반환 — 잘못된 rollup.json 경로, CrossTrade 자동 설치 실패 |
+| [[aa-eip7702-isthmus-genesis-l2rpcurl]] | AA/EIP-7702 두 Root Cause 수정 — L2RpcUrl threading bug + Isthmus genesis 미설정 |
+| [[bridge-l2-chain-switch-error]] | Thanos Bridge에서 MetaMask 체인 자동 전환 불가 — `wallet_switchEthereumChain` DApp 제한, 수동 전환 가이드 |
+| [[quick-links-provisioning-after-deploy]] | AWS 배포 완료 후 Quick Links "Provisioning…" 고착 — ELB DNS 미전파 + 폴링 타임아웃 버그 |
 
 ---
 
