@@ -79,12 +79,13 @@ curl -s -X POST http://localhost:8000/api/v1/stacks/thanos/{STACK_ID}/integratio
 |------|------|------|
 | `databaseUsername` | ✅ | Blockscout DB 전용 유저명 (RDS username 규칙) |
 | `databasePassword` | ✅ | Blockscout DB 비밀번호 (RDS password 규칙) |
-| `coinmarketcapKey` | ❌ | CoinMarketCap API Key (토큰 가격 표시용, 없으면 가격 표시 비활성) |
-| `coinmarketcapTokenId` | ❌ | CMC 특정 코인 ID (없으면 심볼로 자동 검색) |
+| `coinmarketcapKey` | ❌ | CoinMarketCap API Key — 둘 다 설정 시 CMC 사용, 없으면 CoinGecko 자동 fallback |
+| `coinmarketcapTokenId` | ❌ | CMC 코인 ID — `coinmarketcapKey`와 함께 설정해야 CMC 활성화 |
 | `walletConnectId` | ❌ | WalletConnect Project ID (없으면 WC 기능 비활성) |
 
-> CMC/WalletConnect 키가 없어도 설치 가능. 가격 표시·WC 기능만 비활성화됨.
-> `coinmarketcapTokenId`를 설정하지 않으면 TON 심볼 충돌로 잘못된 가격이 표시될 수 있음. → [[blockscout-wrong-coin-price]]
+> CMC/WalletConnect 키가 없어도 설치 가능.
+> CMC 키 미설정 시 CoinGecko(`tokamak-network` coin ID)를 자동으로 사용. API 키 불필요.
+> WalletConnect 미설정 시 WC 지갑 연결 기능만 비활성화됨. → [[blockscout-wrong-coin-price]]
 
 **현재 설정 조회**:
 ```bash

@@ -4,6 +4,12 @@ Append-only chronological record of all wiki operations.
 
 Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
+## [2026-05-19] fix | blockscout exchange rate CoinGecko fallback 추가
+
+`tokamak-thanos-stack/charts/blockscout-stack/scripts/generate-blockscout.sh` — CMC 키 미설정 시 `EXCHANGE_RATES_ENABLED: "false"` 대신 CoinGecko(`tokamak-network` coin ID)를 자동 사용하도록 변경.
+`stack_coingecko_coin_id` 기본값 `tokamak-network` 추가. CMC는 두 필드(`stack_coinmarketcap_api_key` + `stack_coinmarketcap_coin_id`) 모두 설정 시에만 사용. SDK 변경 불필요 (스크립트 기본값으로 처리).
+wiki `integration-install.md` 필드 설명 업데이트.
+
 ## [2026-05-19] bugfix | block-explorer CMC/WC 키 optional로 변경
 
 `trh-backend/pkg/api/dtos/thanos.go` — `InstallBlockExplorerRequest.CoinmarketcapKey`, `WalletConnectID` 필드를 `binding:"required"` → optional로 변경.
