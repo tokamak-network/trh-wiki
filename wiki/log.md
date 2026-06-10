@@ -4,6 +4,16 @@ Append-only chronological record of all wiki operations.
 
 Parse the last 5 entries: `grep "^## \[" wiki/log.md | tail -5`
 
+## [2026-06-10] ingest | Contract Asset Emergency Exit — 보안 감사 후 4건 수정
+
+`tokamak-thanos` PR #396 (`fix/emergency-exit-security`) — 긴급 자산 출금 컨트랙트 보안 감사 + 수정.
+- 신규 페이지 [[emergency-exit]] (concepts) 생성: 2개 출금 경로(L2 Force-TX / L1 MPT resolver) + 4개 보안 설계 결정 + pitfall
+- HIGH-1 replay: 사용자 `blockNumber` 제거 → guardian 고정 스냅샷(`declareEmergency`), claim 키 `(token,user)`
+- C-1b over-claim(HIGH, 신규 발견): storage 값 RLP 이중 디코딩 (`OptimismPortal2` `_value: hex"01"` 근거)
+- C-1: `MerkleTrie` → `SecureMerkleTrie` (키 keccak256 해싱)
+- C-2/C-3: `activateToken` `NotRegistered` 가드 / `emergencyExit` `msg.sender` 직접 사용
+- `index.md` Concepts에 [[emergency-exit]] 추가
+
 ## [2026-05-19] feat | Deployment History 탭 — Integration 카드 분해 (per-type sub-cards)
 
 `trh-platform-ui` `ef49598` — `DeploymentsTab.tsx`의 단일 `Integration` 그룹 테이블을 8개 integration-type 서브카드로 분해.

@@ -43,6 +43,7 @@ Master index of all wiki pages. Updated on every ingest operation.
 |------|---------|
 | [[presets]] | General / DeFi / Gaming / Full — what each preset includes and why |
 | [[deposit-tx]] | L1→L2 Deposit Transaction pattern via OptimismPortal |
+| [[emergency-exit]] | 긴급 자산 출금 — L2 Force-TX 경로 + L1 MPT 증명 리졸버, replay/over-claim 방지 설계 (PR #396) |
 | [[l2-deployment]] | End-to-end L2 deployment flow — from preset selection to running chain |
 | [[keystore]] | Electron safeStorage + BIP44 key derivation — mnemonic → deployer keys |
 | [[docker-compose-lifecycle]] | How the platform manages Docker Compose services at runtime |
